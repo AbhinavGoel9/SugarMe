@@ -592,6 +592,48 @@ window.closeChat = () => {
   window.currentChar = null;
 };
 
+// ── PASTE YOUR GROQ API KEY HERE ──
+const GROQ_API_KEY = "PASTE_YOUR_GROQ_API_KEY_HERE";
+
+async function getAIReply(char, userMessage, history) {
+  // Build conversation history for context
+  const messages = [
+    {
+      role: "system",
+      content: `You are ${char.name}, a ${char.age} year old AI companion. 
+Personality: ${char.personality}.
+Bio: ${char.bio}
+Things you love: ${char.likes.join(', ')}.
+Stay in character at all times. Keep replies short, warm and natural (1-3 sentences max).
+If the user asks for a photo, selfie or picture of you, reply saying you'll send one and end your message with [SENDING_PHOTO].
+Never break character. Never say you are an AI.`
+    },
+    ...history.slice(-10).map(m => ({ role: m.role === 'ai' ? 'assistant' : 'user', content: m.text })),
+    { role: "user", content: userMessage }
+  ];
+
+  try {
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${GROQ_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "llama3-8b-8192",
+        messages,
+        max_tokens: 150,
+        temperature: 0.85
+      })
+    });
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content || getLocalReply(userMessage, char);
+  } catch(e) {
+    console.error('Groq error:', e);
+    return getLocalReply(userMessage, char);
+  }
+}
+
 window.sendMessage = async () => {
   const input = document.getElementById('chatInput');
   const text = input.value.trim();
@@ -617,18 +659,30 @@ window.sendMessage = async () => {
   // show typing
   const typingId = showTyping();
   const wantsPhoto = /pic|photo|image|show|send|see you|look like|selfie/i.test(text);
-  await new Promise(r => setTimeout(r, 1200 + Math.random()*800));
-  removeTyping(typingId);
 
-  // AI reply
-  const reply = getLocalReply(text, char);
+  // Get chat history for context
+  const uid = window.currentUser.uid;
+  let history = [];
+  try {
+    const snap = await getDoc(doc(db, 'chats', `${uid}_${char.id}`));
+    if (snap.exists()) history = snap.data().messages || [];
+  } catch(e) {}
+
+  // Get AI reply
+  let reply = await getAIReply(char, text, history);
+
+  // Check if AI wants to send a photo
+  const aiWantsPhoto = reply.includes('[SENDING_PHOTO]');
+  reply = reply.replace('[SENDING_PHOTO]', '').trim();
+
+  removeTyping(typingId);
   renderMessage('ai', reply);
   await saveMessage(char, 'ai', reply);
 
-  // send photo if asked
-  if (wantsPhoto && char.photos && char.photos.length > 0) {
+  // send photo if asked or AI triggered it
+  if ((wantsPhoto || aiWantsPhoto) && char.photos && char.photos.length > 0) {
     setTimeout(async () => {
-      const photo = char.photos[Math.floor(Math.random()*char.photos.length)];
+      const photo = char.photos[Math.floor(Math.random() * char.photos.length)];
       renderMessage('ai', null, photo);
       await saveMessage(char, 'ai', null, photo);
     }, 700);
@@ -636,9 +690,7 @@ window.sendMessage = async () => {
 
   // show limit if reached
   if (char.free && window.messageCount >= window.FREE_LIMIT) {
-    // save final count to Firestore
     try {
-      const uid = window.currentUser.uid;
       await updateDoc(doc(db, 'chats', `${uid}_${char.id}`), { messageCount: window.messageCount });
     } catch(e) {}
     setTimeout(() => showLimitReached(), 400);
