@@ -237,10 +237,10 @@
 
 <!-- NAV -->
 <nav>
-  <a href="index.html" class="nav-logo">SugarMe</a>
+  <a href="/pages/index.html" class="nav-logo">SugarMe</a>
   <ul class="nav-links">
-    <li><a href="pages/index.html">Home</a></li>
-    <li><a href="pages/characters.html" class="active">Characters</a></li>
+    <li><a href="/pages/index.html">Home</a></li>
+    <li><a href="/pages/characters.html" class="active">Characters</a></li>
     <li><a href="#">Pricing</a></li>
   </ul>
   <div id="navActions">
@@ -592,9 +592,6 @@ window.closeChat = () => {
   window.currentChar = null;
 };
 
-// ── PASTE YOUR GROQ API KEY HERE ──
-const GROQ_API_KEY = "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";
-
 async function getAIReply(char, userMessage, history) {
   // Build conversation history for context
   const messages = [
@@ -613,12 +610,9 @@ Never break character. Never say you are an AI.`
   ];
 
   try {
-    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    const res = await fetch("/api/chat", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${GROQ_API_KEY}`
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "llama3-8b-8192",
         messages,
