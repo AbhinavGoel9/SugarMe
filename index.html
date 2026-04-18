@@ -458,9 +458,9 @@
     <li><a href="#">Soul Chat</a></li>
     <li><a href="#">Pricing</a></li>
   </ul>
-  <div class="nav-actions">
-    <button class="btn-ghost">Log in</button>
-    <button class="btn-primary">Sign up free</button>
+  <div class="nav-actions" id="navActions">
+    <button class="btn-ghost" onclick="openModal('login')">Log in</button>
+    <button class="btn-primary" onclick="openModal('signup')">Sign up free</button>
   </div>
 </nav>
 
@@ -797,6 +797,206 @@
     </div>
   </div>
 </footer>
+
+<!-- ── AUTH MODAL ── -->
+<div id="authOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);z-index:999;align-items:center;justify-content:center;">
+  <div style="background:#0e0e1a;border:1px solid rgba(168,85,247,0.3);border-radius:22px;padding:44px 40px;width:100%;max-width:420px;position:relative;box-shadow:0 30px 80px rgba(0,0,0,0.6),0 0 60px rgba(168,85,247,0.15);margin:16px;">
+
+    <!-- Close -->
+    <button onclick="closeModal()" style="position:absolute;top:16px;right:18px;background:none;border:none;color:#8888aa;font-size:1.4rem;cursor:pointer;line-height:1;">✕</button>
+
+    <!-- Logo -->
+    <div style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;background:linear-gradient(135deg,#a855f7,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;">SoulGen</div>
+
+    <!-- Tabs -->
+    <div style="display:flex;gap:0;margin-bottom:30px;background:rgba(255,255,255,0.04);border-radius:10px;padding:4px;">
+      <button id="tabLogin" onclick="switchTab('login')" style="flex:1;padding:9px;border-radius:8px;border:none;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;background:linear-gradient(135deg,#a855f7,#ec4899);color:#fff;transition:.2s;">Log In</button>
+      <button id="tabSignup" onclick="switchTab('signup')" style="flex:1;padding:9px;border-radius:8px;border:none;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:500;cursor:pointer;background:none;color:#8888aa;transition:.2s;">Sign Up</button>
+    </div>
+
+    <!-- Error msg -->
+    <div id="authError" style="display:none;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);color:#f87171;padding:10px 14px;border-radius:9px;font-size:0.85rem;margin-bottom:16px;"></div>
+    <!-- Success msg -->
+    <div id="authSuccess" style="display:none;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:#4ade80;padding:10px 14px;border-radius:9px;font-size:0.85rem;margin-bottom:16px;"></div>
+
+    <!-- Login Form -->
+    <div id="formLogin">
+      <div style="margin-bottom:16px;">
+        <label style="display:block;font-size:0.82rem;color:#8888aa;margin-bottom:7px;font-weight:500;">Email address</label>
+        <input id="loginEmail" type="email" placeholder="you@example.com" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(168,85,247,0.2);color:#f0f0f8;padding:12px 16px;border-radius:10px;font-size:0.9rem;font-family:'DM Sans',sans-serif;outline:none;transition:border .2s;" onfocus="this.style.borderColor='rgba(168,85,247,0.6)'" onblur="this.style.borderColor='rgba(168,85,247,0.2)'"/>
+      </div>
+      <div style="margin-bottom:24px;">
+        <label style="display:block;font-size:0.82rem;color:#8888aa;margin-bottom:7px;font-weight:500;">Password</label>
+        <input id="loginPassword" type="password" placeholder="Enter your password" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(168,85,247,0.2);color:#f0f0f8;padding:12px 16px;border-radius:10px;font-size:0.9rem;font-family:'DM Sans',sans-serif;outline:none;transition:border .2s;" onfocus="this.style.borderColor='rgba(168,85,247,0.6)'" onblur="this.style.borderColor='rgba(168,85,247,0.2)'"/>
+      </div>
+      <button onclick="doLogin()" id="loginBtn" style="width:100%;padding:13px;background:linear-gradient(135deg,#a855f7,#ec4899);border:none;color:#fff;border-radius:11px;font-size:0.95rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 4px 20px rgba(168,85,247,0.35);transition:opacity .2s;">Log In</button>
+      <p style="text-align:center;color:#8888aa;font-size:0.82rem;margin-top:18px;">Don't have an account? <a onclick="switchTab('signup')" style="color:#a855f7;cursor:pointer;font-weight:600;">Sign up free</a></p>
+    </div>
+
+    <!-- Signup Form -->
+    <div id="formSignup" style="display:none;">
+      <div style="margin-bottom:16px;">
+        <label style="display:block;font-size:0.82rem;color:#8888aa;margin-bottom:7px;font-weight:500;">Full name</label>
+        <input id="signupName" type="text" placeholder="Your name" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(168,85,247,0.2);color:#f0f0f8;padding:12px 16px;border-radius:10px;font-size:0.9rem;font-family:'DM Sans',sans-serif;outline:none;transition:border .2s;" onfocus="this.style.borderColor='rgba(168,85,247,0.6)'" onblur="this.style.borderColor='rgba(168,85,247,0.2)'"/>
+      </div>
+      <div style="margin-bottom:16px;">
+        <label style="display:block;font-size:0.82rem;color:#8888aa;margin-bottom:7px;font-weight:500;">Email address</label>
+        <input id="signupEmail" type="email" placeholder="you@example.com" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(168,85,247,0.2);color:#f0f0f8;padding:12px 16px;border-radius:10px;font-size:0.9rem;font-family:'DM Sans',sans-serif;outline:none;transition:border .2s;" onfocus="this.style.borderColor='rgba(168,85,247,0.6)'" onblur="this.style.borderColor='rgba(168,85,247,0.2)'"/>
+      </div>
+      <div style="margin-bottom:24px;">
+        <label style="display:block;font-size:0.82rem;color:#8888aa;margin-bottom:7px;font-weight:500;">Password</label>
+        <input id="signupPassword" type="password" placeholder="Min 6 characters" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(168,85,247,0.2);color:#f0f0f8;padding:12px 16px;border-radius:10px;font-size:0.9rem;font-family:'DM Sans',sans-serif;outline:none;transition:border .2s;" onfocus="this.style.borderColor='rgba(168,85,247,0.6)'" onblur="this.style.borderColor='rgba(168,85,247,0.2)'"/>
+      </div>
+      <button onclick="doSignup()" id="signupBtn" style="width:100%;padding:13px;background:linear-gradient(135deg,#a855f7,#ec4899);border:none;color:#fff;border-radius:11px;font-size:0.95rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 4px 20px rgba(168,85,247,0.35);transition:opacity .2s;">Create Account</button>
+      <p style="text-align:center;color:#8888aa;font-size:0.82rem;margin-top:18px;">Already have an account? <a onclick="switchTab('login')" style="color:#a855f7;cursor:pointer;font-weight:600;">Log in</a></p>
+    </div>
+
+  </div>
+</div>
+
+<!-- Firebase SDKs -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDUERWnHurjAPYm9N7P52sXYXLI2Npux54",
+    authDomain: "sugarme-9a37d.firebaseapp.com",
+    projectId: "sugarme-9a37d",
+    storageBucket: "sugarme-9a37d.firebasestorage.app",
+    messagingSenderId: "237083119168",
+    appId: "1:237083119168:web:dded20690c03658a9259a5"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  // ── Expose functions to window so onclick= works ──
+  window.openModal = (tab) => {
+    document.getElementById('authOverlay').style.display = 'flex';
+    document.getElementById('authError').style.display = 'none';
+    document.getElementById('authSuccess').style.display = 'none';
+    switchTab(tab);
+  };
+
+  window.closeModal = () => {
+    document.getElementById('authOverlay').style.display = 'none';
+  };
+
+  window.switchTab = (tab) => {
+    const isLogin = tab === 'login';
+    document.getElementById('formLogin').style.display = isLogin ? 'block' : 'none';
+    document.getElementById('formSignup').style.display = isLogin ? 'none' : 'block';
+    document.getElementById('tabLogin').style.background = isLogin ? 'linear-gradient(135deg,#a855f7,#ec4899)' : 'none';
+    document.getElementById('tabLogin').style.color = isLogin ? '#fff' : '#8888aa';
+    document.getElementById('tabSignup').style.background = isLogin ? 'none' : 'linear-gradient(135deg,#a855f7,#ec4899)';
+    document.getElementById('tabSignup').style.color = isLogin ? '#8888aa' : '#fff';
+    document.getElementById('authError').style.display = 'none';
+    document.getElementById('authSuccess').style.display = 'none';
+  };
+
+  function showError(msg) {
+    const el = document.getElementById('authError');
+    el.textContent = msg; el.style.display = 'block';
+    document.getElementById('authSuccess').style.display = 'none';
+  }
+  function showSuccess(msg) {
+    const el = document.getElementById('authSuccess');
+    el.textContent = msg; el.style.display = 'block';
+    document.getElementById('authError').style.display = 'none';
+  }
+  function setLoading(btnId, loading) {
+    const btn = document.getElementById(btnId);
+    btn.disabled = loading;
+    btn.style.opacity = loading ? '0.6' : '1';
+    btn.textContent = loading ? 'Please wait...' : (btnId === 'loginBtn' ? 'Log In' : 'Create Account');
+  }
+
+  window.doLogin = async () => {
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass = document.getElementById('loginPassword').value;
+    if (!email || !pass) return showError('Please fill in all fields.');
+    setLoading('loginBtn', true);
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
+      showSuccess('Logged in! Welcome back 👋');
+      setTimeout(() => window.closeModal(), 1200);
+    } catch(e) {
+      const msgs = {
+        'auth/user-not-found': 'No account found with this email.',
+        'auth/wrong-password': 'Incorrect password. Try again.',
+        'auth/invalid-email': 'Please enter a valid email.',
+        'auth/too-many-requests': 'Too many attempts. Please wait a moment.',
+        'auth/invalid-credential': 'Incorrect email or password.'
+      };
+      showError(msgs[e.code] || 'Login failed. Please try again.');
+    }
+    setLoading('loginBtn', false);
+  };
+
+  window.doSignup = async () => {
+    const name = document.getElementById('signupName').value.trim();
+    const email = document.getElementById('signupEmail').value.trim();
+    const pass = document.getElementById('signupPassword').value;
+    if (!name || !email || !pass) return showError('Please fill in all fields.');
+    if (pass.length < 6) return showError('Password must be at least 6 characters.');
+    setLoading('signupBtn', true);
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, pass);
+      await updateProfile(cred.user, { displayName: name });
+      showSuccess('Account created! Welcome to SoulGen 🎉');
+      setTimeout(() => window.closeModal(), 1400);
+    } catch(e) {
+      const msgs = {
+        'auth/email-already-in-use': 'An account with this email already exists.',
+        'auth/invalid-email': 'Please enter a valid email.',
+        'auth/weak-password': 'Password should be at least 6 characters.'
+      };
+      showError(msgs[e.code] || 'Signup failed. Please try again.');
+    }
+    setLoading('signupBtn', false);
+  };
+
+  // ── Auth state listener — updates navbar in real time ──
+  onAuthStateChanged(auth, (user) => {
+    const nav = document.getElementById('navActions');
+    if (user) {
+      const firstName = (user.displayName || user.email).split(' ')[0];
+      nav.innerHTML = `
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#a855f7,#ec4899);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;color:#fff;">
+            ${firstName[0].toUpperCase()}
+          </div>
+          <span style="font-size:0.88rem;color:#f0f0f8;font-weight:500;">Hi, ${firstName}</span>
+          <button onclick="window.doLogout()" style="background:none;border:1px solid rgba(168,85,247,0.3);color:#8888aa;padding:7px 16px;border-radius:9px;font-size:0.82rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.2s;" onmouseover="this.style.borderColor='rgba(168,85,247,0.7)';this.style.color='#f0f0f8'" onmouseout="this.style.borderColor='rgba(168,85,247,0.3)';this.style.color='#8888aa'">Log out</button>
+        </div>`;
+    } else {
+      nav.innerHTML = `
+        <button class="btn-ghost" onclick="openModal('login')">Log in</button>
+        <button class="btn-primary" onclick="openModal('signup')">Sign up free</button>`;
+    }
+  });
+
+  window.doLogout = async () => {
+    await signOut(auth);
+  };
+
+  // Close modal on overlay click
+  document.getElementById('authOverlay').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('authOverlay')) window.closeModal();
+  });
+
+  // Enter key support
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const loginVisible = document.getElementById('formLogin').style.display !== 'none';
+      if (document.getElementById('authOverlay').style.display === 'flex') {
+        loginVisible ? window.doLogin() : window.doSignup();
+      }
+    }
+    if (e.key === 'Escape') window.closeModal();
+  });
+</script>
 
 <script>
   // Scroll reveal
