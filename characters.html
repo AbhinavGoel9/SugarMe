@@ -352,6 +352,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDUERWnHurjAPYm9N7P52sXYXLI2Npux54",
@@ -364,6 +365,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 
 // ── CHARACTER DATA ──
 // To add real images: replace the `emoji` with `img: "your-image-url.jpg"`
@@ -498,7 +500,7 @@ window.filterChars = (filter, btn) => {
 };
 
 // ── CHAT ──
-window.openChat = (char) => {
+window.openChat = async (char) => {
   window.currentChar = char;
   window.messageCount = 0;
   document.getElementById('chatPage').style.display = 'flex';
@@ -509,18 +511,81 @@ window.openChat = (char) => {
     ? `<img src="${char.img}" alt="${char.name}"/>`
     : `<span style="font-size:1.3rem;">${char.emoji}</span>`;
 
-  const counter = document.getElementById('freeCounter');
-  if (char.free) { counter.style.display='block'; counter.textContent=`${window.FREE_LIMIT - window.messageCount} messages left`; }
-  else { counter.style.display='none'; }
-
   const msgs = document.getElementById('chatMessages');
-  msgs.innerHTML = '';
-  document.getElementById('chatInput').disabled = false;
-  document.getElementById('sendBtn').disabled = false;
+  msgs.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:0.8rem;padding:20px;">Loading your chat history...</div>';
+  document.getElementById('chatInput').disabled = true;
+  document.getElementById('sendBtn').disabled = true;
 
-  const greeting = char.greetings[Math.floor(Math.random()*char.greetings.length)];
-  setTimeout(() => addMessage('ai', greeting), 600);
+  // ── Load from Firestore ──
+  const uid = window.currentUser.uid;
+  const chatRef = doc(db, 'chats', `${uid}_${char.id}`);
+  const chatSnap = await getDoc(chatRef);
+
+  msgs.innerHTML = '';
+
+  if (chatSnap.exists()) {
+    const data = chatSnap.data();
+    window.messageCount = data.messageCount || 0;
+
+    // Restore previous messages
+    const history = data.messages || [];
+    history.forEach(m => renderMessage(m.role, m.text, m.imgUrl || null));
+
+    // Check if already hit limit
+    if (char.free && window.messageCount >= window.FREE_LIMIT) {
+      showLimitReached();
+    } else {
+      document.getElementById('chatInput').disabled = false;
+      document.getElementById('sendBtn').disabled = false;
+    }
+  } else {
+    // First time opening this chat — show greeting
+    document.getElementById('chatInput').disabled = false;
+    document.getElementById('sendBtn').disabled = false;
+    const greeting = char.greetings[Math.floor(Math.random()*char.greetings.length)];
+    setTimeout(async () => {
+      renderMessage('ai', greeting);
+      await saveMessage(char, 'ai', greeting);
+    }, 600);
+  }
+
+  // Update counter
+  const counter = document.getElementById('freeCounter');
+  if (char.free) {
+    const remaining = Math.max(0, window.FREE_LIMIT - window.messageCount);
+    counter.style.display = 'block';
+    counter.textContent = `${remaining} messages left`;
+  } else {
+    counter.style.display = 'none';
+  }
 };
+
+// Save a single message to Firestore
+async function saveMessage(char, role, text, imgUrl = null) {
+  const uid = window.currentUser.uid;
+  const chatRef = doc(db, 'chats', `${uid}_${char.id}`);
+  const msgObj = { role, text: text || '', imgUrl: imgUrl || null, time: new Date().toISOString() };
+  try {
+    const snap = await getDoc(chatRef);
+    if (snap.exists()) {
+      await updateDoc(chatRef, {
+        messages: arrayUnion(msgObj),
+        messageCount: window.messageCount,
+        updatedAt: new Date().toISOString()
+      });
+    } else {
+      await setDoc(chatRef, {
+        userId: uid,
+        charId: char.id,
+        charName: char.name,
+        messages: [msgObj],
+        messageCount: window.messageCount,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+    }
+  } catch(e) { console.error('Save error:', e); }
+}
 
 window.closeChat = () => {
   document.getElementById('chatPage').style.display = 'none';
@@ -533,44 +598,49 @@ window.sendMessage = async () => {
   if (!text || !window.currentChar) return;
 
   const char = window.currentChar;
-
-  // check free limit
   if (char.free && window.messageCount >= window.FREE_LIMIT) return;
 
   input.value = '';
   input.style.height = 'auto';
-  addMessage('user', text);
+
+  // render + save user message
+  renderMessage('user', text);
   window.messageCount++;
+  await saveMessage(char, 'user', text);
 
   // update counter
   if (char.free) {
-    const remaining = window.FREE_LIMIT - window.messageCount;
+    const remaining = Math.max(0, window.FREE_LIMIT - window.messageCount);
     document.getElementById('freeCounter').textContent = `${remaining} messages left`;
   }
 
   // show typing
   const typingId = showTyping();
-
-  // check if user is asking for photos
   const wantsPhoto = /pic|photo|image|show|send|see you|look like|selfie/i.test(text);
-
-  // simulate AI reply with Claude API (we'll add real API next step)
   await new Promise(r => setTimeout(r, 1200 + Math.random()*800));
   removeTyping(typingId);
 
-  let reply = getLocalReply(text, char);
-  addMessage('ai', reply);
+  // AI reply
+  const reply = getLocalReply(text, char);
+  renderMessage('ai', reply);
+  await saveMessage(char, 'ai', reply);
 
-  // send a photo if asked and available
+  // send photo if asked
   if (wantsPhoto && char.photos && char.photos.length > 0) {
-    setTimeout(() => {
+    setTimeout(async () => {
       const photo = char.photos[Math.floor(Math.random()*char.photos.length)];
-      addMessage('ai', null, photo);
-    }, 600);
+      renderMessage('ai', null, photo);
+      await saveMessage(char, 'ai', null, photo);
+    }, 700);
   }
 
-  // show limit reached
+  // show limit if reached
   if (char.free && window.messageCount >= window.FREE_LIMIT) {
+    // save final count to Firestore
+    try {
+      const uid = window.currentUser.uid;
+      await updateDoc(doc(db, 'chats', `${uid}_${char.id}`), { messageCount: window.messageCount });
+    } catch(e) {}
     setTimeout(() => showLimitReached(), 400);
   }
 };
@@ -615,7 +685,8 @@ function getLocalReply(text, char) {
   return pool[Math.floor(Math.random()*pool.length)];
 }
 
-function addMessage(role, text, imgUrl) {
+// renderMessage — only draws to screen, no DB save
+function renderMessage(role, text, imgUrl) {
   const msgs = document.getElementById('chatMessages');
   const char = window.currentChar;
   const div = document.createElement('div');
