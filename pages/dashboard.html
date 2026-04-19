@@ -420,7 +420,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, signOut, onAuthStateChanged, updateProfile, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDUERWnHurjAPYm9N7P52sXYXLI2Npux54",
@@ -470,21 +470,26 @@ onAuthStateChanged(auth, async (user) => {
 
 async function loadChats(uid) {
   try {
-    const q = query(collection(db, 'chats'), where('userId', '==', uid));
-    const snap = await getDocs(q);
-
     const chats = [];
     let totalMessages = 0;
 
-    snap.forEach(doc => {
-      const data = doc.data();
-      chats.push(data);
-      // count only user messages
-      const userMsgs = (data.messages || []).filter(m => m.role === 'user');
-      totalMessages += userMsgs.length;
+    // Fetch chats for each character directly by known ID pattern
+    const charIds = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
+    const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+
+    const fetches = charIds.map(id => getDoc(doc(db, 'chats', `${uid}_${id}`)));
+    const results = await Promise.all(fetches);
+
+    results.forEach(snap => {
+      if (snap.exists()) {
+        const data = snap.data();
+        chats.push(data);
+        const userMsgs = (data.messages || []).filter(m => m.role === 'user');
+        totalMessages += userMsgs.length;
+      }
     });
 
-    // sort by latest
+    // sort by latest updated
     chats.sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
 
     // Update stats
@@ -498,7 +503,8 @@ async function loadChats(uid) {
 
   } catch(e) {
     console.error('Load chats error:', e);
-    document.getElementById('overviewChatsList').innerHTML = '<div class="empty-state"><div class="empty-icon">💬</div><div>Could not load chats.</div></div>';
+    document.getElementById('overviewChatsList').innerHTML = '<div class="empty-state"><div class="empty-icon">💬</div><div>Could not load chats. Please refresh.</div></div>';
+    document.getElementById('allChatsList').innerHTML = '<div class="empty-state"><div class="empty-icon">💬</div><div>Could not load chats. Please refresh.</div></div>';
   }
 }
 
