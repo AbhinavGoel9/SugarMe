@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SugarMe — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #080810; --bg2: #0e0e1a; --bg3: #13131f;
+    --purple: #a855f7; --pink: #ec4899;
+    --grad: linear-gradient(135deg, #a855f7, #ec4899);
+    --text: #f0f0f8; --muted: #8888aa;
+    --border: rgba(168,85,247,0.18); --card: rgba(255,255,255,0.04);
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; overflow-x: hidden; min-height: 100vh; display: flex; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 240px; flex-shrink: 0;
+    background: var(--bg2); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    position: fixed; top: 0; left: 0; bottom: 0; z-index: 100;
+    padding: 24px 0;
+  }
+  .sidebar-logo {
+    font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800;
+    background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    padding: 0 24px; margin-bottom: 36px;
+    text-decoration: none;
+  }
+  .sidebar-nav { display: flex; flex-direction: column; gap: 4px; padding: 0 12px; flex: 1; }
+  .nav-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 14px; border-radius: 10px;
+    color: var(--muted); text-decoration: none; font-size: 0.88rem; font-weight: 500;
+    cursor: pointer; transition: .2s; border: none; background: none; width: 100%; text-align: left;
+  }
+  .nav-item:hover { background: var(--card); color: var(--text); }
+  .nav-item.active { background: rgba(168,85,247,0.12); color: #c084fc; border: 1px solid rgba(168,85,247,0.2); }
+  .nav-item .icon { font-size: 1.1rem; width: 20px; text-align: center; }
+  .sidebar-bottom { padding: 0 12px; }
+  .user-card {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 14px; border-radius: 10px;
+    background: var(--card); border: 1px solid var(--border);
+    margin-bottom: 10px;
+  }
+  .user-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--grad); display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.9rem; color: #fff; flex-shrink: 0;
+  }
+  .user-name { font-size: 0.85rem; font-weight: 600; }
+  .user-plan { font-size: 0.72rem; color: var(--muted); }
+  .logout-btn {
+    width: 100%; padding: 10px; border-radius: 10px;
+    background: none; border: 1px solid var(--border);
+    color: var(--muted); font-size: 0.85rem; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; transition: .2s;
+  }
+  .logout-btn:hover { border-color: #f87171; color: #f87171; }
+
+  /* ── MAIN ── */
+  .main { margin-left: 240px; flex: 1; padding: 36px 40px; min-height: 100vh; }
+
+  /* ── PAGES ── */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ── PAGE HEADER ── */
+  .page-title { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; margin-bottom: 6px; }
+  .page-sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 32px; }
+
+  /* ── STATS ROW ── */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+  .stat-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 22px 20px;
+    transition: border-color .2s;
+  }
+  .stat-card:hover { border-color: rgba(168,85,247,0.4); }
+  .stat-icon { font-size: 1.4rem; margin-bottom: 12px; }
+  .stat-value { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; margin-bottom: 4px; }
+  .stat-label { color: var(--muted); font-size: 0.78rem; }
+
+  /* ── SUBSCRIPTION CARD ── */
+  .sub-card {
+    background: linear-gradient(135deg, rgba(168,85,247,0.12), rgba(236,72,153,0.06));
+    border: 1px solid rgba(168,85,247,0.3);
+    border-radius: 18px; padding: 28px;
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 32px; flex-wrap: wrap; gap: 20px;
+  }
+  .sub-info h3 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.1rem; margin-bottom: 6px; }
+  .sub-info p { color: var(--muted); font-size: 0.85rem; }
+  .sub-badge {
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    padding: 4px 12px; border-radius: 100px; margin-bottom: 8px; display: inline-block;
+  }
+  .badge-free-plan { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); color: #4ade80; }
+  .badge-pro-plan { background: rgba(168,85,247,0.15); border: 1px solid rgba(168,85,247,0.3); color: #c084fc; }
+  .upgrade-btn {
+    background: var(--grad); border: none; color: #fff;
+    padding: 12px 28px; border-radius: 11px;
+    font-size: 0.9rem; font-weight: 600; cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    box-shadow: 0 4px 20px rgba(168,85,247,0.35); transition: .2s;
+  }
+  .upgrade-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  /* ── RECENT CHATS ── */
+  .section-title {
+    font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700;
+    margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;
+  }
+  .section-title a { font-size: 0.8rem; color: var(--purple); text-decoration: none; font-weight: 500; }
+  .chats-list { display: flex; flex-direction: column; gap: 12px; }
+  .chat-item {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 16px 20px;
+    display: flex; align-items: center; gap: 16px;
+    cursor: pointer; transition: .2s;
+  }
+  .chat-item:hover { border-color: rgba(168,85,247,0.4); transform: translateX(4px); }
+  .chat-item-avatar {
+    width: 46px; height: 46px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; flex-shrink: 0; border: 2px solid var(--border);
+  }
+  .chat-item-info { flex: 1; min-width: 0; }
+  .chat-item-name { font-weight: 600; font-size: 0.9rem; margin-bottom: 3px; }
+  .chat-item-last { color: var(--muted); font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chat-item-meta { text-align: right; flex-shrink: 0; }
+  .chat-item-time { color: var(--muted); font-size: 0.75rem; margin-bottom: 6px; }
+  .chat-item-count {
+    font-size: 0.7rem; padding: 2px 8px; border-radius: 100px;
+    background: rgba(168,85,247,0.12); color: #c084fc; border: 1px solid rgba(168,85,247,0.2);
+  }
+  .empty-state {
+    text-align: center; padding: 50px 20px;
+    color: var(--muted); font-size: 0.9rem;
+  }
+  .empty-state .empty-icon { font-size: 3rem; margin-bottom: 14px; }
+  .empty-state a {
+    display: inline-block; margin-top: 16px;
+    background: var(--grad); color: #fff;
+    padding: 10px 24px; border-radius: 10px;
+    text-decoration: none; font-size: 0.88rem; font-weight: 600;
+  }
+
+  /* ── ACCOUNT PAGE ── */
+  .account-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .account-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 24px;
+  }
+  .account-card h3 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; margin-bottom: 20px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; font-size: 0.75rem; }
+  .account-field { margin-bottom: 16px; }
+  .account-field label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 7px; }
+  .account-field input {
+    width: 100%; background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border); color: var(--text);
+    padding: 11px 14px; border-radius: 10px;
+    font-size: 0.88rem; font-family: 'DM Sans', sans-serif; outline: none;
+    transition: border .2s;
+  }
+  .account-field input:focus { border-color: rgba(168,85,247,0.5); }
+  .account-field input:disabled { opacity: 0.5; cursor: not-allowed; }
+  .save-btn {
+    background: var(--grad); border: none; color: #fff;
+    padding: 11px 24px; border-radius: 10px;
+    font-size: 0.88rem; font-weight: 600; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; transition: .2s; margin-top: 4px;
+  }
+  .save-btn:hover { opacity: 0.88; }
+  .danger-btn {
+    background: none; border: 1px solid rgba(239,68,68,0.3);
+    color: #f87171; padding: 11px 24px; border-radius: 10px;
+    font-size: 0.88rem; font-weight: 600; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; transition: .2s; margin-top: 8px; width: 100%;
+  }
+  .danger-btn:hover { background: rgba(239,68,68,0.08); border-color: #f87171; }
+  .success-msg { color: #4ade80; font-size: 0.82rem; margin-top: 10px; display: none; }
+
+  /* ── LOADING ── */
+  #loadingScreen {
+    position: fixed; inset: 0; background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 999; flex-direction: column; gap: 16px;
+  }
+  .loading-logo { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .loading-dots { display: flex; gap: 6px; }
+  .loading-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--purple); animation: typingBounce 1.2s infinite; }
+  .loading-dot:nth-child(2) { animation-delay: .2s; }
+  .loading-dot:nth-child(3) { animation-delay: .4s; }
+  @keyframes typingBounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-8px)} }
+
+  /* ── NOT LOGGED IN ── */
+  #notLoggedIn {
+    display: none; position: fixed; inset: 0; background: var(--bg);
+    align-items: center; justify-content: center; z-index: 999; flex-direction: column; gap: 16px; text-align: center;
+  }
+  #notLoggedIn h2 { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800; }
+  #notLoggedIn p { color: var(--muted); font-size: 0.9rem; }
+  #notLoggedIn a { display: inline-block; margin-top: 10px; background: var(--grad); color: #fff; padding: 12px 30px; border-radius: 11px; text-decoration: none; font-weight: 600; }
+
+  @media (max-width: 768px) {
+    .sidebar { width: 200px; }
+    .main { margin-left: 200px; padding: 24px 20px; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .account-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 580px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loadingScreen">
+  <div class="loading-logo">SugarMe</div>
+  <div class="loading-dots">
+    <div class="loading-dot"></div>
+    <div class="loading-dot"></div>
+    <div class="loading-dot"></div>
+  </div>
+</div>
+
+<!-- NOT LOGGED IN -->
+<div id="notLoggedIn">
+  <div style="font-size:3rem;">🔒</div>
+  <h2>Please log in first</h2>
+  <p>You need an account to access your dashboard.</p>
+  <a href="/index.html">Go to Home</a>
+</div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar" style="display:none;">
+  <a href="/index.html" class="sidebar-logo">SugarMe</a>
+  <nav class="sidebar-nav">
+    <button class="nav-item active" onclick="showPage('overview', this)">
+      <span class="icon">🏠</span> Overview
+    </button>
+    <button class="nav-item" onclick="showPage('chats', this)">
+      <span class="icon">💬</span> My Chats
+    </button>
+    <button class="nav-item" onclick="showPage('subscription', this)">
+      <span class="icon">💎</span> Subscription
+    </button>
+    <button class="nav-item" onclick="showPage('account', this)">
+      <span class="icon">👤</span> Account
+    </button>
+    <a class="nav-item" href="/pages/characters.html">
+      <span class="icon">✨</span> Browse Characters
+    </a>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="user-card">
+      <div class="user-avatar" id="sidebarAvatar">?</div>
+      <div>
+        <div class="user-name" id="sidebarName">Loading...</div>
+        <div class="user-plan" id="sidebarPlan">Free Plan</div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">← Log out</button>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main" id="mainContent" style="display:none;">
+
+  <!-- OVERVIEW PAGE -->
+  <div class="page active" id="page-overview">
+    <div class="page-title">Welcome back, <span id="welcomeName" style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">there</span> 👋</div>
+    <div class="page-sub">Here's what's happening with your account.</div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon">💬</div>
+        <div class="stat-value" id="statChats">0</div>
+        <div class="stat-label">Active Chats</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📨</div>
+        <div class="stat-value" id="statMessages">0</div>
+        <div class="stat-label">Total Messages Sent</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⭐</div>
+        <div class="stat-value" id="statCharsUnlocked">3</div>
+        <div class="stat-label">Characters Unlocked</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💎</div>
+        <div class="stat-value" id="statPlan">Free</div>
+        <div class="stat-label">Current Plan</div>
+      </div>
+    </div>
+
+    <!-- Subscription status -->
+    <div class="sub-card">
+      <div class="sub-info">
+        <div class="sub-badge badge-free-plan" id="planBadge">FREE PLAN</div>
+        <h3 id="planTitle">You're on the Free Plan</h3>
+        <p id="planDesc">Upgrade to unlock all 15 characters with unlimited messaging and exclusive photos.</p>
+      </div>
+      <button class="upgrade-btn" onclick="showPage('subscription', document.querySelector('.nav-item:nth-child(3)'))">
+        💎 Upgrade Now
+      </button>
+    </div>
+
+    <!-- Recent chats -->
+    <div class="section-title">
+      Recent Chats
+      <a href="#" onclick="showPage('chats', document.querySelector('.nav-item:nth-child(2)'))">View all →</a>
+    </div>
+    <div class="chats-list" id="overviewChatsList">
+      <div class="empty-state">
+        <div class="empty-icon">💬</div>
+        <div>Loading your chats...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHATS PAGE -->
+  <div class="page" id="page-chats">
+    <div class="page-title">My Chats</div>
+    <div class="page-sub">All your conversations in one place.</div>
+    <div class="chats-list" id="allChatsList">
+      <div class="empty-state">
+        <div class="empty-icon">💬</div>
+        <div>Loading your chats...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUBSCRIPTION PAGE -->
+  <div class="page" id="page-subscription">
+    <div class="page-title">Subscription</div>
+    <div class="page-sub">Manage your plan and billing.</div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;max-width:800px;">
+      <!-- Free -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;padding:28px;">
+        <div style="font-size:0.75rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;">Free</div>
+        <div style="font-family:'Syne',sans-serif;font-size:2.4rem;font-weight:800;margin-bottom:6px;">$0 <span style="font-size:1rem;color:var(--muted);font-weight:400;">/mo</span></div>
+        <ul style="list-style:none;margin:20px 0 24px;display:flex;flex-direction:column;gap:10px;">
+          <li style="font-size:0.85rem;color:var(--muted);display:flex;gap:8px;"><span style="color:#4ade80;">✓</span> 3 free characters</li>
+          <li style="font-size:0.85rem;color:var(--muted);display:flex;gap:8px;"><span style="color:#4ade80;">✓</span> 8 messages per character</li>
+          <li style="font-size:0.85rem;color:var(--muted);display:flex;gap:8px;"><span style="color:#f87171;">✗</span> Premium characters</li>
+          <li style="font-size:0.85rem;color:var(--muted);display:flex;gap:8px;"><span style="color:#f87171;">✗</span> Unlimited messaging</li>
+        </ul>
+        <div id="currentPlanFree" style="width:100%;padding:11px;border-radius:10px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:#4ade80;font-size:0.85rem;font-weight:600;text-align:center;">Current Plan ✓</div>
+      </div>
+
+      <!-- Pro -->
+      <div style="background:linear-gradient(160deg,rgba(168,85,247,0.1),rgba(236,72,153,0.06));border:1px solid var(--purple);border-radius:18px;padding:28px;position:relative;">
+        <div style="position:absolute;top:14px;right:14px;font-size:0.62rem;font-weight:800;letter-spacing:1.5px;background:var(--grad);color:#fff;padding:3px 10px;border-radius:100px;">POPULAR</div>
+        <div style="font-size:0.75rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#c084fc;margin-bottom:14px;">Pro</div>
+        <div style="font-family:'Syne',sans-serif;font-size:2.4rem;font-weight:800;margin-bottom:6px;">$9.99 <span style="font-size:1rem;color:var(--muted);font-weight:400;">/mo</span></div>
+        <ul style="list-style:none;margin:20px 0 24px;display:flex;flex-direction:column;gap:10px;">
+          <li style="font-size:0.85rem;color:var(--muted);display:flex;gap:8px;"><span style="color:#4ade80;">✓</span> All 15+ characters</li>
+          <li style="font-size:0.85rem;color:var(--muted);display:flex;gap:8px;"><span style="color:#4ade80;">✓</span> Unlimited messaging</li>
+          <li style="font-size:0.85rem;color:var(--muted);display:flex;gap:8px;"><span style="color:#4ade80;">✓</span> Exclusive photos</li>
+          <li style="font-size:0.85rem;color:var(--muted);display:flex;gap:8px;"><span style="color:#4ade80;">✓</span> Priority AI replies</li>
+        </ul>
+        <button class="upgrade-btn" style="width:100%;" onclick="alert('Payment coming soon! Razorpay is being verified. 💎')">Upgrade to Pro</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACCOUNT PAGE -->
+  <div class="page" id="page-account">
+    <div class="page-title">Account Settings</div>
+    <div class="page-sub">Manage your profile and preferences.</div>
+    <div class="account-grid">
+      <div class="account-card">
+        <h3>Profile Info</h3>
+        <div class="account-field">
+          <label>Full Name</label>
+          <input type="text" id="accountName" placeholder="Your name"/>
+        </div>
+        <div class="account-field">
+          <label>Email Address</label>
+          <input type="email" id="accountEmail" placeholder="your@email.com" disabled/>
+        </div>
+        <button class="save-btn" onclick="saveProfile()">Save Changes</button>
+        <div class="success-msg" id="profileSuccess">✓ Profile updated successfully!</div>
+      </div>
+      <div class="account-card">
+        <h3>Change Password</h3>
+        <div class="account-field">
+          <label>New Password</label>
+          <input type="password" id="newPassword" placeholder="Min 6 characters"/>
+        </div>
+        <div class="account-field">
+          <label>Confirm Password</label>
+          <input type="password" id="confirmPassword" placeholder="Repeat password"/>
+        </div>
+        <button class="save-btn" onclick="changePassword()">Update Password</button>
+        <div class="success-msg" id="passwordSuccess">✓ Password updated!</div>
+      </div>
+      <div class="account-card" style="grid-column:1/-1;">
+        <h3>Danger Zone</h3>
+        <p style="color:var(--muted);font-size:0.85rem;margin-bottom:16px;">These actions are permanent and cannot be undone.</p>
+        <button class="danger-btn" onclick="if(confirm('Are you sure you want to delete your account? This cannot be undone.')) alert('Please contact support to delete your account.')">Delete My Account</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signOut, onAuthStateChanged, updateProfile, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDUERWnHurjAPYm9N7P52sXYXLI2Npux54",
+  authDomain: "sugarme-9a37d.firebaseapp.com",
+  projectId: "sugarme-9a37d",
+  storageBucket: "sugarme-9a37d.firebasestorage.app",
+  messagingSenderId: "237083119168",
+  appId: "1:237083119168:web:dded20690c03658a9259a5"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// character data (same emojis as characters.html)
+const charMap = {
+  1:{name:'Mia',emoji:'🌸'}, 2:{name:'Sakura',emoji:'🌺'}, 3:{name:'Luna',emoji:'🌙'},
+  4:{name:'Aria',emoji:'💜'}, 5:{name:'Yuki',emoji:'❄️'}, 6:{name:'Nova',emoji:'⭐'},
+  7:{name:'Hana',emoji:'🌼'}, 8:{name:'Zoe',emoji:'🔮'}, 9:{name:'Elena',emoji:'🎵'},
+  10:{name:'Rei',emoji:'🐱'}, 11:{name:'Chloe',emoji:'😂'}, 12:{name:'Amara',emoji:'👑'},
+  13:{name:'Nori',emoji:'🌷'}, 14:{name:'Isla',emoji:'🌊'}, 15:{name:'Tara',emoji:'⚡'}
+};
+
+onAuthStateChanged(auth, async (user) => {
+  document.getElementById('loadingScreen').style.display = 'none';
+  if (!user) {
+    document.getElementById('notLoggedIn').style.display = 'flex';
+    return;
+  }
+
+  // Show dashboard
+  document.getElementById('sidebar').style.display = 'flex';
+  document.getElementById('mainContent').style.display = 'block';
+
+  // Fill user info
+  const name = user.displayName || user.email.split('@')[0];
+  const firstName = name.split(' ')[0];
+  document.getElementById('sidebarAvatar').textContent = firstName[0].toUpperCase();
+  document.getElementById('sidebarName').textContent = name;
+  document.getElementById('welcomeName').textContent = firstName;
+  document.getElementById('accountName').value = name;
+  document.getElementById('accountEmail').value = user.email;
+
+  // Load chats from Firestore
+  await loadChats(user.uid);
+});
+
+async function loadChats(uid) {
+  try {
+    const q = query(collection(db, 'chats'), where('userId', '==', uid));
+    const snap = await getDocs(q);
+
+    const chats = [];
+    let totalMessages = 0;
+
+    snap.forEach(doc => {
+      const data = doc.data();
+      chats.push(data);
+      // count only user messages
+      const userMsgs = (data.messages || []).filter(m => m.role === 'user');
+      totalMessages += userMsgs.length;
+    });
+
+    // sort by latest
+    chats.sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
+
+    // Update stats
+    document.getElementById('statChats').textContent = chats.length;
+    document.getElementById('statMessages').textContent = totalMessages;
+
+    // Render overview (top 3)
+    renderChatList(chats.slice(0, 3), 'overviewChatsList');
+    // Render all chats
+    renderChatList(chats, 'allChatsList');
+
+  } catch(e) {
+    console.error('Load chats error:', e);
+    document.getElementById('overviewChatsList').innerHTML = '<div class="empty-state"><div class="empty-icon">💬</div><div>Could not load chats.</div></div>';
+  }
+}
+
+function renderChatList(chats, containerId) {
+  const container = document.getElementById(containerId);
+  if (!chats.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">💬</div>
+        <div>No chats yet. Start a conversation!</div>
+        <a href="/pages/characters.html">Browse Characters →</a>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = chats.map(chat => {
+    const char = charMap[chat.charId] || { name: chat.charName, emoji: '🌸' };
+    const messages = chat.messages || [];
+    const lastMsg = messages[messages.length - 1];
+    const lastText = lastMsg?.text || 'No messages yet';
+    const lastTime = lastMsg?.time ? new Date(lastMsg.time).toLocaleDateString() : '';
+    const userMsgCount = messages.filter(m => m.role === 'user').length;
+
+    return `
+      <div class="chat-item" onclick="window.location.href='/pages/characters.html'">
+        <div class="chat-item-avatar">${char.emoji}</div>
+        <div class="chat-item-info">
+          <div class="chat-item-name">${char.name}</div>
+          <div class="chat-item-last">${lastText.slice(0, 60)}${lastText.length > 60 ? '...' : ''}</div>
+        </div>
+        <div class="chat-item-meta">
+          <div class="chat-item-time">${lastTime}</div>
+          <div class="chat-item-count">${userMsgCount} msgs</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── PAGE NAVIGATION ──
+window.showPage = (pageId, btn) => {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + pageId).classList.add('active');
+  if (btn) btn.classList.add('active');
+};
+
+// ── SAVE PROFILE ──
+window.saveProfile = async () => {
+  const name = document.getElementById('accountName').value.trim();
+  if (!name) return;
+  try {
+    await updateProfile(auth.currentUser, { displayName: name });
+    document.getElementById('sidebarName').textContent = name;
+    document.getElementById('welcomeName').textContent = name.split(' ')[0];
+    document.getElementById('sidebarAvatar').textContent = name[0].toUpperCase();
+    const s = document.getElementById('profileSuccess');
+    s.style.display = 'block';
+    setTimeout(() => s.style.display = 'none', 3000);
+  } catch(e) { alert('Error saving profile: ' + e.message); }
+};
+
+// ── CHANGE PASSWORD ──
+window.changePassword = async () => {
+  const newPass = document.getElementById('newPassword').value;
+  const confirmPass = document.getElementById('confirmPassword').value;
+  if (!newPass || !confirmPass) return alert('Please fill in both fields.');
+  if (newPass !== confirmPass) return alert('Passwords do not match.');
+  if (newPass.length < 6) return alert('Password must be at least 6 characters.');
+  try {
+    await updatePassword(auth.currentUser, newPass);
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmPassword').value = '';
+    const s = document.getElementById('passwordSuccess');
+    s.style.display = 'block';
+    setTimeout(() => s.style.display = 'none', 3000);
+  } catch(e) {
+    if (e.code === 'auth/requires-recent-login') {
+      alert('For security, please log out and log back in before changing your password.');
+    } else {
+      alert('Error: ' + e.message);
+    }
+  }
+};
+
+// ── LOGOUT ──
+window.doLogout = async () => {
+  await signOut(auth);
+  window.location.href = '/index.html';
+};
+</script>
+</body>
+</html>
