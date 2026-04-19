@@ -237,12 +237,12 @@
   <div style="font-size:3rem;">🔒</div>
   <h2>Please log in first</h2>
   <p>You need an account to access your dashboard.</p>
-  <a href="/index.html">Go to Home</a>
+  <a href="/pages/index.html">Go to Home</a>
 </div>
 
 <!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar" style="display:none;">
-  <a href="/index.html" class="sidebar-logo">SugarMe</a>
+  <a href="/pages/index.html" class="sidebar-logo">SugarMe</a>
   <nav class="sidebar-nav">
     <button class="nav-item active" onclick="showPage('overview', this)">
       <span class="icon">🏠</span> Overview
@@ -529,7 +529,7 @@ function renderChatList(chats, containerId) {
     const userMsgCount = messages.filter(m => m.role === 'user').length;
 
     return `
-      <div class="chat-item" onclick="window.location.href='/pages/characters.html'">
+      <div class="chat-item" onclick="window.location.href='/pages/characters.html?openChat=${chat.charId}'">
         <div class="chat-item-avatar">${char.emoji}</div>
         <div class="chat-item-info">
           <div class="chat-item-name">${char.name}</div>
@@ -592,7 +592,7 @@ window.changePassword = async () => {
 // ── LOGOUT ──
 window.doLogout = async () => {
   await signOut(auth);
-  window.location.href = '/index.html';
+  window.location.href = '/pages/index.html';
 };
 </script>
 </body>
