@@ -237,12 +237,12 @@
   <div style="font-size:3rem;">🔒</div>
   <h2>Please log in first</h2>
   <p>You need an account to access your dashboard.</p>
-  <a href="/pages/index.html">Go to Home</a>
+  <a href="/index.html">Go to Home</a>
 </div>
 
 <!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar" style="display:none;">
-  <a href="/pages/index.html" class="sidebar-logo">SugarMe</a>
+  <a href="/index.html" class="sidebar-logo">SugarMe</a>
   <nav class="sidebar-nav">
     <button class="nav-item active" onclick="showPage('overview', this)">
       <span class="icon">🏠</span> Overview
@@ -592,7 +592,7 @@ window.changePassword = async () => {
 // ── LOGOUT ──
 window.doLogout = async () => {
   await signOut(auth);
-  window.location.href = '/pages/index.html';
+  window.location.href = '/index.html';
 };
 </script>
 </body>
