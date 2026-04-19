@@ -237,11 +237,10 @@
 
 <!-- NAV -->
 <nav>
-  <a href="/index.html" class="nav-logo">SugarMe</a>
+  <a href="/pages/index.html" class="nav-logo">SugarMe</a>
   <ul class="nav-links">
-    <li><a href="/index.html">Home</a></li>
+    <li><a href="/pages/index.html">Home</a></li>
     <li><a href="/pages/characters.html" class="active">Characters</a></li>
-   <li><a href="/pages/dashboard.html">Dashboard</a></li>
     <li><a href="#">Pricing</a></li>
   </ul>
   <div id="navActions">
@@ -400,12 +399,12 @@ const characters = [
 window.currentChar = null;
 window.messageCount = 0;
 window.FREE_LIMIT = 8;
-window.currentUser = null;
+window.currentUser = undefined;
 window.isSubscribed = false; // will be connected to Stripe later
 
 // ── AUTH STATE ──
 onAuthStateChanged(auth, (user) => {
-  window.currentUser = user;
+  window.currentUser = user; // null if logged out, user object if logged in
   const nav = document.getElementById('navActions');
   if (user) {
     const firstName = (user.displayName || user.email).split(' ')[0];
@@ -847,6 +846,23 @@ window.doLogout = async () => { await signOut(auth); };
 document.getElementById('authOverlay').addEventListener('click', e => { if(e.target===document.getElementById('authOverlay')) window.closeModal(); });
 document.getElementById('payModal').addEventListener('click', e => { if(e.target===document.getElementById('payModal')) window.closePayModal(); });
 document.addEventListener('keydown', e => { if(e.key==='Escape'){window.closeModal();window.closePayModal();} });
+
+// ── AUTO OPEN CHAT FROM DASHBOARD ──
+const urlParams = new URLSearchParams(window.location.search);
+const openChatId = parseInt(urlParams.get('openChat'));
+if (openChatId) {
+  const checkAndOpen = setInterval(() => {
+    if (window.currentUser !== undefined) {
+      clearInterval(checkAndOpen);
+      if (!window.currentUser) { openModal('login'); return; }
+      const char = characters.find(c => c.id === openChatId);
+      if (char) {
+        if (!char.free && !window.isSubscribed) { openPayModal(char); return; }
+        openChat(char);
+      }
+    }
+  }, 200);
+}
 </script>
 </body>
 </html>
