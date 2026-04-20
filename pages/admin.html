@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SugarMe — Admin Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #080810; --bg2: #0e0e1a; --bg3: #13131f;
+    --purple: #a855f7; --pink: #ec4899;
+    --grad: linear-gradient(135deg, #a855f7, #ec4899);
+    --text: #f0f0f8; --muted: #8888aa;
+    --border: rgba(168,85,247,0.18); --card: rgba(255,255,255,0.04);
+    --green: #4ade80; --red: #f87171; --yellow: #fbbf24;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; overflow-x: hidden; min-height: 100vh; display: flex; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 240px; flex-shrink: 0;
+    background: var(--bg2); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    position: fixed; top: 0; left: 0; bottom: 0; z-index: 100;
+    padding: 24px 0;
+  }
+  .sidebar-logo { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; padding: 0 24px; margin-bottom: 8px; }
+  .admin-badge { font-size: 0.65rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--yellow); background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.25); padding: 2px 10px; border-radius: 100px; margin: 0 24px 28px; display: inline-block; width: fit-content; }
+  .sidebar-nav { display: flex; flex-direction: column; gap: 4px; padding: 0 12px; flex: 1; }
+  .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 10px; color: var(--muted); text-decoration: none; font-size: 0.88rem; font-weight: 500; cursor: pointer; transition: .2s; border: none; background: none; width: 100%; text-align: left; }
+  .nav-item:hover { background: var(--card); color: var(--text); }
+  .nav-item.active { background: rgba(168,85,247,0.12); color: #c084fc; border: 1px solid rgba(168,85,247,0.2); }
+  .nav-item .icon { font-size: 1rem; width: 20px; text-align: center; }
+  .sidebar-bottom { padding: 0 12px; }
+  .admin-info { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 10px; background: var(--card); border: 1px solid var(--border); margin-bottom: 10px; }
+  .admin-avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #fbbf24, #f59e0b); display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+  .admin-name { font-size: 0.82rem; font-weight: 600; }
+  .admin-role { font-size: 0.7rem; color: var(--yellow); }
+  .logout-btn { width: 100%; padding: 10px; border-radius: 10px; background: none; border: 1px solid var(--border); color: var(--muted); font-size: 0.85rem; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: .2s; }
+  .logout-btn:hover { border-color: var(--red); color: var(--red); }
+
+  /* ── MAIN ── */
+  .main { margin-left: 240px; flex: 1; padding: 36px 40px; min-height: 100vh; }
+  .page { display: none; }
+  .page.active { display: block; }
+  .page-title { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; margin-bottom: 6px; }
+  .page-sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 32px; }
+
+  /* ── STATS ── */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+  .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 22px 20px; transition: .2s; }
+  .stat-card:hover { border-color: rgba(168,85,247,0.4); }
+  .stat-icon { font-size: 1.4rem; margin-bottom: 12px; }
+  .stat-value { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; margin-bottom: 4px; }
+  .stat-label { color: var(--muted); font-size: 0.78rem; }
+  .stat-change { font-size: 0.75rem; margin-top: 6px; }
+  .stat-change.up { color: var(--green); }
+  .stat-change.down { color: var(--red); }
+
+  /* ── TABLES ── */
+  .table-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 24px; }
+  .table-header { padding: 18px 22px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .table-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th { padding: 12px 20px; text-align: left; font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); }
+  td { padding: 14px 20px; font-size: 0.85rem; border-bottom: 1px solid rgba(168,85,247,0.06); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(168,85,247,0.03); }
+  .badge { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.5px; padding: 3px 10px; border-radius: 100px; }
+  .badge-free { background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.3); color: var(--green); }
+  .badge-pro { background: rgba(168,85,247,0.12); border: 1px solid rgba(168,85,247,0.3); color: #c084fc; }
+  .badge-active { background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.3); color: var(--green); }
+  .badge-blocked { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); color: var(--red); }
+
+  /* ── ACTIONS ── */
+  .action-btn { background: none; border: 1px solid var(--border); color: var(--muted); padding: 5px 12px; border-radius: 7px; font-size: 0.75rem; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: .2s; margin-right: 4px; }
+  .action-btn:hover { border-color: var(--purple); color: var(--text); }
+  .action-btn.danger:hover { border-color: var(--red); color: var(--red); }
+  .action-btn.success:hover { border-color: var(--green); color: var(--green); }
+
+  /* ── CHARACTER MANAGEMENT ── */
+  .chars-admin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .char-admin-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; transition: .2s; }
+  .char-admin-card:hover { border-color: rgba(168,85,247,0.35); }
+  .char-admin-top { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .char-admin-emoji { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; border: 1px solid var(--border); }
+  .char-admin-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; }
+  .char-admin-meta { color: var(--muted); font-size: 0.78rem; }
+  .char-admin-actions { display: flex; gap: 8px; }
+
+  /* ── ADD CHARACTER FORM ── */
+  .add-char-form { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 24px; }
+  .add-char-form h3 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; margin-bottom: 20px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-field { display: flex; flex-direction: column; gap: 6px; }
+  .form-field.full { grid-column: 1 / -1; }
+  .form-field label { font-size: 0.78rem; color: var(--muted); font-weight: 500; }
+  .form-field input, .form-field select, .form-field textarea {
+    background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+    color: var(--text); padding: 10px 14px; border-radius: 10px;
+    font-size: 0.88rem; font-family: 'DM Sans', sans-serif; outline: none; transition: border .2s;
+  }
+  .form-field input:focus, .form-field select:focus, .form-field textarea:focus { border-color: rgba(168,85,247,0.5); }
+  .form-field select option { background: var(--bg2); }
+  .form-field textarea { resize: vertical; min-height: 80px; }
+  .submit-btn { background: var(--grad); border: none; color: #fff; padding: 11px 28px; border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: .2s; margin-top: 16px; }
+  .submit-btn:hover { opacity: 0.88; }
+
+  /* ── ACCESS DENIED ── */
+  #accessDenied { display: none; position: fixed; inset: 0; background: var(--bg); align-items: center; justify-content: center; z-index: 999; flex-direction: column; gap: 16px; text-align: center; }
+  #accessDenied h2 { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; }
+  #accessDenied p { color: var(--muted); }
+  #accessDenied a { display: inline-block; margin-top: 10px; background: var(--grad); color: #fff; padding: 12px 30px; border-radius: 11px; text-decoration: none; font-weight: 600; }
+
+  /* ── LOADING ── */
+  #loadingScreen { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 999; flex-direction: column; gap: 16px; }
+  .loading-logo { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .loading-dots { display: flex; gap: 6px; }
+  .loading-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--purple); animation: bounce 1.2s infinite; }
+  .loading-dot:nth-child(2) { animation-delay: .2s; }
+  .loading-dot:nth-child(3) { animation-delay: .4s; }
+  @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-8px)} }
+
+  /* ── SEARCH ── */
+  .search-input { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text); padding: 8px 14px; border-radius: 9px; font-size: 0.85rem; font-family: 'DM Sans', sans-serif; outline: none; width: 220px; transition: border .2s; }
+  .search-input:focus { border-color: rgba(168,85,247,0.5); }
+
+  /* ── TOAST ── */
+  #toast { position: fixed; bottom: 30px; right: 30px; background: var(--bg2); border: 1px solid var(--border); color: var(--text); padding: 14px 22px; border-radius: 12px; font-size: 0.88rem; box-shadow: 0 10px 40px rgba(0,0,0,0.4); z-index: 9999; transform: translateY(100px); opacity: 0; transition: .3s; }
+  #toast.show { transform: translateY(0); opacity: 1; }
+
+  @media (max-width: 900px) {
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .form-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 680px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loadingScreen">
+  <div class="loading-logo">SugarMe Admin</div>
+  <div class="loading-dots"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div>
+</div>
+
+<!-- ACCESS DENIED -->
+<div id="accessDenied">
+  <div style="font-size:3rem;">🔒</div>
+  <h2>Access Denied</h2>
+  <p>This page is only accessible to administrators.</p>
+  <a href="/index.html">Go to Home</a>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar" style="display:none;">
+  <div class="sidebar-logo">SugarMe</div>
+  <div class="admin-badge">⚡ Admin Panel</div>
+  <nav class="sidebar-nav">
+    <button class="nav-item active" onclick="showPage('overview', this)"><span class="icon">📊</span> Overview</button>
+    <button class="nav-item" onclick="showPage('users', this)"><span class="icon">👥</span> Users</button>
+    <button class="nav-item" onclick="showPage('characters', this)"><span class="icon">✨</span> Characters</button>
+    <button class="nav-item" onclick="showPage('chats', this)"><span class="icon">💬</span> Chat Activity</button>
+    <button class="nav-item" onclick="showPage('revenue', this)"><span class="icon">💰</span> Revenue</button>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="admin-info">
+      <div class="admin-avatar">👑</div>
+      <div>
+        <div class="admin-name" id="adminName">Admin</div>
+        <div class="admin-role">Administrator</div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">← Log out</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main" id="mainContent" style="display:none;">
+
+  <!-- OVERVIEW -->
+  <div class="page active" id="page-overview">
+    <div class="page-title">Dashboard Overview</div>
+    <div class="page-sub">Your platform at a glance.</div>
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-value" id="statTotalUsers">—</div>
+        <div class="stat-label">Total Users</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💬</div>
+        <div class="stat-value" id="statTotalChats">—</div>
+        <div class="stat-label">Total Chats</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📨</div>
+        <div class="stat-value" id="statTotalMessages">—</div>
+        <div class="stat-label">Total Messages</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💎</div>
+        <div class="stat-value" id="statSubscribers">—</div>
+        <div class="stat-label">Pro Subscribers</div>
+      </div>
+    </div>
+
+    <!-- Recent users table -->
+    <div class="table-card">
+      <div class="table-header">
+        <div class="table-title">Recent Users</div>
+        <button class="action-btn" onclick="showPage('users', document.querySelectorAll('.nav-item')[1])">View All</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>User</th><th>Email</th><th>Plan</th><th>Joined</th><th>Chats</th></tr></thead>
+          <tbody id="recentUsersTable"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:30px;">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- USERS -->
+  <div class="page" id="page-users">
+    <div class="page-title">Users</div>
+    <div class="page-sub">Manage all registered users.</div>
+    <div class="table-card">
+      <div class="table-header">
+        <div class="table-title">All Users <span id="userCount" style="color:var(--muted);font-weight:400;font-size:0.85rem;"></span></div>
+        <input class="search-input" placeholder="🔍 Search users..." oninput="filterUsers(this.value)"/>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>User</th><th>Email</th><th>Plan</th><th>Messages Sent</th><th>Active Chats</th><th>Joined</th><th>Actions</th></tr></thead>
+          <tbody id="usersTable"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px;">Loading users...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHARACTERS -->
+  <div class="page" id="page-characters">
+    <div class="page-title">Characters</div>
+    <div class="page-sub">Add, edit, or remove AI companions.</div>
+
+    <!-- Add new character form -->
+    <div class="add-char-form">
+      <h3>➕ Add New Character</h3>
+      <div class="form-grid">
+        <div class="form-field">
+          <label>Name *</label>
+          <input type="text" id="charName" placeholder="e.g. Mia"/>
+        </div>
+        <div class="form-field">
+          <label>Age *</label>
+          <input type="number" id="charAge" placeholder="e.g. 22" min="18" max="35"/>
+        </div>
+        <div class="form-field">
+          <label>Personality *</label>
+          <select id="charPersonality">
+            <option value="Playful">Playful</option>
+            <option value="Shy">Shy</option>
+            <option value="Confident">Confident</option>
+            <option value="Mysterious">Mysterious</option>
+            <option value="Sweet">Sweet</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Plan</label>
+          <select id="charPlan">
+            <option value="free">Free</option>
+            <option value="paid">Premium (Paid)</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Emoji (used as avatar)</label>
+          <input type="text" id="charEmoji" placeholder="e.g. 🌸" maxlength="2"/>
+        </div>
+        <div class="form-field">
+          <label>Likes (comma separated)</label>
+          <input type="text" id="charLikes" placeholder="e.g. Dancing, Coffee, Travel"/>
+        </div>
+        <div class="form-field full">
+          <label>Bio *</label>
+          <textarea id="charBio" placeholder="Short description of this character..."></textarea>
+        </div>
+        <div class="form-field full">
+          <label>Image URL (optional)</label>
+          <input type="text" id="charImg" placeholder="https://your-image-url.jpg"/>
+        </div>
+        <div class="form-field full">
+          <label>Hover Video URL (optional)</label>
+          <input type="text" id="charVideo" placeholder="https://your-video-url.mp4"/>
+        </div>
+        <div class="form-field full">
+          <label>Photo URLs for chat (comma separated, optional)</label>
+          <input type="text" id="charPhotos" placeholder="https://photo1.jpg, https://photo2.jpg"/>
+        </div>
+        <div class="form-field full">
+          <label>Greeting Messages (comma separated)</label>
+          <input type="text" id="charGreetings" placeholder="Hey! I've been waiting..., Hi there! 💕"/>
+        </div>
+      </div>
+      <button class="submit-btn" onclick="addCharacter()">✦ Add Character</button>
+    </div>
+
+    <!-- Existing characters -->
+    <div class="table-title" style="margin-bottom:16px;">Existing Characters</div>
+    <div class="chars-admin-grid" id="charsAdminGrid">
+      <div style="color:var(--muted);font-size:0.9rem;">Loading characters...</div>
+    </div>
+  </div>
+
+  <!-- CHAT ACTIVITY -->
+  <div class="page" id="page-chats">
+    <div class="page-title">Chat Activity</div>
+    <div class="page-sub">Overview of all conversations on the platform.</div>
+    <div class="table-card">
+      <div class="table-header">
+        <div class="table-title">All Chats</div>
+        <span id="chatActivityCount" style="color:var(--muted);font-size:0.85rem;"></span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>User</th><th>Character</th><th>Messages</th><th>Last Active</th><th>Status</th></tr></thead>
+          <tbody id="chatActivityTable"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:30px;">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- REVENUE -->
+  <div class="page" id="page-revenue">
+    <div class="page-title">Revenue</div>
+    <div class="page-sub">Track your earnings and subscriptions.</div>
+    <div class="stats-row" style="grid-template-columns:repeat(3,1fr);">
+      <div class="stat-card">
+        <div class="stat-icon">💰</div>
+        <div class="stat-value" id="revTotal">$0</div>
+        <div class="stat-label">Total Revenue</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📅</div>
+        <div class="stat-value" id="revMonthly">$0</div>
+        <div class="stat-label">Monthly Subscribers</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📆</div>
+        <div class="stat-value" id="revYearly">$0</div>
+        <div class="stat-label">Yearly Subscribers</div>
+      </div>
+    </div>
+    <div class="table-card">
+      <div class="table-header"><div class="table-title">Subscription History</div></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>User</th><th>Plan</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead>
+          <tbody id="revenueTable">
+            <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:40px;">
+              No payments yet. Razorpay will be connected soon. 💎
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, getDocs, setDoc, deleteDoc, updateDoc, collection } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDUERWnHurjAPYm9N7P52sXYXLI2Npux54",
+  authDomain: "sugarme-9a37d.firebaseapp.com",
+  projectId: "sugarme-9a37d",
+  storageBucket: "sugarme-9a37d.firebasestorage.app",
+  messagingSenderId: "237083119168",
+  appId: "1:237083119168:web:dded20690c03658a9259a5"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// ── YOUR ADMIN EMAIL — CHANGE THIS TO YOUR EMAIL ──
+const ADMIN_EMAIL = "YOUR_EMAIL@gmail.com";
+
+// character map
+const charMap = {
+  1:{name:'Mia',emoji:'🌸'}, 2:{name:'Sakura',emoji:'🌺'}, 3:{name:'Luna',emoji:'🌙'},
+  4:{name:'Aria',emoji:'💜'}, 5:{name:'Yuki',emoji:'❄️'}, 6:{name:'Nova',emoji:'⭐'},
+  7:{name:'Hana',emoji:'🌼'}, 8:{name:'Zoe',emoji:'🔮'}, 9:{name:'Elena',emoji:'🎵'},
+  10:{name:'Rei',emoji:'🐱'}, 11:{name:'Chloe',emoji:'😂'}, 12:{name:'Amara',emoji:'👑'},
+  13:{name:'Nori',emoji:'🌷'}, 14:{name:'Isla',emoji:'🌊'}, 15:{name:'Tara',emoji:'⚡'}
+};
+
+let allUsersData = [];
+
+// ── DEFAULT CHARACTERS ──
+const defaultCharacters = [
+  { id:1, name:"Mia", age:22, personality:"Playful", bio:"Loves adventure, always laughing.", likes:["Travel","Dancing","Coffee"], emoji:"🌸", free:true, img:null, video:null, photos:[], greetings:["Hey! I've been waiting for you 😊"] },
+  { id:2, name:"Sakura", age:20, personality:"Shy", bio:"Quiet on the outside, passionate within.", likes:["Reading","Anime","Rain"], emoji:"🌺", free:true, img:null, video:null, photos:[], greetings:["O-oh, hi... I didn't expect you so soon 😳"] },
+  { id:3, name:"Luna", age:24, personality:"Mysterious", bio:"She knows things she shouldn't.", likes:["Stargazing","Philosophy","Midnight walks"], emoji:"🌙", free:true, img:null, video:null, photos:[], greetings:["I knew you'd come... eventually."] },
+  { id:4, name:"Aria", age:23, personality:"Confident", bio:"Born to lead.", likes:["Fitness","Business","Fashion"], emoji:"💜", free:false, img:null, video:null, photos:[], greetings:["Hey, I've been expecting you 😏"] },
+  { id:5, name:"Yuki", age:21, personality:"Sweet", bio:"The warmest soul you'll ever meet.", likes:["Cooking","Music","Sunsets"], emoji:"❄️", free:false, img:null, video:null, photos:[], greetings:["Hi there! 💕 So nice to meet you!"] },
+];
+
+onAuthStateChanged(auth, async (user) => {
+  document.getElementById('loadingScreen').style.display = 'none';
+  if (!user || user.email !== ADMIN_EMAIL) {
+    document.getElementById('accessDenied').style.display = 'flex';
+    return;
+  }
+  document.getElementById('sidebar').style.display = 'flex';
+  document.getElementById('mainContent').style.display = 'block';
+  document.getElementById('adminName').textContent = user.displayName || 'Admin';
+  await loadAllData();
+});
+
+// ── LOAD ALL DATA ──
+async function loadAllData() {
+  await Promise.all([loadUsers(), loadChats(), loadCharacters()]);
+}
+
+// ── LOAD USERS ──
+async function loadUsers() {
+  try {
+    const snap = await getDocs(collection(db, 'users'));
+    allUsersData = [];
+    snap.forEach(d => allUsersData.push({ id: d.id, ...d.data() }));
+
+    document.getElementById('statTotalUsers').textContent = allUsersData.length;
+    document.getElementById('statSubscribers').textContent = allUsersData.filter(u => u.plan === 'pro').length;
+    document.getElementById('userCount').textContent = `(${allUsersData.length})`;
+
+    renderUsersTable(allUsersData, 'usersTable');
+    renderUsersTable(allUsersData.slice(0, 5), 'recentUsersTable');
+  } catch(e) {
+    console.error('Load users error:', e);
+    document.getElementById('usersTable').innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px;">Could not load users. Check Firestore rules.</td></tr>';
+  }
+}
+
+function renderUsersTable(users, tableId) {
+  const tbody = document.getElementById(tableId);
+  if (!users.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px;">No users yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = users.map(u => `
+    <tr>
+      <td><div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:30px;height:30px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;color:#fff;">${(u.name||u.email||'?')[0].toUpperCase()}</div>
+        <span>${u.name || 'Unknown'}</span>
+      </div></td>
+      <td style="color:var(--muted);">${u.email || '—'}</td>
+      <td><span class="badge ${u.plan === 'pro' ? 'badge-pro' : 'badge-free'}">${u.plan === 'pro' ? 'Pro' : 'Free'}</span></td>
+      <td>${u.messageCount || 0}</td>
+      <td>${u.chatCount || 0}</td>
+      <td style="color:var(--muted);">${u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '—'}</td>
+      <td>
+        <button class="action-btn danger" onclick="blockUser('${u.id}', '${u.name||u.email}')">Block</button>
+        <button class="action-btn success" onclick="makeAdmin('${u.id}', '${u.name||u.email}')">Make Admin</button>
+      </td>
+    </tr>`).join('');
+}
+
+// ── LOAD CHATS ──
+async function loadChats() {
+  try {
+    const snap = await getDocs(collection(db, 'chats'));
+    const chats = [];
+    let totalMessages = 0;
+    snap.forEach(d => {
+      const data = d.data();
+      chats.push({ id: d.id, ...data });
+      totalMessages += (data.messages || []).filter(m => m.role === 'user').length;
+    });
+
+    document.getElementById('statTotalChats').textContent = chats.length;
+    document.getElementById('statTotalMessages').textContent = totalMessages;
+    document.getElementById('chatActivityCount').textContent = `${chats.length} total conversations`;
+
+    // render chat activity
+    const tbody = document.getElementById('chatActivityTable');
+    if (!chats.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:30px;">No chats yet.</td></tr>';
+      return;
+    }
+    chats.sort((a,b) => new Date(b.updatedAt||0) - new Date(a.updatedAt||0));
+    tbody.innerHTML = chats.map(chat => {
+      const char = charMap[chat.charId] || { name: chat.charName || '?', emoji: '🌸' };
+      const userMsgs = (chat.messages || []).filter(m => m.role === 'user').length;
+      const lastActive = chat.updatedAt ? new Date(chat.updatedAt).toLocaleDateString() : '—';
+      const isAtLimit = userMsgs >= 8;
+      return `
+        <tr>
+          <td style="color:var(--muted);font-size:0.8rem;">${chat.userId?.slice(0,12)}...</td>
+          <td><div style="display:flex;align-items:center;gap:8px;">${char.emoji} ${char.name}</div></td>
+          <td>${userMsgs}</td>
+          <td style="color:var(--muted);">${lastActive}</td>
+          <td><span class="badge ${isAtLimit ? 'badge-blocked' : 'badge-active'}">${isAtLimit ? 'Limit Reached' : 'Active'}</span></td>
+        </tr>`;
+    }).join('');
+  } catch(e) {
+    console.error('Load chats error:', e);
+  }
+}
+
+// ── LOAD CHARACTERS ──
+async function loadCharacters() {
+  try {
+    const snap = await getDocs(collection(db, 'characters'));
+    let chars = [];
+    snap.forEach(d => chars.push({ id: d.id, ...d.data() }));
+
+    // if no characters in DB yet, use defaults
+    if (!chars.length) chars = defaultCharacters;
+
+    renderCharsAdmin(chars);
+  } catch(e) {
+    renderCharsAdmin(defaultCharacters);
+  }
+}
+
+function renderCharsAdmin(chars) {
+  const grid = document.getElementById('charsAdminGrid');
+  if (!chars.length) { grid.innerHTML = '<div style="color:var(--muted);">No characters yet.</div>'; return; }
+  grid.innerHTML = chars.map(c => `
+    <div class="char-admin-card">
+      <div class="char-admin-top">
+        <div class="char-admin-emoji">${c.emoji || '🌸'}</div>
+        <div>
+          <div class="char-admin-name">${c.name}</div>
+          <div class="char-admin-meta">Age ${c.age} · ${c.personality} · <span style="color:${c.free ? 'var(--green)' : '#c084fc'}">${c.free ? 'Free' : 'Premium'}</span></div>
+        </div>
+      </div>
+      <div style="color:var(--muted);font-size:0.8rem;margin-bottom:12px;line-height:1.5;">${c.bio}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px;">
+        ${(c.likes||[]).map(l => `<span style="font-size:0.7rem;background:var(--card);border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:100px;">${l}</span>`).join('')}
+      </div>
+      <div class="char-admin-actions">
+        <button class="action-btn danger" onclick="deleteCharacter('${c.id}', '${c.name}')">🗑 Remove</button>
+        <button class="action-btn" onclick="toggleCharPlan('${c.id}', ${c.free})">${c.free ? '🔒 Make Premium' : '🔓 Make Free'}</button>
+      </div>
+    </div>`).join('');
+}
+
+// ── ADD CHARACTER ──
+window.addCharacter = async () => {
+  const name = document.getElementById('charName').value.trim();
+  const age = parseInt(document.getElementById('charAge').value);
+  const personality = document.getElementById('charPersonality').value;
+  const plan = document.getElementById('charPlan').value;
+  const emoji = document.getElementById('charEmoji').value.trim() || '🌸';
+  const likes = document.getElementById('charLikes').value.split(',').map(l => l.trim()).filter(Boolean);
+  const bio = document.getElementById('charBio').value.trim();
+  const img = document.getElementById('charImg').value.trim() || null;
+  const video = document.getElementById('charVideo').value.trim() || null;
+  const photos = document.getElementById('charPhotos').value.split(',').map(p => p.trim()).filter(Boolean);
+  const greetings = document.getElementById('charGreetings').value.split(',').map(g => g.trim()).filter(Boolean);
+
+  if (!name || !age || !bio) return showToast('⚠️ Please fill in Name, Age, and Bio.');
+
+  const charData = {
+    name, age, personality, free: plan === 'free',
+    emoji, likes, bio, img, video, photos, greetings,
+    createdAt: new Date().toISOString()
+  };
+
+  try {
+    const charRef = doc(collection(db, 'characters'));
+    await setDoc(charRef, { ...charData, id: charRef.id });
+    showToast(`✅ ${name} added successfully!`);
+    // clear form
+    ['charName','charAge','charEmoji','charLikes','charBio','charImg','charVideo','charPhotos','charGreetings'].forEach(id => document.getElementById(id).value = '');
+    await loadCharacters();
+  } catch(e) {
+    showToast('❌ Error adding character: ' + e.message);
+  }
+};
+
+// ── DELETE CHARACTER ──
+window.deleteCharacter = async (id, name) => {
+  if (!confirm(`Remove ${name} from the platform? This cannot be undone.`)) return;
+  try {
+    await deleteDoc(doc(db, 'characters', id));
+    showToast(`🗑 ${name} removed.`);
+    await loadCharacters();
+  } catch(e) {
+    showToast('❌ Error: ' + e.message);
+  }
+};
+
+// ── TOGGLE CHARACTER PLAN ──
+window.toggleCharPlan = async (id, currentlyFree) => {
+  try {
+    await updateDoc(doc(db, 'characters', id), { free: !currentlyFree });
+    showToast(`✅ Character plan updated!`);
+    await loadCharacters();
+  } catch(e) {
+    showToast('❌ Error: ' + e.message);
+  }
+};
+
+// ── BLOCK USER ──
+window.blockUser = async (uid, name) => {
+  if (!confirm(`Block user ${name}? They won't be able to log in.`)) return;
+  try {
+    await updateDoc(doc(db, 'users', uid), { blocked: true });
+    showToast(`🚫 ${name} has been blocked.`);
+    await loadUsers();
+  } catch(e) {
+    showToast('❌ Error: ' + e.message);
+  }
+};
+
+// ── MAKE ADMIN ──
+window.makeAdmin = async (uid, name) => {
+  if (!confirm(`Give ${name} admin access?`)) return;
+  try {
+    await updateDoc(doc(db, 'users', uid), { role: 'admin' });
+    showToast(`👑 ${name} is now an admin.`);
+  } catch(e) {
+    showToast('❌ Error: ' + e.message);
+  }
+};
+
+// ── FILTER USERS ──
+window.filterUsers = (query) => {
+  const filtered = allUsersData.filter(u =>
+    (u.name||'').toLowerCase().includes(query.toLowerCase()) ||
+    (u.email||'').toLowerCase().includes(query.toLowerCase())
+  );
+  renderUsersTable(filtered, 'usersTable');
+};
+
+// ── PAGE NAV ──
+window.showPage = (pageId, btn) => {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + pageId).classList.add('active');
+  if (btn) btn.classList.add('active');
+};
+
+// ── LOGOUT ──
+window.doLogout = async () => {
+  await signOut(auth);
+  window.location.href = '/index.html';
+};
+
+// ── TOAST ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
