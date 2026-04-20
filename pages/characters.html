@@ -496,7 +496,7 @@ function buildCard(c) {
       <span class="char-personality">${c.personality}</span>
       <div class="char-bio">${c.bio}</div>
       <div class="char-likes">${likesHtml}</div>
-      <button class="char-cta ${ctaClass}" onclick="handleCardClick(${c.id})">${ctaLabel}</button>
+      <button class="char-cta ${ctaClass}" onclick="handleCardClick('${c.id}')">${ctaLabel}</button>
     </div>`;
 
   // hover video for placeholder (simulate video effect with animation)
@@ -511,7 +511,7 @@ function buildCard(c) {
 
 // ── CARD CLICK ──
 window.handleCardClick = (id) => {
-  const char = window.characters.find(c => c.id === id);
+  const char = window.characters.find(c => String(c.id) === String(id));
   if (!char) return;
   if (!window.currentUser) { openModal('login'); return; }
   if (!char.free && !window.isSubscribed) { openPayModal(char); return; }
@@ -885,7 +885,7 @@ if (openChatId) {
     if (window.currentUser !== undefined) {
       clearInterval(checkAndOpen);
       if (!window.currentUser) { openModal('login'); return; }
-      const char = window.characters.find(c => c.id === openChatId || c.id === String(openChatId));
+      const char = window.characters.find(c => String(c.id) === String(openChatId));
       if (char) {
         if (!char.free && !window.isSubscribed) { openPayModal(char); return; }
         openChat(char);
