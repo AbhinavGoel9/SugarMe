@@ -396,7 +396,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 // ── YOUR ADMIN EMAIL — CHANGE THIS TO YOUR EMAIL ──
-const ADMIN_EMAIL = "abhinavgoel052@gmail.com";
+const ADMIN_EMAIL = "YOUR_EMAIL@gmail.com";
 
 // character map
 const charMap = {
@@ -527,14 +527,55 @@ async function loadCharacters() {
     let chars = [];
     snap.forEach(d => chars.push({ id: d.id, ...d.data() }));
 
-    // if no characters in DB yet, use defaults
-    if (!chars.length) chars = defaultCharacters;
-
+    if (!chars.length) {
+      // Show migrate button
+      document.getElementById('charsAdminGrid').innerHTML = `
+        <div style="grid-column:1/-1;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);border-radius:14px;padding:24px;text-align:center;">
+          <div style="font-size:1.5rem;margin-bottom:10px;">⚠️</div>
+          <div style="font-weight:600;margin-bottom:8px;">No characters in database yet</div>
+          <div style="color:var(--muted);font-size:0.85rem;margin-bottom:16px;">Click the button below to migrate all default characters to Firestore.</div>
+          <button class="submit-btn" onclick="migrateDefaultCharacters()">✦ Migrate Default Characters to Firestore</button>
+        </div>`;
+      return;
+    }
+    chars.sort((a,b) => a.name?.localeCompare(b.name));
     renderCharsAdmin(chars);
   } catch(e) {
-    renderCharsAdmin(defaultCharacters);
+    console.error('Load characters error:', e);
+    showToast('❌ Could not load characters: ' + e.message);
   }
 }
+
+// ── MIGRATE DEFAULT CHARACTERS ──
+window.migrateDefaultCharacters = async () => {
+  showToast('⏳ Migrating characters...');
+  const defaults = [
+    { id:'char_1', name:"Mia", age:22, personality:"Playful", bio:"Loves adventure, always laughing. Will brighten your worst day with her energy.", likes:["Travel","Dancing","Coffee"], emoji:"🌸", color:"#f472b6,#ec4899", free:true, img:null, video:null, photos:["https://picsum.photos/seed/mia1/400/600","https://picsum.photos/seed/mia2/400/600"], greetings:["Hey! I've been waiting for you 😊","Hi there! You look like fun 💕"]},
+    { id:'char_2', name:"Sakura", age:20, personality:"Shy", bio:"Quiet on the outside, passionate within. She opens up slowly but it's worth the wait.", likes:["Reading","Anime","Rain"], emoji:"🌺", color:"#fb7185,#f43f5e", free:true, img:null, video:null, photos:["https://picsum.photos/seed/sakura1/400/600"], greetings:["O-oh, hi... I didn't expect you so soon 😳"]},
+    { id:'char_3', name:"Luna", age:24, personality:"Mysterious", bio:"She knows things she shouldn't. Dark aesthetic, deep conversations, hauntingly beautiful.", likes:["Stargazing","Philosophy","Midnight walks"], emoji:"🌙", color:"#818cf8,#6366f1", free:true, img:null, video:null, photos:["https://picsum.photos/seed/luna1/400/600"], greetings:["I knew you'd come... eventually."]},
+    { id:'char_4', name:"Aria", age:23, personality:"Confident", bio:"Born to lead. Aria knows exactly what she wants and isn't afraid to go get it.", likes:["Fitness","Business","Fashion"], emoji:"💜", color:"#c084fc,#a855f7", free:false, img:null, video:null, photos:[], greetings:["Hey, I've been expecting you 😏"]},
+    { id:'char_5', name:"Yuki", age:21, personality:"Sweet", bio:"The warmest soul you'll ever meet. She remembers everything you tell her.", likes:["Cooking","Music","Sunsets"], emoji:"❄️", color:"#67e8f9,#22d3ee", free:false, img:null, video:null, photos:[], greetings:["Hi there! 💕 So nice to meet you!"]},
+    { id:'char_6', name:"Nova", age:25, personality:"Confident", bio:"Former model turned artist. Life is her canvas and she paints it bold.", likes:["Art","Travel","Wine"], emoji:"⭐", color:"#fbbf24,#f59e0b", free:false, img:null, video:null, photos:[], greetings:["Ready to make something beautiful? 😏"]},
+    { id:'char_7', name:"Hana", age:22, personality:"Playful", bio:"She'll challenge you to everything — chess, dance battles, trivia. Always wins.", likes:["Games","Sports","Ramen"], emoji:"🌼", color:"#86efac,#4ade80", free:false, img:null, video:null, photos:[], greetings:["Bet you can't keep up with me 😜"]},
+    { id:'char_8', name:"Zoe", age:26, personality:"Mysterious", bio:"Travelled to 40 countries. Every story she tells takes you somewhere new.", likes:["Adventure","Photography","Yoga"], emoji:"🔮", color:"#f9a8d4,#f472b6", free:false, img:null, video:null, photos:[], greetings:["Every journey starts with hello..."]},
+    { id:'char_9', name:"Elena", age:23, personality:"Sweet", bio:"Writes poetry, plays piano, and somehow makes everyone around her smile.", likes:["Poetry","Piano","Tea"], emoji:"🎵", color:"#a78bfa,#8b5cf6", free:false, img:null, video:null, photos:[], greetings:["Hi~ I just finished writing a poem 🥰"]},
+    { id:'char_10', name:"Rei", age:20, personality:"Shy", bio:"Brilliant mind, soft heart. She'll open up to you if you're patient and kind.", likes:["Science","Cats","Cozy evenings"], emoji:"🐱", color:"#fdba74,#fb923c", free:false, img:null, video:null, photos:[], greetings:["U-um... hi. I wasn't expecting anyone 😳"]},
+    { id:'char_11', name:"Chloe", age:24, personality:"Playful", bio:"Stand-up comedian energy. She'll make you laugh until your stomach hurts.", likes:["Comedy","Movies","Pizza"], emoji:"😂", color:"#6ee7b7,#34d399", free:false, img:null, video:null, photos:[], greetings:["Okay okay, I have the BEST joke for you 😂"]},
+    { id:'char_12', name:"Amara", age:27, personality:"Confident", bio:"CEO energy, golden heart. She inspires everyone she meets.", likes:["Finance","Meditation","Jazz"], emoji:"👑", color:"#fde68a,#fcd34d", free:false, img:null, video:null, photos:[], greetings:["Let's talk. I have a feeling you're interesting."]},
+    { id:'char_13', name:"Nori", age:21, personality:"Sweet", bio:"Tiny but mighty. She loves hard and fights for the people she cares about.", likes:["Manga","Baking","Flowers"], emoji:"🌷", color:"#fca5a5,#f87171", free:false, img:null, video:null, photos:[], greetings:["I made cookies today! Want some? 🍪"]},
+    { id:'char_14', name:"Isla", age:25, personality:"Mysterious", bio:"Marine biologist by day, philosopher by night. The ocean is her second home.", likes:["Ocean","Science","Silence"], emoji:"🌊", color:"#7dd3fc,#38bdf8", free:false, img:null, video:null, photos:[], greetings:["The ocean told me you were coming."]},
+    { id:'char_15', name:"Tara", age:22, personality:"Playful", bio:"Extreme sports, extreme love. Life is short — she lives every second.", likes:["Skydiving","Music festivals","Hiking"], emoji:"⚡", color:"#fb923c,#f97316", free:false, img:null, video:null, photos:[], greetings:["Life's too short to be boring! Let's go! ⚡"]},
+  ];
+  try {
+    for (const char of defaults) {
+      await setDoc(doc(db, 'characters', char.id), char);
+    }
+    showToast('✅ All 15 characters migrated!');
+    await loadCharacters();
+  } catch(e) {
+    showToast('❌ Migration error: ' + e.message);
+  }
+};
 
 function renderCharsAdmin(chars) {
   const grid = document.getElementById('charsAdminGrid');
@@ -582,10 +623,9 @@ window.addCharacter = async () => {
   };
 
   try {
-    const charRef = doc(collection(db, 'characters'));
-    await setDoc(charRef, { ...charData, id: charRef.id });
+    const newId = 'char_' + Date.now();
+    await setDoc(doc(db, 'characters', newId), { ...charData, id: newId });
     showToast(`✅ ${name} added successfully!`);
-    // clear form
     ['charName','charAge','charEmoji','charLikes','charBio','charImg','charVideo','charPhotos','charGreetings'].forEach(id => document.getElementById(id).value = '');
     await loadCharacters();
   } catch(e) {
