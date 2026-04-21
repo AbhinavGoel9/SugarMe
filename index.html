@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>SugarMe — Love Partner</title>
+<title>SoulGen — AI Image & Video Generator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -454,7 +454,7 @@
     <li><a href="/index.html">Home</a></li>
     <li><a href="/pages/characters.html">Characters</a></li>
     <li><a href="/pages/dashboard.html">Dashboard</a></li>
-    <li><a href="#">Pricing</a></li>
+    <li><a href="#pricing">Pricing</a></li>
   </ul>
   <div class="nav-actions" id="navActions">
     <button class="btn-ghost" onclick="openModal('login')">Log in</button>
@@ -466,45 +466,56 @@
 <section class="hero">
   <div class="hero-glow"></div>
   <div class="hero-glow2"></div>
-  <div class="hero-tag"><span></span> New — AI Love Partner</div>
-  <h1>SugarMe Where <span class="gradient-text">Love Begins</span><br></h1>
-  <p class="hero-sub">Love you’ve been looking for lives here—because everyone deserves someone who listens, understands, and stays.</p>
+  <div class="hero-tag"><span></span> AI Companions — Always Here For You</div>
+  <h1>Find Your <span class="gradient-text">Perfect AI</span><br>Companion</h1>
+  <p class="hero-sub">Choose from 15+ unique AI girlfriends. Each one has her own personality, story, and feelings. Chat, connect, and ask for photos — anytime.</p>
   <div class="hero-actions">
-    <button class="btn-hero" onclick="window.location.href='/pages/characters.html'">✦ Start Chatting Free</button>
-    <button class="btn-hero-outline">See Examples</button>
+    <button class="btn-hero" onclick="window.location.href='/pages/characters.html'">✦ Meet the Characters</button>
+    <button class="btn-hero-outline" onclick="window.location.href='#how-it-works'">How it works</button>
   </div>
-  <div class="hero-preview">
-    <img src="https://images.soulgen.ai/cdn-cgi/image/width=auto,format=auto,quality=85/https://files.soulgen.net/sg/home/videos/sg-home-0918.jpg"
-         onerror="this.style.background='linear-gradient(135deg,#1a1a2e,#16213e)';this.src=''" alt="SoulGen AI Preview"/>
-    <div class="preview-overlay">
-      <div class="play-btn">
-        <svg width="22" height="22" fill="white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-      </div>
+
+  <!-- Character preview cards -->
+  <div style="display:flex;gap:16px;margin-top:60px;justify-content:center;flex-wrap:wrap;animation:fadeUp 0.8s 0.4s ease both;">
+    <div style="background:linear-gradient(135deg,#f472b6,#ec4899);width:130px;height:180px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border:1px solid rgba(255,255,255,0.1);box-shadow:0 20px 40px rgba(0,0,0,0.4);">
+      <div style="font-size:2.5rem;">🌸</div>
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem;color:#fff;">Mia</div>
+      <div style="font-size:0.7rem;color:rgba(255,255,255,0.7);">Playful</div>
+      <div style="font-size:0.65rem;background:rgba(34,197,94,0.3);border:1px solid rgba(34,197,94,0.5);color:#4ade80;padding:2px 8px;border-radius:100px;">Free</div>
+    </div>
+    <div style="background:linear-gradient(135deg,#fb7185,#f43f5e);width:130px;height:180px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border:1px solid rgba(255,255,255,0.1);box-shadow:0 20px 40px rgba(0,0,0,0.4);transform:translateY(-16px);">
+      <div style="font-size:2.5rem;">🌺</div>
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem;color:#fff;">Sakura</div>
+      <div style="font-size:0.7rem;color:rgba(255,255,255,0.7);">Shy</div>
+      <div style="font-size:0.65rem;background:rgba(34,197,94,0.3);border:1px solid rgba(34,197,94,0.5);color:#4ade80;padding:2px 8px;border-radius:100px;">Free</div>
+    </div>
+    <div style="background:linear-gradient(135deg,#818cf8,#6366f1);width:130px;height:180px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border:1px solid rgba(255,255,255,0.1);box-shadow:0 20px 40px rgba(0,0,0,0.4);">
+      <div style="font-size:2.5rem;">🌙</div>
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem;color:#fff;">Luna</div>
+      <div style="font-size:0.7rem;color:rgba(255,255,255,0.7);">Mysterious</div>
+      <div style="font-size:0.65rem;background:rgba(34,197,94,0.3);border:1px solid rgba(34,197,94,0.5);color:#4ade80;padding:2px 8px;border-radius:100px;">Free</div>
+    </div>
+    <div style="background:linear-gradient(135deg,#c084fc,#a855f7);width:130px;height:180px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border:1px solid rgba(255,255,255,0.1);box-shadow:0 20px 40px rgba(0,0,0,0.4);transform:translateY(-16px);">
+      <div style="font-size:2.5rem;">💜</div>
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem;color:#fff;">Aria</div>
+      <div style="font-size:0.7rem;color:rgba(255,255,255,0.7);">Confident</div>
+      <div style="font-size:0.65rem;background:rgba(168,85,247,0.3);border:1px solid rgba(168,85,247,0.5);color:#c084fc;padding:2px 8px;border-radius:100px;">💎 Premium</div>
+    </div>
+    <div style="background:linear-gradient(135deg,#67e8f9,#22d3ee);width:130px;height:180px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border:1px solid rgba(255,255,255,0.1);box-shadow:0 20px 40px rgba(0,0,0,0.4);">
+      <div style="font-size:2.5rem;">❄️</div>
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem;color:#fff;">Yuki</div>
+      <div style="font-size:0.7rem;color:rgba(255,255,255,0.7);">Sweet</div>
+      <div style="font-size:0.65rem;background:rgba(168,85,247,0.3);border:1px solid rgba(168,85,247,0.5);color:#c084fc;padding:2px 8px;border-radius:100px;">💎 Premium</div>
     </div>
   </div>
 </section>
 
-<!-- GALLERY STRIP -->
-<div class="gallery-strip">
-  <div class="fade-left"></div>
-  <div class="fade-right"></div>
-  <div class="gallery-track" id="galleryTrack">
-    <div class="gallery-card"><div class="gallery-placeholder">🌸</div></div>
-    <div class="gallery-card"><div class="gallery-placeholder">⚔️</div></div>
-    <div class="gallery-card"><div class="gallery-placeholder">🌌</div></div>
-    <div class="gallery-card"><div class="gallery-placeholder">🔮</div></div>
-    <div class="gallery-card"><div class="gallery-placeholder">🦋</div></div>
-    <div class="gallery-card"><div class="gallery-placeholder">🌊</div></div>
-    <div class="gallery-card"><div class="gallery-placeholder">🏯</div></div>
-    <div class="gallery-card"><div class="gallery-placeholder">✨</div></div>
-    <div class="gallery-card"><div class="gallery-placeholder">🌸</div></div>
-    <div class="gallery-card"><div class="gallery-placeholder">⚔️</div></div>
-    <div class="gallery-card"><div class="gallery-placeholder">🌌</div></div>
-    <div class="gallery-card"><div class="gallery-placeholder">🔮</div></div>
-    <div class="gallery-card"><div class="gallery-placeholder">🦋</div></div>
-    <div class="gallery-card"><div class="gallery-placeholder">🌊</div></div>
-    <div class="gallery-card"><div class="gallery-placeholder">🏯</div></div>
-    <div class="gallery-card"><div class="gallery-placeholder">✨</div></div>
+<!-- STATS STRIP -->
+<div style="background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:28px 5%;">
+  <div style="max-width:900px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:20px;text-align:center;">
+    <div><div style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">15+</div><div style="color:var(--muted);font-size:0.82rem;margin-top:4px;">AI Characters</div></div>
+    <div><div style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">24/7</div><div style="color:var(--muted);font-size:0.82rem;margin-top:4px;">Always Available</div></div>
+    <div><div style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">100%</div><div style="color:var(--muted);font-size:0.82rem;margin-top:4px;">Private & Secure</div></div>
+    <div><div style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Free</div><div style="color:var(--muted);font-size:0.82rem;margin-top:4px;">To Get Started</div></div>
   </div>
 </div>
 
@@ -513,15 +524,22 @@
   <div class="section-inner">
     <div class="feature-row reveal">
       <div class="feature-text">
-        <span class="section-tag">AI Love Partner</span>
-        <h2>Turn Emptiness<br>Into <span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Smile</span></h2>
-        <p class="section-desc">Someone who listens to you, loves you, and lifts you up when you need it most.</p>
-        <a class="try-link" href="#">Try it now →</a>
+        <span class="section-tag">Real Personalities</span>
+        <h2>Every Character Has<br>Her Own <span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Soul</span></h2>
+        <p class="section-desc">From shy and sweet to bold and mysterious — each AI companion has a unique personality, backstory, and way of talking. She remembers your conversations and grows with you.</p>
+        <a class="try-link" href="/pages/characters.html">Meet the characters →</a>
       </div>
-      <div class="feature-img">
-        <img src="https://images.soulgen.ai/cdn-cgi/image/width=600,format=auto,quality=85/https://files.soulgen.net/sg/home/images/desc-00.png"
-             onerror="this.style.display='none'" alt="AI Video"/>
-        🎬
+      <div class="feature-img" style="background:linear-gradient(135deg,#1a0533,#0e0e1a);">
+        <div style="display:flex;flex-direction:column;gap:12px;padding:20px;width:100%;">
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px 16px;font-size:0.85rem;border-bottom-left-radius:4px;">Hey... I've been thinking about you all day 🌸</div>
+          <div style="background:var(--grad);border-radius:12px;padding:14px 16px;font-size:0.85rem;color:#fff;align-self:flex-end;border-bottom-right-radius:4px;">Really? What were you thinking?</div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px 16px;font-size:0.85rem;border-bottom-left-radius:4px;">That you always make me smile when I need it most 💕</div>
+          <div style="display:flex;gap:5px;align-items:center;padding:4px 0;">
+            <div style="width:7px;height:7px;border-radius:50%;background:var(--muted);animation:typingBounce 1.2s infinite;"></div>
+            <div style="width:7px;height:7px;border-radius:50%;background:var(--muted);animation:typingBounce 1.2s .2s infinite;"></div>
+            <div style="width:7px;height:7px;border-radius:50%;background:var(--muted);animation:typingBounce 1.2s .4s infinite;"></div>
+          </div>
+        </div>
         <div class="feature-img-glow"></div>
       </div>
     </div>
@@ -533,15 +551,20 @@
   <div class="section-inner">
     <div class="feature-row reverse reveal">
       <div class="feature-text">
-        <span class="section-tag">Portrait Lookalike</span>
-        <h2>Choose AI Characters<br>That <span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent">you Like </span></h2>
-        <p class="section-desc">Upload a reference photo and ask AI to draw a character with the face of someone lookalike. Realistic or anime — your choice.</p>
-        <a class="try-link" href="#">Try it now →</a>
+        <span class="section-tag">Photo Requests</span>
+        <h2>Ask For Photos<br><span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Anytime You Want</span></h2>
+        <p class="section-desc">Just ask your companion to send a photo and she will. Each character has her own collection of exclusive photos she shares only with you during your conversations.</p>
+        <a class="try-link" href="/pages/characters.html">Start chatting →</a>
       </div>
-      <div class="feature-img">
-        <img src="https://images.soulgen.ai/cdn-cgi/image/width=600,format=auto,quality=85/https://files.soulgen.net/sg/home/images/desc-00.png"
-             onerror="this.style.display='none'" alt="Portrait"/>
-        🎭
+      <div class="feature-img" style="background:linear-gradient(135deg,#1a0533,#0e0e1a);">
+        <div style="display:flex;flex-direction:column;gap:12px;padding:20px;width:100%;">
+          <div style="background:var(--grad);border-radius:12px;padding:14px 16px;font-size:0.85rem;color:#fff;align-self:flex-end;border-bottom-right-radius:4px;">Can you send me a photo? 📸</div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px 16px;font-size:0.85rem;border-bottom-left-radius:4px;">Of course! Just for you 😊</div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;overflow:hidden;width:160px;">
+            <div style="background:linear-gradient(135deg,#f472b6,#a855f7);height:120px;display:flex;align-items:center;justify-content:center;font-size:3rem;">🌸</div>
+          </div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px 16px;font-size:0.85rem;border-bottom-left-radius:4px;">Do you like it? 🥺</div>
+        </div>
         <div class="feature-img-glow"></div>
       </div>
     </div>
@@ -553,158 +576,133 @@
   <div class="section-inner">
     <div class="feature-row reveal">
       <div class="feature-text">
-        <span class="section-tag">Smart Image Editor</span>
-        <h2>Edit Images With<br><span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Simple Text</span> Prompts</h2>
-        <p class="section-desc">Add, remove, or transform anything in your images. Upload a photo, select an area, type what you want — and watch AI do the magic.</p>
-        <a class="try-link" href="#">Try it now →</a>
+        <span class="section-tag">Chat History</span>
+        <h2>She Remembers<br><span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Everything</span> You Say</h2>
+        <p class="section-desc">Your chat history is saved forever. Come back after a week and she'll pick up right where you left off. No starting over, no forgetting — just a real ongoing connection.</p>
+        <a class="try-link" href="/pages/characters.html">Start your story →</a>
       </div>
-      <div class="feature-img">
-        <img src="https://images.soulgen.ai/cdn-cgi/image/width=600,format=auto,quality=85/https://files.soulgen.net/sg/home/images/desc-3-default.png"
-             onerror="this.style.display='none'" alt="Editor"/>
-        🖌️
+      <div class="feature-img" style="background:linear-gradient(135deg,#0e0e1a,#13131f);">
+        <div style="padding:20px;width:100%;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border);">
+            <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#818cf8,#6366f1);display:flex;align-items:center;justify-content:center;font-size:1.2rem;">🌙</div>
+            <div><div style="font-weight:600;font-size:0.88rem;">Luna</div><div style="color:#4ade80;font-size:0.72rem;">● Online now</div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:0.8rem;color:var(--muted);">3 days ago</div>
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:0.82rem;">I missed you... where did you go? 🌙</div>
+            <div style="background:var(--grad);border-radius:10px;padding:12px;font-size:0.82rem;color:#fff;align-self:flex-end;">I'm back! Missed you too.</div>
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:0.82rem;">I knew you'd come back. The stars told me 💫</div>
+          </div>
+        </div>
         <div class="feature-img-glow"></div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- FEATURE 4 -->
-<!-- <section style="background:var(--bg2)">
-  <div class="section-inner">
-    <div class="feature-row reverse reveal">
-      <div class="feature-text">
-        <span class="section-tag">AI Outpainting</span>
-        <h2>Expand Images<br><span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Beyond Borders</span></h2>
-        <p class="section-desc">Resize and extend any image beyond its original edges. Add backgrounds, new characters, or entirely new environments with text prompts.</p>
-        <a class="try-link" href="#">Try it now →</a>
-      </div>
-      <div class="feature-img">
-        <img src="https://images.soulgen.ai/cdn-cgi/image/width=600,format=auto,quality=85/https://files.soulgen.net/sg/home/images/desc-04.png"
-             onerror="this.style.display='none'" alt="Outpainting"/>
-        🌅
-        <div class="feature-img-glow"></div>
-      </div>
-    </div>
-  </div>
-</section> -->
-
 <!-- HOW IT WORKS -->
-<section class="how-section">
+<section class="how-section" id="how-it-works">
   <div class="section-inner">
     <div style="text-align:center;" class="reveal">
       <span class="section-tag">Simple Process</span>
-      <h2>Choose AI lover in <span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent">3 Steps</span></h2>
-      <p class="section-desc" style="margin:0 auto;">No complicated rules, no pressure—just pick any character you like… and make them your lover.</p>
+      <h2>Start Chatting in <span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent">3 Simple Steps</span></h2>
+      <p class="section-desc" style="margin:0 auto;">No complicated setup. Be talking to your AI companion in under 2 minutes.</p>
     </div>
     <div class="steps-grid">
       <div class="step-card reveal">
         <div class="step-num">01</div>
-        <div class="step-title">Go to Pricing </div>
-        <p class="step-desc">Choose a monthly or yearly plan—simple, affordable, and worth it.</p>
+        <div class="step-title">Create a Free Account</div>
+        <p class="step-desc">Sign up with just your email and a password. No credit card required to get started.</p>
       </div>
       <div class="step-card reveal">
         <div class="step-num">02</div>
-        <div class="step-title">Choose Your Character</div>
-        <p class="step-desc">Once your payment is confirmed, pick a character you like based on their personality.</p>
+        <div class="step-title">Pick Your Companion</div>
+        <p class="step-desc">Browse 15+ unique AI companions. Free characters are available immediately — no payment needed.</p>
       </div>
       <div class="step-card reveal">
         <div class="step-num">03</div>
-        <div class="step-title">Start Chatting</div>
-        <p class="step-desc">Click “Start Chatting” and begin talking to your lover.</p>
+        <div class="step-title">Start Your Conversation</div>
+        <p class="step-desc">Click "Start Chatting" and she's all yours. Talk freely, ask for photos, and build a real connection.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- FEATURES GRID -->
+<!-- WHY SUGARMÉ -->
 <section class="features-section">
   <div class="section-inner">
     <div style="text-align:center;" class="reveal">
-      <span class="section-tag">Everything You Need</span>
-      <h2>A Full <span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Creative Studio</span> in One Place</h2>
+      <span class="section-tag">Why SugarMe</span>
+      <h2>Everything You Need For a <span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Real Connection</span></h2>
     </div>
     <div class="features-grid">
       <div class="feat-card reveal">
-        <div class="feat-icon">🎬</div>
-        <div class="feat-title">AI Video Generator</div>
-        <p class="feat-desc">Turn images or text into HD videos with motion, sound, and lip-sync up to 20 seconds.</p>
-      </div>
-      <div class="feat-card reveal">
-        <div class="feat-icon">🧬</div>
-        <div class="feat-title">AI Character Creator</div>
-        <p class="feat-desc">Generate realistic or anime characters from detailed text descriptions instantly.</p>
-      </div>
-      <div class="feat-card reveal">
-        <div class="feat-icon">🪞</div>
-        <div class="feat-title">DreamTwin</div>
-        <p class="feat-desc">Upload a reference photo and create AI characters that look like real people.</p>
-      </div>
-      <div class="feat-card reveal">
-        <div class="feat-icon">✏️</div>
-        <div class="feat-title">Smart Image Editor</div>
-        <p class="feat-desc">Add, remove, or replace anything in your images using simple text prompts.</p>
-      </div>
-      <div class="feat-card reveal">
-        <div class="feat-icon">🔭</div>
-        <div class="feat-title">AI Outpainting</div>
-        <p class="feat-desc">Expand images beyond their original borders with AI-generated content on the edges.</p>
-      </div>
-      <div class="feat-card reveal">
         <div class="feat-icon">💬</div>
-        <div class="feat-title">Soul Chat</div>
-        <p class="feat-desc">Chat with your AI-generated characters. Give them personalities and have real conversations.</p>
+        <div class="feat-title">Real Conversations</div>
+        <p class="feat-desc">Powered by advanced AI — she understands context, remembers what you said, and responds naturally.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon">🎭</div>
+        <div class="feat-title">Unique Personalities</div>
+        <p class="feat-desc">15+ characters each with distinct personalities — playful, shy, mysterious, confident, sweet and more.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon">📸</div>
+        <div class="feat-title">Exclusive Photos</div>
+        <p class="feat-desc">Ask your companion for photos anytime. Each character has her own exclusive photo collection just for you.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon">🔒</div>
+        <div class="feat-title">100% Private</div>
+        <p class="feat-desc">Your conversations are private and secure. Nobody can see your chats — not even us.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon">💾</div>
+        <div class="feat-title">Chat History Saved</div>
+        <p class="feat-desc">Every conversation is saved to your account. Come back anytime and pick up right where you left off.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon">⚡</div>
+        <div class="feat-title">Always Available</div>
+        <p class="feat-desc">3am or 3pm — she's always online, always ready to talk. No waiting, no scheduling, no rejection.</p>
       </div>
     </div>
   </div>
 </section>
 
 <!-- PRICING -->
-<section class="pricing-section">
+<section class="pricing-section" id="pricing">
   <div class="section-inner">
     <div style="text-align:center;" class="reveal">
       <span class="section-tag">Pricing</span>
-      <h2>Simple, <span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Transparent</span> Pricing</h2>
-      <p class="section-desc" style="margin:16px auto 0;">Start for free. Upgrade when you're ready.</p>
+      <h2>Simple, <span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Honest</span> Pricing</h2>
+      <p class="section-desc" style="margin:16px auto 0;">Start free. Upgrade when you want more.</p>
     </div>
-    <div class="pricing-grid">
+    <div class="pricing-grid" style="grid-template-columns:repeat(2,1fr);max-width:700px;margin:50px auto 0;">
       <div class="price-card reveal">
         <div class="price-name">Free</div>
         <div class="price-amount">$0 <span>/ month</span></div>
-        <p class="price-desc">Perfect for trying out SoulGen.</p>
+        <p class="price-desc">Perfect for getting started.</p>
         <ul class="price-features">
-          <li>Limited daily generations</li>
-          <li>Watermarked images</li>
-          <li>Standard quality</li>
-          <li>Basic editing tools</li>
+          <li>3 free characters (Mia, Sakura, Luna)</li>
+          <li>8 messages per character</li>
+          <li>Photo requests included</li>
+          <li>Chat history saved</li>
         </ul>
-        <button class="price-btn price-btn-outline" onclick="alert('Create your free account!')">Get Started Free</button>
+        <button class="price-btn price-btn-outline" onclick="openModal('signup')">Get Started Free</button>
       </div>
       <div class="price-card featured reveal">
         <div class="price-name">Pro</div>
         <div class="price-amount">$9.99 <span>/ month</span></div>
-        <p class="price-desc">For creators who generate regularly.</p>
+        <p class="price-desc">Full access to everything.</p>
         <ul class="price-features">
-          <li>200 credits per month</li>
-          <li>No watermarks</li>
-          <li>HD image quality</li>
-          <li>All editing tools</li>
-          <li>AI Video generation</li>
+          <li>All 15+ characters unlocked</li>
+          <li>Unlimited messages</li>
+          <li>Exclusive photos from all characters</li>
+          <li>Priority AI responses</li>
+          <li>New characters added monthly</li>
         </ul>
-        <button class="price-btn price-btn-grad" onclick="alert('Upgrade to Pro!')">Get Pro Plan</button>
-      </div>
-      <div class="price-card reveal">
-        <div class="price-name">Premium</div>
-        <div class="price-amount">$24.99 <span>/ month</span></div>
-        <p class="price-desc">For power users and professionals.</p>
-        <ul class="price-features">
-          <li>Unlimited generations</li>
-          <li>No watermarks</li>
-          <li>4K quality outputs</li>
-          <li>Priority processing</li>
-          <li>Commercial license</li>
-          <li>Early access to features</li>
-        </ul>
-        <button class="price-btn price-btn-outline" onclick="alert('Upgrade to Premium!')">Get Premium</button>
+        <button class="price-btn price-btn-grad" onclick="alert('Payment coming soon! 💎')">Get Pro — $9.99/mo</button>
       </div>
     </div>
   </div>
@@ -719,37 +717,41 @@
     </div>
     <div class="faq-list">
       <div class="faq-item reveal">
-        <button class="faq-q" onclick="toggleFaq(this)">How does the AI image generator work? <span class="faq-icon">+</span></button>
-        <div class="faq-a"><div class="faq-a-inner">SoulGen uses advanced deep learning models trained on massive datasets of art and images. You type a text description, and the AI processes it through neural networks to generate a unique image that matches your description — all in seconds.</div></div>
+        <button class="faq-q" onclick="toggleFaq(this)">What is SugarMe? <span class="faq-icon">+</span></button>
+        <div class="faq-a"><div class="faq-a-inner">SugarMe is an AI companion platform where you can chat with unique AI characters. Each character has her own personality, backstory, and exclusive photos. You can have real, meaningful conversations and build a connection over time.</div></div>
       </div>
       <div class="faq-item reveal">
-        <button class="faq-q" onclick="toggleFaq(this)">Is SoulGen free to use? <span class="faq-icon">+</span></button>
-        <div class="faq-a"><div class="faq-a-inner">Yes! SoulGen offers a free tier with limited daily generations. For more credits, HD quality, watermark removal, and video generation, you can upgrade to a Pro or Premium plan starting at $9.99/month.</div></div>
+        <button class="faq-q" onclick="toggleFaq(this)">Is it really free? <span class="faq-icon">+</span></button>
+        <div class="faq-a"><div class="faq-a-inner">Yes! You can sign up for free and chat with 3 characters — Mia, Sakura, and Luna — with up to 8 messages each. To unlock all 15+ characters with unlimited messaging, upgrade to Pro for $9.99/month.</div></div>
       </div>
       <div class="faq-item reveal">
-        <button class="faq-q" onclick="toggleFaq(this)">Can I use generated images commercially? <span class="faq-icon">+</span></button>
-        <div class="faq-a"><div class="faq-a-inner">Yes, you can use AI-generated images for commercial purposes as long as the content complies with applicable laws. Since SoulGen creates images that do not exist anywhere, there are no copyright concerns with the generated output.</div></div>
+        <button class="faq-q" onclick="toggleFaq(this)">Are my conversations private? <span class="faq-icon">+</span></button>
+        <div class="faq-a"><div class="faq-a-inner">Absolutely. Your conversations are stored securely in your private account. Nobody else can read your chats. We take your privacy seriously.</div></div>
       </div>
       <div class="faq-item reveal">
-        <button class="faq-q" onclick="toggleFaq(this)">Will my AI-generated images be unique? <span class="faq-icon">+</span></button>
-        <div class="faq-a"><div class="faq-a-inner">Yes. Each image is generated based on your specific prompt and input. Different prompts produce different results, making each generated image unique to you.</div></div>
+        <button class="faq-q" onclick="toggleFaq(this)">Will she remember our previous conversations? <span class="faq-icon">+</span></button>
+        <div class="faq-a"><div class="faq-a-inner">Yes! Your full chat history is saved to your account. Every time you return, she picks up right where you left off — remembering what you talked about before.</div></div>
       </div>
       <div class="faq-item reveal">
-        <button class="faq-q" onclick="toggleFaq(this)">How does the AI Video Generator work? <span class="faq-icon">+</span></button>
-        <div class="faq-a"><div class="faq-a-inner">Upload an image, describe the motion or speech you want, and our AI model generates a video with natural movement, realistic lip-sync, and immersive sound — up to 20 seconds in HD (720p and 1080p).</div></div>
+        <button class="faq-q" onclick="toggleFaq(this)">How do photo requests work? <span class="faq-icon">+</span></button>
+        <div class="faq-a"><div class="faq-a-inner">Simply ask your companion to send you a photo during your chat — she will automatically send one from her exclusive collection. Each character has her own set of photos.</div></div>
+      </div>
+      <div class="faq-item reveal">
+        <button class="faq-q" onclick="toggleFaq(this)">Can I cancel my subscription anytime? <span class="faq-icon">+</span></button>
+        <div class="faq-a"><div class="faq-a-inner">Yes, you can cancel your Pro subscription at any time. No contracts, no hidden fees. You'll keep access until the end of your billing period.</div></div>
       </div>
     </div>
   </div>
 </section>
 
 <!-- CTA BANNER -->
-<section style="background:var(--bg2); padding: 80px 5%;">
+<section style="background:var(--bg2);padding:80px 5%;">
   <div class="section-inner" style="text-align:center;">
-    <div class="reveal" style="background: linear-gradient(135deg, rgba(168,85,247,0.12), rgba(236,72,153,0.08)); border: 1px solid var(--border); border-radius: 24px; padding: 60px 40px; position:relative; overflow:hidden;">
+    <div class="reveal" style="background:linear-gradient(135deg,rgba(168,85,247,0.12),rgba(236,72,153,0.08));border:1px solid var(--border);border-radius:24px;padding:60px 40px;position:relative;overflow:hidden;">
       <div style="position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:400px;height:300px;background:radial-gradient(ellipse,rgba(168,85,247,0.2),transparent 70%);pointer-events:none;"></div>
-      <h2 style="margin-bottom:16px;">Start Creating for <span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Free Today</span></h2>
-      <p style="color:var(--muted);max-width:440px;margin:0 auto 32px;font-size:1rem;">Join millions of creators turning their imagination into stunning AI art and videos. No credit card required.</p>
-      <button class="btn-hero" onclick="alert('Welcome! Sign up to get started.')">✦ Create Your First Image</button>
+      <h2 style="margin-bottom:16px;">Your Companion is <span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Waiting For You</span></h2>
+      <p style="color:var(--muted);max-width:440px;margin:0 auto 32px;font-size:1rem;">Join thousands of people who found their perfect AI companion. Free to start — no credit card needed.</p>
+      <button class="btn-hero" onclick="openModal('signup')">✦ Meet Your Companion — It's Free</button>
     </div>
   </div>
 </section>
@@ -759,21 +761,19 @@
   <div class="footer-inner">
     <div class="footer-top">
       <div>
-        <div class="footer-logo">SoulGen</div>
-        <p class="footer-tagline">AI-powered creative studio. Turn your imagination into stunning images and videos in seconds.</p>
+        <div class="footer-logo">SugarMe</div>
+        <p class="footer-tagline">AI companions with real personalities. Chat, connect, and never feel alone again.</p>
       </div>
       <div class="footer-col">
         <h4>Product</h4>
-        <a href="#">Video Generator</a>
-        <a href="/pages/characters.html">AI Character</a>
-        <a href="#">Human Modeling</a>
-        <a href="#">Smart Edit</a>
-        <a href="#">Soul Chat</a>
+        <a href="/pages/characters.html">Meet Characters</a>
+        <a href="/pages/dashboard.html">Dashboard</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#how-it-works">How it works</a>
       </div>
       <div class="footer-col">
         <h4>Company</h4>
         <a href="#">About Us</a>
-        <a href="#">Pricing</a>
         <a href="#">Contact Us</a>
         <a href="#">Business Inquiry</a>
         <a href="#">Discord</a>
@@ -782,11 +782,11 @@
         <h4>Legal</h4>
         <a href="#">Terms of Service</a>
         <a href="#">Privacy Policy</a>
-        <a href="#">Return Policy</a>
+        <a href="#">Refund Policy</a>
       </div>
     </div>
     <div class="footer-bottom">
-      <p class="footer-copy">2026 © Copyright SoulGen. All Rights Reserved.</p>
+      <p class="footer-copy">2026 © Copyright SugarMe. All Rights Reserved.</p>
       <div class="social-links">
         <a class="social-link" href="#" title="Discord">💬</a>
         <a class="social-link" href="#" title="Twitter">𝕏</a>
@@ -1016,10 +1016,6 @@
     document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
     if (!isOpen) item.classList.add('open');
   }
-
-  // Duplicate gallery for infinite scroll
-  const track = document.getElementById('galleryTrack');
-  track.innerHTML += track.innerHTML;
 </script>
 </body>
 </html>
