@@ -623,7 +623,6 @@ window.closeChat = () => {
 };
 
 async function getAIReply(char, userMessage, history) {
-  // Build conversation history for context
   const messages = [
     {
       role: "system",
@@ -640,6 +639,7 @@ Never break character. Never say you are an AI.`
   ];
 
   try {
+    console.log('🤖 Calling /api/chat...');
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -650,10 +650,26 @@ Never break character. Never say you are an AI.`
         temperature: 0.85
       })
     });
+
+    console.log('📡 Response status:', res.status);
+
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error('❌ API error response:', errText);
+      return getLocalReply(userMessage, char);
+    }
+
     const data = await res.json();
+    console.log('✅ Groq response:', data);
+
+    if (data.error) {
+      console.error('❌ Groq error in data:', data.error);
+      return getLocalReply(userMessage, char);
+    }
+
     return data.choices?.[0]?.message?.content || getLocalReply(userMessage, char);
   } catch(e) {
-    console.error('Groq error:', e);
+    console.error('❌ Fetch error:', e.message);
     return getLocalReply(userMessage, char);
   }
 }
