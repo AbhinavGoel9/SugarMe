@@ -392,8 +392,22 @@ window.currentChar = null;
 window.messageCount = 0;
 window.FREE_LIMIT = 8;
 window.currentUser = undefined;
+ 
 window.isSubscribed = false;
 
+// Check subscription status from Firestore on load
+async function checkSubscription(uid) {
+  const { getFirestore, doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+  const db = getFirestore();
+  try {
+    const snap = await getDoc(doc(db, 'users', uid));
+    if (snap.exists()) {
+      const data = snap.data();
+      window.isSubscribed = data.plan === 'monthly' || data.plan === 'yearly';
+    }
+  } catch(e) { console.error('Subscription check error:', e); }
+}
+ 
 // ── LOAD CHARACTERS FROM FIRESTORE ──
 async function loadCharacters() {
   const { getDocs, collection } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
@@ -435,6 +449,7 @@ async function migrateCharacters() {
 // ── AUTH STATE ──
 onAuthStateChanged(auth, async (user) => {
   window.currentUser = user;
+ if (user) await checkSubscription(user.uid);
   const nav = document.getElementById('navActions');
   if (user) {
     const firstName = (user.displayName || user.email).split(' ')[0];
@@ -830,7 +845,89 @@ window.openPayModal = (char) => {
 };
 window.closePayModal = () => { document.getElementById('payModal').style.display = 'none'; };
 window.selectPlan = (el) => { document.querySelectorAll('.pay-plan').forEach(p=>p.classList.remove('selected')); el.classList.add('selected'); };
-window.handlePayment = () => { alert('Payment coming soon! We are setting up Stripe. Stay tuned 💎'); closePayModal(); };
+ 
+window.handlePayment = async () => {
+  const selectedPlan = document.querySelector('.pay-plan.selected');
+  const isYearly = selectedPlan?.querySelector('.pay-plan-name')?.textContent?.includes('Yearly');
+  const amount = isYearly ? 2000 : 199;
+  const plan = isYearly ? 'yearly' : 'monthly';
+
+  if (!window.currentUser) { openModal('login'); return; }
+
+  const payBtn = document.querySelector('.pay-btn');
+  payBtn.textContent = 'Creating order...';
+  payBtn.disabled = true;
+
+  try {
+    // Create order on server
+    const orderRes = await fetch('/api/payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'create_order', amount, plan })
+    });
+    const order = await orderRes.json();
+    if (order.error) { alert('Error: ' + order.error); payBtn.textContent = 'Continue to Payment →'; payBtn.disabled = false; return; }
+
+    // Open Razorpay checkout
+    const options = {
+      key: 'rzp_live_SkVDaX3o0zXi5q',
+      amount: order.amount,
+      currency: 'INR',
+      name: 'SugarMe',
+      description: plan === 'yearly' ? 'Yearly Plan — ₹2000/year' : 'Monthly Plan — ₹199/month',
+      order_id: order.id,
+      prefill: {
+        name: window.currentUser.displayName || '',
+        email: window.currentUser.email || ''
+      },
+      theme: { color: '#a855f7' },
+      handler: async function(response) {
+        // Verify payment on server
+        const verifyRes = await fetch('/api/payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'verify_payment',
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature
+          })
+        });
+        const verify = await verifyRes.json();
+        if (verify.verified) {
+          // Update user plan in Firestore
+          const { getFirestore, doc, updateDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+          const db = getFirestore();
+          await updateDoc(doc(db, 'users', window.currentUser.uid), {
+            plan: plan,
+            planActivatedAt: new Date().toISOString(),
+            paymentId: response.razorpay_payment_id
+          });
+          window.isSubscribed = true;
+          closePayModal();
+          alert('🎉 Payment successful! You now have full access to all characters.');
+          window.location.reload();
+        } else {
+          alert('Payment verification failed. Please contact support@sugarme.in');
+        }
+      },
+      modal: {
+        ondismiss: function() {
+          payBtn.textContent = 'Continue to Payment →';
+          payBtn.disabled = false;
+        }
+      }
+    };
+
+    const rzp = new Razorpay(options);
+    rzp.open();
+
+  } catch(e) {
+    alert('Something went wrong: ' + e.message);
+    payBtn.textContent = 'Continue to Payment →';
+    payBtn.disabled = false;
+  }
+};
 
 // ── AUTH MODAL ──
 window.openModal = (tab) => {
@@ -925,5 +1022,6 @@ if (openChatId) {
   }, 200);
 }
 </script>
+ <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </body>
 </html>
