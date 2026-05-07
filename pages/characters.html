@@ -1008,6 +1008,24 @@ document.addEventListener('keydown', e => { if(e.key==='Escape'){window.closeMod
 // ── AUTO OPEN CHAT FROM DASHBOARD ──
 const urlParams = new URLSearchParams(window.location.search);
 const openChatId = parseInt(urlParams.get('openChat'));
+
+const planParam = urlParams.get('plan');
+if (planParam) {
+  const checkAndPay = setInterval(() => {
+    if (window.currentUser !== undefined) {
+      clearInterval(checkAndPay);
+      if (!window.currentUser) { openModal('login'); return; }
+      document.querySelectorAll('.pay-plan').forEach(p => p.classList.remove('selected'));
+      if (planParam === 'yearly') {
+        document.querySelectorAll('.pay-plan')[1]?.classList.add('selected');
+      } else {
+        document.querySelectorAll('.pay-plan')[0]?.classList.add('selected');
+      }
+      openPayModal(null);
+    }
+  }, 200);
+}
+ 
 if (openChatId) {
   const checkAndOpen = setInterval(() => {
     if (window.currentUser !== undefined) {
