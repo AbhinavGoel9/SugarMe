@@ -564,6 +564,7 @@ await setDoc(doc(db, 'users', cred.user.uid), {
     setLoading('signupBtn',false);
   };
   onAuthStateChanged(auth,(user)=>{
+    window.currentUser = user;
     const nav=document.getElementById('navActions');
     if(user){
       const firstName=(user.displayName||user.email).split(' ')[0];
