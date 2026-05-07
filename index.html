@@ -372,7 +372,7 @@
           <li>Priority support</li>
           <li>Only ₹167/month effective</li>
         </ul>
-        <button class="price-btn price-btn-grad" onclick="window.location.href='/pages/characters.html'">Get Yearly — ₹2000/yr</button>
+        <button class="price-btn price-btn-grad" onclick="handlePricingClick('yearly')">Get Yearly — ₹2000/yr</button>
       </div>
 
     </div>
@@ -575,12 +575,22 @@ await setDoc(doc(db, 'users', cred.user.uid), {
   window.doLogout=async()=>{await signOut(auth);};
   document.getElementById('authOverlay').addEventListener('click',(e)=>{if(e.target===document.getElementById('authOverlay'))window.closeModal();});
   document.addEventListener('keydown',(e)=>{if(e.key==='Enter'){const loginVisible=document.getElementById('formLogin').style.display!=='none';if(document.getElementById('authOverlay').style.display==='flex'){loginVisible?window.doLogin():window.doSignup();}}if(e.key==='Escape')window.closeModal();});
+
+
+ window.handlePricingClick = (plan) => {
+  if (window.currentUser) {
+    window.location.href = `/pages/characters.html?plan=${plan}`;
+  } else {
+    openModal('login');
+  }
+};
 </script>
 <script>
   const reveals=document.querySelectorAll('.reveal');
   const observer=new IntersectionObserver(entries=>{entries.forEach((e,i)=>{if(e.isIntersecting){setTimeout(()=>e.target.classList.add('visible'),i*80);observer.unobserve(e.target);}});},{threshold:0.1});
   reveals.forEach(r=>observer.observe(r));
   function toggleFaq(btn){const item=btn.closest('.faq-item');const isOpen=item.classList.contains('open');document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));if(!isOpen)item.classList.add('open');}
+ 
 </script>
 </body>
 </html>
