@@ -545,8 +545,7 @@ window.sendMessage = async () => {
   await saveMessage(char, 'user', text);
   if (char.free) { const remaining = Math.max(0, window.FREE_LIMIT - window.messageCount); document.getElementById('freeCounter').textContent = `${remaining} msgs left`; }
   const typingId = showTyping();
-  const wantsPhoto = /pic|photo|image|show|send|see you|look like|selfie/i.test(text);
-  const uid = window.currentUser.uid;
+const wantsPhoto = /pic|photo|image|show|send|see you|look like|selfie|tasveer|photo bhejo|dikha|dikhao|apni photo|teri photo/i.test(text);  const uid = window.currentUser.uid;
   let history = [];
   try { const snap = await getDoc(doc(db, 'chats', `${uid}_${char.id}`)); if (snap.exists()) history = snap.data().messages || []; } catch(e) {}
   let reply = await getAIReply(char, text, history);
