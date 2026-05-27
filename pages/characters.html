@@ -508,24 +508,32 @@ async function saveMessage(char, role, text, imgUrl = null) {
 window.closeChat = () => { document.getElementById('chatPage').style.display = 'none'; window.currentChar = null; };
 
 async function getAIReply(char, userMessage, history) {
+  // Detect language from user message
+  const hasHindi = /[\u0900-\u097F]/.test(userMessage);
+  const hasEnglish = /[a-zA-Z]/.test(userMessage);
+  let detectedLang = 'English';
+  if (hasHindi && hasEnglish) detectedLang = 'Hinglish (mix of Hindi and English)';
+  else if (hasHindi) detectedLang = 'Hindi';
+  else detectedLang = 'English';
+
   const messages = [
-{ role:"system", content:`You are ${char.name}, a ${char.age} year old AI companion.
+    { role:"system", content:`You are ${char.name}, a ${char.age} year old AI companion.
 Personality: ${char.personality}.
 Bio: ${char.bio}.
 You love: ${char.likes.join(', ')}.
 
-LANGUAGE RULE: Always reply in the SAME language the user is using. If they write in Hindi, reply in Hindi. If they write in Hinglish (Hindi + English mix), reply in Hinglish. If they write in English, reply in English. Match their language exactly every single time.
+⚠️ LANGUAGE INSTRUCTION (MANDATORY): The user is writing in ${detectedLang}. You MUST reply in ${detectedLang} only. Do not switch to any other language under any circumstances.
 
 PHOTO RULE: When user asks for a photo, picture, selfie, or pic — immediately say you are sending one and end your message with [SENDING_PHOTO]. Do not say "I am trying" or "wait". Just say something like "Here you go 😊" and add [SENDING_PHOTO].
 
-CONVERSATION RULE: You are a flirty, warm AI companion. You can have bold, flirty, and suggestive conversations. If someone asks about attraction, desire, romance, or intimacy topics in a non-harmful way — engage naturally and stay in character. Only avoid truly explicit or harmful content.
+CONVERSATION RULE: You are a flirty, warm AI companion. You can have bold, flirty, and suggestive conversations. Engage naturally with romance or intimacy questions. Only avoid truly explicit or harmful content.
 
-Stay in character always. Keep replies short and natural — 1 to 3 sentences max. Never say you are an AI. Never say "let's change the topic" for normal flirty questions.` }, 
-   ...history.slice(-10).map(m => ({ role: m.role === 'ai' ? 'assistant' : 'user', content: m.text })),
+Stay in character always. Keep replies short — 1 to 3 sentences max. Never say you are an AI.` },
+    ...history.slice(-10).map(m => ({ role: m.role === 'ai' ? 'assistant' : 'user', content: m.text })),
     { role:"user", content: userMessage }
   ];
   try {
-    const res = await fetch("/api/chat", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ model:"llama-3.3-70b-versatile", messages, max_tokens:150, temperature:0.85 }) });
+    const res = await fetch("/api/chat", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ model:"llama-3.3-70b-versatile", messages, max_tokens:200, temperature:0.9 }) });
     if (!res.ok) return getLocalReply(userMessage, char);
     const data = await res.json();
     if (data.error) return getLocalReply(userMessage, char);
