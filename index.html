@@ -187,21 +187,18 @@ img, video { max-width: 100%; }
 <body>
 
 <!-- NAVBAR -->
-<nav>
-  <div class="nav-logo">SugarMe</div>
-  <ul class="nav-links">
-    <li><a href="/index.html">Home</a></li>
-    <li><a href="/pages/characters.html">Characters</a></li>
-    <li><a href="/pages/dashboard.html">Dashboard</a></li>
-    <li><a href="#pricing">Pricing</a></li>
-  </ul>
-  <div class="nav-actions" id="navActions">
-    <button class="btn-ghost" onclick="openModal('login')">Log in</button>
-    <button class="btn-primary" onclick="openModal('signup')">Sign up free</button>
+<nav class="lux-nav glass-panel">
+  <a href="/" class="logo-text">Sugar<span class="logo-accent">Me</span></a>
+  <div class="nav-links">
+    <a href="/" class="nav-link active">The Lounge</a>
+    <a href="/pages/characters.html" class="nav-link">Meet Them</a>
+    <a href="/pages/dashboard.html" class="nav-link">My Space</a>
   </div>
-  <button class="hamburger" id="hamburger" onclick="toggleMenu()">
-    <span></span><span></span><span></span>
-  </button>
+  <div class="nav-actions">
+    <button class="btn-ghost" onclick="window.location.href='/pages/dashboard.html'">Log In</button>
+    <button class="btn-primary" onclick="window.location.href='/pages/characters.html'">Claim Access</button>
+  </div>
+</nav>>
 </nav>
 
 <!-- MOBILE MENU -->
