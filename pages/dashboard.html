@@ -3,161 +3,206 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>SugarMe — Dashboard</title>
+<title>SugarMe — My Private Space</title>
 <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#a855f7">
+<meta name="theme-color" content="#09090B">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="SugarMe">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #080810; --bg2: #0e0e1a; --bg3: #13131f;
-    --purple: #a855f7; --pink: #ec4899;
-    --grad: linear-gradient(135deg, #a855f7, #ec4899);
-    --text: #f0f0f8; --muted: #8888aa;
-    --border: rgba(168,85,247,0.18); --card: rgba(255,255,255,0.04);
-  }
-  html { scroll-behavior: smooth; }
-  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; overflow-x: hidden; min-height: 100vh; display: flex; flex-direction: column; }
+/* =========================================
+   SUGARME LUXURY DASHBOARD STYLES
+   ========================================= */
+:root {
+  --bg-primary: #09090B;
+  --bg-secondary: #121216;
+  --bg-glass: rgba(20, 20, 25, 0.7);
+  --accent-gold: #D4AF37;
+  --accent-crimson: #7A1212;
+  --text-primary: #F9FAFB;
+  --text-secondary: #A1A1AA;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --shadow-luxury: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
 
-  /* ── MOBILE TOP NAV (visible only on mobile) ── */
-  .mobile-topbar {
-    display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-    background: var(--bg2); border-bottom: 1px solid var(--border);
-    padding: 12px 16px; align-items: center; justify-content: space-between; height: 58px;
-  }
-  .mobile-topbar-logo { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  .mobile-topbar-right { display: flex; align-items: center; gap: 10px; }
-  .mobile-user-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--grad); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; color: #fff; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { 
+  background: var(--bg-primary); color: var(--text-primary); font-family: 'Inter', sans-serif; 
+  overflow-x: hidden; min-height: 100vh; display: flex; flex-direction: column; 
+}
+h1, h2, h3, h4 { font-family: 'Playfair Display', serif; font-weight: 400; }
 
-  /* ── BOTTOM NAV (mobile only) ── */
-  .bottom-nav {
-    display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
-    background: var(--bg2); border-top: 1px solid var(--border);
-    padding: 8px 0 max(8px, env(safe-area-inset-bottom));
-    flex-direction: row;
-  }
-  .bottom-nav-item {
-    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
-    padding: 6px 4px; cursor: pointer; background: none; border: none;
-    color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 0.62rem; font-weight: 500;
-    transition: .2s;
-  }
-  .bottom-nav-item.active { color: #c084fc; }
-  .bottom-nav-item .bnav-icon { font-size: 1.1rem; }
+/* Loading & Auth Screens */
+#loadingScreen, #notLoggedIn { 
+  position: fixed; inset: 0; background: var(--bg-primary); display: flex; 
+  align-items: center; justify-content: center; z-index: 999; flex-direction: column; gap: 16px; 
+}
+.loading-logo { font-family: 'Playfair Display', serif; font-size: 2.2rem; color: var(--accent-gold); font-style: italic; }
+.loading-dots { display: flex; gap: 6px; }
+.loading-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-gold); animation: typingBounce 1.2s infinite; }
+.loading-dot:nth-child(2) { animation-delay: .2s; }
+.loading-dot:nth-child(3) { animation-delay: .4s; }
+@keyframes typingBounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-8px)} }
 
-  /* ── SIDEBAR (desktop) ── */
-  .sidebar {
-    width: 230px; flex-shrink: 0;
-    background: var(--bg2); border-right: 1px solid var(--border);
-    display: flex; flex-direction: column;
-    position: fixed; top: 0; left: 0; bottom: 0; z-index: 100;
-    padding: 22px 0;
-  }
-  .sidebar-logo { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; padding: 0 22px; margin-bottom: 32px; text-decoration: none; }
-  .sidebar-nav { display: flex; flex-direction: column; gap: 3px; padding: 0 10px; flex: 1; }
-  .nav-item { display: flex; align-items: center; gap: 11px; padding: 11px 13px; border-radius: 10px; color: var(--muted); text-decoration: none; font-size: 0.86rem; font-weight: 500; cursor: pointer; transition: .2s; border: none; background: none; width: 100%; text-align: left; }
-  .nav-item:hover { background: var(--card); color: var(--text); }
-  .nav-item.active { background: rgba(168,85,247,0.12); color: #c084fc; border: 1px solid rgba(168,85,247,0.2); }
-  .nav-item .icon { font-size: 1rem; width: 20px; text-align: center; }
-  .sidebar-bottom { padding: 0 10px; }
-  .user-card { display: flex; align-items: center; gap: 10px; padding: 12px 13px; border-radius: 10px; background: var(--card); border: 1px solid var(--border); margin-bottom: 10px; }
-  .user-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--grad); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.88rem; color: #fff; flex-shrink: 0; }
-  .user-name { font-size: 0.83rem; font-weight: 600; }
-  .user-plan { font-size: 0.7rem; color: var(--muted); }
-  .logout-btn { width: 100%; padding: 10px; border-radius: 10px; background: none; border: 1px solid var(--border); color: var(--muted); font-size: 0.83rem; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: .2s; }
-  .logout-btn:hover { border-color: #f87171; color: #f87171; }
+/* Mobile Topbar */
+.mobile-topbar {
+  display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  background: var(--bg-secondary); border-bottom: 1px solid var(--border-subtle);
+  padding: 12px 20px; align-items: center; justify-content: space-between; height: 60px;
+}
+.mobile-topbar-logo { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 600; color: var(--text-primary); text-decoration: none; }
+.mobile-topbar-logo span { color: var(--accent-gold); }
 
-  /* ── MAIN ── */
-  .main { margin-left: 230px; flex: 1; padding: 34px 36px; min-height: 100vh; }
-  .page { display: none; }
-  .page.active { display: block; }
-  .page-title { font-family: 'Syne', sans-serif; font-size: 1.7rem; font-weight: 800; margin-bottom: 5px; }
-  .page-sub { color: var(--muted); font-size: 0.88rem; margin-bottom: 28px; }
+/* Bottom Nav (Mobile) */
+.bottom-nav {
+  display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+  background: var(--bg-secondary); border-top: 1px solid var(--border-subtle);
+  padding: 8px 0 max(8px, env(safe-area-inset-bottom)); flex-direction: row;
+}
+.bottom-nav-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 8px 4px; cursor: pointer; background: none; border: none;
+  color: var(--text-secondary); font-family: 'Inter', sans-serif; font-size: 0.7rem; font-weight: 500; transition: .2s;
+}
+.bottom-nav-item.active { color: var(--accent-gold); }
+.bottom-nav-item .bnav-icon { font-size: 1.2rem; }
 
-  /* ── STATS ── */
-  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
-  .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px 18px; transition: .2s; }
-  .stat-card:hover { border-color: rgba(168,85,247,0.4); }
-  .stat-icon { font-size: 1.3rem; margin-bottom: 10px; }
-  .stat-value { font-family: 'Syne', sans-serif; font-size: 1.7rem; font-weight: 800; margin-bottom: 3px; }
-  .stat-label { color: var(--muted); font-size: 0.76rem; }
+/* Sidebar (Desktop) */
+.sidebar {
+  width: 260px; flex-shrink: 0; background: var(--bg-secondary); border-right: 1px solid var(--border-subtle);
+  display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; padding: 24px 0;
+}
+.sidebar-logo { 
+  font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 600; 
+  color: var(--text-primary); padding: 0 24px; margin-bottom: 40px; text-decoration: none; 
+}
+.sidebar-logo span { color: var(--accent-gold); }
+.sidebar-nav { display: flex; flex-direction: column; gap: 4px; padding: 0 12px; flex: 1; }
+.nav-item { 
+  display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 10px; 
+  color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; font-weight: 500; 
+  cursor: pointer; transition: .2s; border: none; background: none; width: 100%; text-align: left; 
+}
+.nav-item:hover { background: rgba(255,255,255,0.03); color: var(--text-primary); }
+.nav-item.active { background: rgba(212, 175, 55, 0.08); color: var(--accent-gold); border-left: 3px solid var(--accent-gold); border-radius: 0 10px 10px 0; }
+.nav-item .icon { font-size: 1.1rem; width: 24px; text-align: center; }
 
-  /* ── SUB CARD ── */
-  .sub-card { background: linear-gradient(135deg, rgba(168,85,247,0.12), rgba(236,72,153,0.06)); border: 1px solid rgba(168,85,247,0.3); border-radius: 16px; padding: 24px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; flex-wrap: wrap; gap: 16px; }
-  .sub-info h3 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.05rem; margin-bottom: 5px; }
-  .sub-info p { color: var(--muted); font-size: 0.83rem; }
-  .sub-badge { font-size: 0.7rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 3px 11px; border-radius: 100px; margin-bottom: 7px; display: inline-block; }
-  .badge-free-plan { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); color: #4ade80; }
-  .badge-pro-plan { background: rgba(168,85,247,0.15); border: 1px solid rgba(168,85,247,0.3); color: #c084fc; }
-  .upgrade-btn { background: var(--grad); border: none; color: #fff; padding: 11px 24px; border-radius: 10px; font-size: 0.88rem; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; box-shadow: 0 4px 20px rgba(168,85,247,0.35); transition: .2s; }
-  .upgrade-btn:hover { opacity: 0.88; }
+.sidebar-bottom { padding: 0 12px; }
+.user-card { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); margin-bottom: 12px; }
+.user-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent-crimson); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.9rem; color: #fff; flex-shrink: 0; border: 1px solid var(--accent-gold); }
+.user-name { font-size: 0.85rem; font-weight: 600; color: var(--text-primary); }
+.user-plan { font-size: 0.75rem; color: var(--accent-gold); }
+.logout-btn { width: 100%; padding: 10px; border-radius: 10px; background: none; border: 1px solid var(--border-subtle); color: var(--text-secondary); font-size: 0.85rem; cursor: pointer; font-family: 'Inter', sans-serif; transition: .2s; }
+.logout-btn:hover { border-color: var(--accent-crimson); color: #f87171; }
 
-  /* ── CHATS ── */
-  .section-title { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; }
-  .section-title a { font-size: 0.78rem; color: var(--purple); text-decoration: none; font-weight: 500; }
-  .chats-list { display: flex; flex-direction: column; gap: 10px; }
-  .chat-item { background: var(--card); border: 1px solid var(--border); border-radius: 13px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: .2s; }
-  .chat-item:hover { border-color: rgba(168,85,247,0.4); transform: translateX(3px); }
-  .chat-item-avatar { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; border: 2px solid var(--border); }
-  .chat-item-info { flex: 1; min-width: 0; }
-  .chat-item-name { font-weight: 600; font-size: 0.88rem; margin-bottom: 2px; }
-  .chat-item-last { color: var(--muted); font-size: 0.78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .chat-item-meta { text-align: right; flex-shrink: 0; }
-  .chat-item-time { color: var(--muted); font-size: 0.72rem; margin-bottom: 5px; }
-  .chat-item-count { font-size: 0.68rem; padding: 2px 7px; border-radius: 100px; background: rgba(168,85,247,0.12); color: #c084fc; border: 1px solid rgba(168,85,247,0.2); }
-  .empty-state { text-align: center; padding: 44px 20px; color: var(--muted); font-size: 0.88rem; }
-  .empty-state .empty-icon { font-size: 2.8rem; margin-bottom: 12px; }
-  .empty-state a { display: inline-block; margin-top: 14px; background: var(--grad); color: #fff; padding: 10px 22px; border-radius: 10px; text-decoration: none; font-size: 0.86rem; font-weight: 600; }
+/* Main Content */
+.main { margin-left: 260px; flex: 1; padding: 40px; min-height: 100vh; }
+.page { display: none; animation: fadeIn 0.3s ease; }
+.page.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-  /* ── ACCOUNT ── */
-  .account-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-  .account-card { background: var(--card); border: 1px solid var(--border); border-radius: 15px; padding: 22px; }
-  .account-card h3 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.72rem; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
-  .account-field { margin-bottom: 14px; }
-  .account-field label { display: block; font-size: 0.78rem; color: var(--muted); margin-bottom: 6px; }
-  .account-field input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text); padding: 10px 13px; border-radius: 10px; font-size: 0.86rem; font-family: 'DM Sans', sans-serif; outline: none; transition: border .2s; }
-  .account-field input:focus { border-color: rgba(168,85,247,0.5); }
-  .account-field input:disabled { opacity: 0.5; cursor: not-allowed; }
-  .save-btn { background: var(--grad); border: none; color: #fff; padding: 10px 22px; border-radius: 10px; font-size: 0.86rem; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: .2s; margin-top: 3px; }
-  .save-btn:hover { opacity: 0.88; }
-  .danger-btn { background: none; border: 1px solid rgba(239,68,68,0.3); color: #f87171; padding: 10px 22px; border-radius: 10px; font-size: 0.86rem; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: .2s; margin-top: 8px; width: 100%; }
-  .danger-btn:hover { background: rgba(239,68,68,0.08); }
-  .success-msg { color: #4ade80; font-size: 0.8rem; margin-top: 8px; display: none; }
+.page-title { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 400; margin-bottom: 8px; color: var(--text-primary); }
+.page-title span { color: var(--accent-gold); font-style: italic; }
+.page-sub { color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 32px; }
 
-  /* ── LOADING / NOT LOGGED IN ── */
-  #loadingScreen { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 999; flex-direction: column; gap: 14px; }
-  .loading-logo { font-family: 'Syne', sans-serif; font-size: 1.7rem; font-weight: 800; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  .loading-dots { display: flex; gap: 6px; }
-  .loading-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--purple); animation: typingBounce 1.2s infinite; }
-  .loading-dot:nth-child(2) { animation-delay: .2s; }
-  .loading-dot:nth-child(3) { animation-delay: .4s; }
-  @keyframes typingBounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-8px)} }
-  #notLoggedIn { display: none; position: fixed; inset: 0; background: var(--bg); align-items: center; justify-content: center; z-index: 999; flex-direction: column; gap: 14px; text-align: center; }
-  #notLoggedIn h2 { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; }
-  #notLoggedIn p { color: var(--muted); font-size: 0.88rem; }
-  #notLoggedIn a { display: inline-block; margin-top: 10px; background: var(--grad); color: #fff; padding: 11px 28px; border-radius: 11px; text-decoration: none; font-weight: 600; }
+/* Stats */
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+.stat-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 24px; transition: .3s; }
+.stat-card:hover { border-color: var(--accent-gold); transform: translateY(-2px); }
+.stat-icon { font-size: 1.5rem; margin-bottom: 12px; }
+.stat-value { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 600; margin-bottom: 4px; color: var(--text-primary); }
+.stat-label { color: var(--text-secondary); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
 
-  /* ── MOBILE ── */
-  @media (max-width: 768px) {
-    .sidebar { display: none; }
-    .mobile-topbar { display: flex; }
-    .bottom-nav { display: flex; }
-    .main { margin-left: 0; padding: 70px 16px 90px; }
-    .stats-row { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    .account-grid { grid-template-columns: 1fr; }
-    .sub-card { flex-direction: column; align-items: flex-start; }
-    .upgrade-btn { width: 100%; }
-    .page-title { font-size: 1.4rem; }
-  }
-  @media (max-width: 480px) {
-    .stats-row { grid-template-columns: repeat(2, 1fr); }
-    .chat-item-meta { display: none; }
-  }
+/* Subscription Card */
+.sub-card { 
+  background: linear-gradient(135deg, rgba(122, 18, 18, 0.15), rgba(20, 20, 25, 0.8)); 
+  border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 20px; padding: 28px; 
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; flex-wrap: wrap; gap: 20px; 
+}
+.sub-info h3 { font-family: 'Playfair Display', serif; font-weight: 400; font-size: 1.2rem; margin-bottom: 8px; color: var(--text-primary); }
+.sub-info p { color: var(--text-secondary); font-size: 0.9rem; }
+.sub-badge { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 12px; border-radius: 100px; margin-bottom: 10px; display: inline-block; }
+.badge-free-plan { background: rgba(255,255,255,0.05); border: 1px solid var(--border-subtle); color: var(--text-secondary); }
+
+.upgrade-btn { 
+  background: linear-gradient(135deg, var(--accent-crimson), #4A0A0A); border: none; color: #fff; 
+  padding: 12px 28px; border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; 
+  font-family: 'Inter', sans-serif; box-shadow: 0 4px 20px rgba(122, 18, 18, 0.4); transition: .3s; 
+}
+.upgrade-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(122, 18, 18, 0.6); }
+
+/* Chats List */
+.section-title { font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-secondary); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+.section-title a { font-size: 0.8rem; color: var(--accent-gold); text-decoration: none; font-weight: 500; text-transform: none; letter-spacing: 0; }
+.chats-list { display: flex; flex-direction: column; gap: 12px; }
+.chat-item { 
+  background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: 14px; 
+  padding: 16px 20px; display: flex; align-items: center; gap: 16px; cursor: pointer; transition: .2s; 
+}
+.chat-item:hover { border-color: var(--accent-gold); background: rgba(255,255,255,0.04); }
+.chat-item-avatar { width: 48px; height: 48px; border-radius: 50%; background-color: #222; background-size: cover; background-position: center; flex-shrink: 0; border: 2px solid var(--border-subtle); }
+.chat-item-info { flex: 1; min-width: 0; }
+.chat-item-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 4px; color: var(--text-primary); }
+.chat-item-last { color: var(--text-secondary); font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-style: italic; }
+.chat-item-meta { text-align: right; flex-shrink: 0; }
+.chat-item-time { color: var(--text-secondary); font-size: 0.75rem; margin-bottom: 6px; }
+.chat-item-count { font-size: 0.7rem; padding: 3px 8px; border-radius: 100px; background: rgba(212, 175, 55, 0.1); color: var(--accent-gold); border: 1px solid rgba(212, 175, 55, 0.2); }
+
+.empty-state { text-align: center; padding: 60px 20px; color: var(--text-secondary); }
+.empty-state .empty-icon { font-size: 3rem; margin-bottom: 16px; opacity: 0.3; }
+.empty-state p { font-size: 1.2rem; margin-bottom: 8px; color: var(--text-primary); font-family: 'Playfair Display', serif; }
+.empty-state span { font-size: 0.9rem; }
+.empty-state a { display: inline-block; margin-top: 20px; background: var(--accent-crimson); color: #fff; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-size: 0.9rem; font-weight: 600; transition: .3s; }
+.empty-state a:hover { background: #9a1a1a; }
+
+/* Account Grid */
+.account-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.account-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 28px; }
+.account-card h3 { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-gold); margin-bottom: 20px; }
+.account-field { margin-bottom: 18px; }
+.account-field label { display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px; }
+.account-field input { 
+  width: 100%; background: rgba(0,0,0,0.2); border: 1px solid var(--border-subtle); color: var(--text-primary); 
+  padding: 12px 16px; border-radius: 10px; font-size: 0.9rem; font-family: 'Inter', sans-serif; outline: none; transition: border .2s; 
+}
+.account-field input:focus { border-color: var(--accent-gold); }
+.account-field input:disabled { opacity: 0.4; cursor: not-allowed; }
+.save-btn { background: var(--accent-gold); border: none; color: #000; padding: 12px 24px; border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: .2s; margin-top: 8px; }
+.save-btn:hover { background: #e5c158; }
+.danger-btn { background: none; border: 1px solid rgba(239,68,68,0.3); color: #f87171; padding: 12px 24px; border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: .2s; margin-top: 12px; width: 100%; }
+.danger-btn:hover { background: rgba(239,68,68,0.08); }
+.success-msg { color: #4ade80; font-size: 0.85rem; margin-top: 12px; display: none; }
+
+/* Pricing Grid */
+.pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; max-width: 1000px; }
+.pricing-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: 20px; padding: 28px; position: relative; transition: .3s; }
+.pricing-card:hover { border-color: var(--accent-gold); transform: translateY(-4px); }
+.pricing-card.popular { background: linear-gradient(160deg, rgba(212, 175, 55, 0.08), rgba(122, 18, 18, 0.05)); border-color: var(--accent-gold); }
+.pricing-card .badge { position: absolute; top: 16px; right: 16px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; background: var(--accent-gold); color: #000; padding: 4px 10px; border-radius: 100px; }
+.pricing-card h4 { font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 12px; }
+.pricing-card .price { font-family: 'Playfair Display', serif; font-size: 2.5rem; font-weight: 600; margin-bottom: 8px; color: var(--text-primary); }
+.pricing-card .price span { font-size: 1rem; color: var(--text-secondary); font-weight: 400; font-family: 'Inter', sans-serif; }
+.pricing-card ul { list-style: none; margin: 20px 0 24px; display: flex; flex-direction: column; gap: 12px; }
+.pricing-card li { font-size: 0.9rem; color: var(--text-secondary); display: flex; gap: 10px; align-items: center; }
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .mobile-topbar { display: flex; }
+  .bottom-nav { display: flex; }
+  .main { margin-left: 0; padding: 80px 20px 100px; }
+  .stats-row { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .account-grid { grid-template-columns: 1fr; }
+  .sub-card { flex-direction: column; align-items: flex-start; }
+  .upgrade-btn { width: 100%; text-align: center; }
+  .page-title { font-size: 1.6rem; }
+}
+@media (max-width: 480px) {
+  .chat-item-meta { display: none; }
+}
 </style>
-    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -169,49 +214,48 @@
 
 <!-- NOT LOGGED IN -->
 <div id="notLoggedIn">
-  <div style="font-size:3rem;">🔒</div>
-  <h2>Please log in first</h2>
-  <p>You need an account to access your dashboard.</p>
-  <a href="/index.html">Go to Home</a>
+  <div style="font-size:3rem; opacity:0.5;">🔒</div>
+  <h2 style="font-family:'Playfair Display',serif; font-size:1.5rem; color:var(--text-primary);">Private Access Required</h2>
+  <p style="color:var(--text-secondary); font-size:0.9rem;">Please log in to access your personal space.</p>
+  <a href="/index.html" class="upgrade-btn" style="text-decoration:none; display:inline-block; margin-top:10px;">Return to Lounge</a>
 </div>
 
 <!-- MOBILE TOP BAR -->
 <div class="mobile-topbar" id="mobileTopbar" style="display:none;">
-  <a href="/index.html" class="mobile-topbar-logo">SugarMe</a>
-  <div class="mobile-topbar-right">
-    <div class="mobile-user-avatar" id="mobileAvatar">?</div>
-    <button onclick="doLogout()" style="background:none;border:1px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:8px;font-size:0.78rem;cursor:pointer;font-family:'DM Sans',sans-serif;">Out</button>
+  <a href="/index.html" class="mobile-topbar-logo">Sugar<span>Me</span></a>
+  <div style="display:flex; align-items:center; gap:10px;">
+    <div class="user-avatar" id="mobileAvatar" style="width:32px; height:32px; font-size:0.8rem;">?</div>
+    <button onclick="doLogout()" style="background:none; border:1px solid var(--border-subtle); color:var(--text-secondary); padding:6px 12px; border-radius:8px; font-size:0.75rem; cursor:pointer; font-family:'Inter',sans-serif;">Out</button>
   </div>
 </div>
 
 <!-- BOTTOM NAV (mobile) -->
 <nav class="bottom-nav" id="bottomNav" style="display:none;">
-  <button class="bottom-nav-item active" id="bnav-overview" onclick="showPage('overview', this, 'bnav-overview')"><span class="bnav-icon">🏠</span>Overview</button>
-  <button class="bottom-nav-item" id="bnav-chats" onclick="showPage('chats', this, 'bnav-chats')"><span class="bnav-icon">💬</span>Chats</button>
-  <button class="bottom-nav-item" id="bnav-subscription" onclick="showPage('subscription', this, 'bnav-subscription')"><span class="bnav-icon">💎</span>Plan</button>
-  <button class="bottom-nav-item" id="bnav-account" onclick="showPage('account', this, 'bnav-account')"><span class="bnav-icon">👤</span>Account</button>
-  <a class="bottom-nav-item" href="/pages/characters.html"><span class="bnav-icon">✨</span>Chat</a>
+  <button class="bottom-nav-item active" id="bnav-overview" onclick="showPage('overview', this, 'bnav-overview')"><span class="bnav-icon">⌂</span>Overview</button>
+  <button class="bottom-nav-item" id="bnav-chats" onclick="showPage('chats', this, 'bnav-chats')"><span class="bnav-icon">✉</span>Chats</button>
+  <button class="bottom-nav-item" id="bnav-subscription" onclick="showPage('subscription', this, 'bnav-subscription')"><span class="bnav-icon">♛</span>Plan</button>
+  <button class="bottom-nav-item" id="bnav-account" onclick="showPage('account', this, 'bnav-account')"><span class="bnav-icon">◉</span>Account</button>
 </nav>
 
 <!-- SIDEBAR (desktop) -->
 <aside class="sidebar" id="sidebar" style="display:none;">
-  <a href="/index.html" class="sidebar-logo">SugarMe</a>
+  <a href="/index.html" class="sidebar-logo">Sugar<span>Me</span></a>
   <nav class="sidebar-nav">
-    <button class="nav-item active" onclick="showPage('overview', this)"><span class="icon">🏠</span> Overview</button>
-    <button class="nav-item" onclick="showPage('chats', this)"><span class="icon">💬</span> My Chats</button>
-    <button class="nav-item" onclick="showPage('subscription', this)"><span class="icon">💎</span> Subscription</button>
-    <button class="nav-item" onclick="showPage('account', this)"><span class="icon">👤</span> Account</button>
-    <a class="nav-item" href="/pages/characters.html"><span class="icon">✨</span> Browse Characters</a>
+    <button class="nav-item active" onclick="showPage('overview', this)"><span class="icon">⌂</span> Overview</button>
+    <button class="nav-item" onclick="showPage('chats', this)"><span class="icon">✉</span> My Connections</button>
+    <button class="nav-item" onclick="showPage('subscription', this)"><span class="icon">♛</span> Membership</button>
+    <button class="nav-item" onclick="showPage('account', this)"><span class="icon">◉</span> Sanctuary Settings</button>
+    <a class="nav-item" href="/pages/characters.html"><span class="icon">✦</span> Browse Companions</a>
   </nav>
   <div class="sidebar-bottom">
     <div class="user-card">
       <div class="user-avatar" id="sidebarAvatar">?</div>
       <div>
         <div class="user-name" id="sidebarName">Loading...</div>
-        <div class="user-plan" id="sidebarPlan">Free Plan</div>
+        <div class="user-plan" id="sidebarPlan">Guest Access</div>
       </div>
     </div>
-    <button class="logout-btn" onclick="doLogout()">← Log out</button>
+    <button class="logout-btn" onclick="doLogout()">← Log out securely</button>
   </div>
 </aside>
 
@@ -220,99 +264,99 @@
 
   <!-- OVERVIEW -->
   <div class="page active" id="page-overview">
-    <div class="page-title">Welcome back, <span id="welcomeName" style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">there</span> 👋</div>
-    <div class="page-sub">Here's what's happening with your account.</div>
+    <div class="page-title">Welcome back, <span id="welcomeName">there</span></div>
+    <div class="page-sub">Here is a glimpse into your private world.</div>
     <div class="stats-row">
-      <div class="stat-card"><div class="stat-icon">💬</div><div class="stat-value" id="statChats">0</div><div class="stat-label">Active Chats</div></div>
-      <div class="stat-card"><div class="stat-icon">📨</div><div class="stat-value" id="statMessages">0</div><div class="stat-label">Messages Sent</div></div>
-      <div class="stat-card"><div class="stat-icon">⭐</div><div class="stat-value" id="statCharsUnlocked">3</div><div class="stat-label">Characters</div></div>
-      <div class="stat-card"><div class="stat-icon">💎</div><div class="stat-value" id="statPlan">Free</div><div class="stat-label">Current Plan</div></div>
+      <div class="stat-card"><div class="stat-icon">✉</div><div class="stat-value" id="statChats">0</div><div class="stat-label">Active Connections</div></div>
+      <div class="stat-card"><div class="stat-icon">✦</div><div class="stat-value" id="statMessages">0</div><div class="stat-label">Messages Exchanged</div></div>
+      <div class="stat-card"><div class="stat-icon">♛</div><div class="stat-value" id="statCharsUnlocked">3</div><div class="stat-label">Companions</div></div>
+      <div class="stat-card"><div class="stat-icon">◉</div><div class="stat-value" id="statPlan">Free</div><div class="stat-label">Current Tier</div></div>
     </div>
     <div class="sub-card">
       <div class="sub-info">
-        <div class="sub-badge badge-free-plan" id="planBadge">FREE PLAN</div>
-        <h3 id="planTitle">You're on the Free Plan</h3>
-        <p id="planDesc">Upgrade to unlock all 15 characters with unlimited messaging and exclusive photos.</p>
+        <div class="sub-badge badge-free-plan">GUEST ACCESS</div>
+        <h3>Unlock the Full Experience</h3>
+        <p>Upgrade to Private Member to unlock all companions, unlimited daily messages, and exclusive intimate moments.</p>
       </div>
-      <button class="upgrade-btn" onclick="showPage('subscription', null)">💎 Upgrade Now</button>
+      <button class="upgrade-btn" onclick="showPage('subscription', null)">Claim Private Access</button>
     </div>
-    <div class="section-title">Recent Chats <a href="#" onclick="showPage('chats', null)">View all →</a></div>
-    <div class="chats-list" id="overviewChatsList"><div class="empty-state"><div class="empty-icon">💬</div><div>Loading your chats...</div></div></div>
+    <div class="section-title">Recent Conversations <a href="#" onclick="showPage('chats', null)">View all →</a></div>
+    <div class="chats-list" id="overviewChatsList"><div class="empty-state"><div class="empty-icon">✉</div><p>Your story starts here.</p><span>Choose a companion and send your first message.</span></div></div>
   </div>
 
   <!-- CHATS -->
   <div class="page" id="page-chats">
-    <div class="page-title">My Chats</div>
-    <div class="page-sub">All your conversations in one place.</div>
-    <div class="chats-list" id="allChatsList"><div class="empty-state"><div class="empty-icon">💬</div><div>Loading your chats...</div></div></div>
+    <div class="page-title">My Connections</div>
+    <div class="page-sub">All your intimate conversations in one secure place.</div>
+    <div class="chats-list" id="allChatsList"><div class="empty-state"><div class="empty-icon">✉</div><p>No conversations yet.</p><span>She is waiting for you.</span><a href="/pages/characters.html">Meet the Companions →</a></div></div>
   </div>
 
   <!-- SUBSCRIPTION -->
   <div class="page" id="page-subscription">
-    <div class="page-title">Subscription</div>
-    <div class="page-sub">Manage your plan and billing.</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;max-width:900px;">
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:17px;padding:26px;">
-        <div style="font-size:0.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">Free</div>
-        <div style="font-family:'Syne',sans-serif;font-size:2.2rem;font-weight:800;margin-bottom:5px;">₹0 <span style="font-size:0.9rem;color:var(--muted);font-weight:400;">/forever</span></div>
-        <ul style="list-style:none;margin:16px 0 22px;display:flex;flex-direction:column;gap:9px;">
-          <li style="font-size:0.83rem;color:var(--muted);display:flex;gap:8px;"><span style="color:#4ade80;">✓</span> 3 free characters</li>
-          <li style="font-size:0.83rem;color:var(--muted);display:flex;gap:8px;"><span style="color:#4ade80;">✓</span> 8 lifetime messages each</li>
-          <li style="font-size:0.83rem;color:var(--muted);display:flex;gap:8px;"><span style="color:#f87171;">✗</span> Premium characters</li>
-          <li style="font-size:0.83rem;color:var(--muted);display:flex;gap:8px;"><span style="color:#f87171;">✗</span> Daily messaging</li>
+    <div class="page-title">Membership Tiers</div>
+    <div class="page-sub">Choose the level of access that suits your desires.</div>
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <h4>Guest</h4>
+        <div class="price">₹0 <span>/forever</span></div>
+        <ul>
+          <li><span class="check">✓</span> 3 free companions</li>
+          <li><span class="check">✓</span> 15 messages per day</li>
+          <li><span class="cross">✗</span> Premium companions</li>
+          <li><span class="cross">✗</span> Exclusive photo requests</li>
         </ul>
-        <div id="currentPlanFree" style="width:100%;padding:10px;border-radius:10px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:#4ade80;font-size:0.83rem;font-weight:600;text-align:center;">Current Plan ✓</div>
+        <div style="width:100%; padding:12px; border-radius:10px; background:rgba(255,255,255,0.05); border:1px solid var(--border-subtle); color:var(--text-secondary); font-size:0.85rem; font-weight:600; text-align:center;">Current Tier ✓</div>
       </div>
-      <div style="background:linear-gradient(160deg,rgba(168,85,247,0.1),rgba(236,72,153,0.06));border:1px solid var(--purple);border-radius:17px;padding:26px;position:relative;">
-        <div style="position:absolute;top:13px;right:13px;font-size:0.6rem;font-weight:800;letter-spacing:1.5px;background:var(--grad);color:#fff;padding:3px 9px;border-radius:100px;">POPULAR</div>
-        <div style="font-size:0.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#c084fc;margin-bottom:12px;">Monthly</div>
-        <div style="font-family:'Syne',sans-serif;font-size:2.2rem;font-weight:800;margin-bottom:5px;">₹199 <span style="font-size:0.9rem;color:var(--muted);font-weight:400;">/month</span></div>
-        <ul style="list-style:none;margin:16px 0 22px;display:flex;flex-direction:column;gap:9px;">
-          <li style="font-size:0.83rem;color:var(--muted);display:flex;gap:8px;"><span style="color:#4ade80;">✓</span> All 15+ characters</li>
-          <li style="font-size:0.83rem;color:var(--muted);display:flex;gap:8px;"><span style="color:#4ade80;">✓</span> 100 messages/day</li>
-          <li style="font-size:0.83rem;color:var(--muted);display:flex;gap:8px;"><span style="color:#4ade80;">✓</span> 5 photos/day</li>
-          <li style="font-size:0.83rem;color:var(--muted);display:flex;gap:8px;"><span style="color:#4ade80;">✓</span> Priority AI responses</li>
+      <div class="pricing-card popular">
+        <div class="badge">MOST POPULAR</div>
+        <h4>Private Member</h4>
+        <div class="price">₹199 <span>/month</span></div>
+        <ul>
+          <li><span class="check">✓</span> All 15+ companions</li>
+          <li><span class="check">✓</span> 100 messages per day</li>
+          <li><span class="check">✓</span> 5 exclusive photos per day</li>
+          <li><span class="check">✓</span> Priority AI responses</li>
         </ul>
         <button class="upgrade-btn" style="width:100%;" onclick="window.location.href='/pages/characters.html?plan=monthly'">Upgrade — ₹199/mo</button>
       </div>
-      <div style="background:linear-gradient(160deg,rgba(236,72,153,0.08),rgba(168,85,247,0.04));border:1px solid rgba(236,72,153,0.35);border-radius:17px;padding:26px;position:relative;">
-        <div style="position:absolute;top:13px;right:13px;font-size:0.6rem;font-weight:800;letter-spacing:1.5px;background:linear-gradient(135deg,#ec4899,#a855f7);color:#fff;padding:3px 9px;border-radius:100px;">BEST VALUE</div>
-        <div style="font-size:0.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#f472b6;margin-bottom:12px;">Yearly</div>
-        <div style="font-family:'Syne',sans-serif;font-size:2.2rem;font-weight:800;margin-bottom:5px;">₹2000 <span style="font-size:0.9rem;color:var(--muted);font-weight:400;">/year</span></div>
-        <ul style="list-style:none;margin:16px 0 22px;display:flex;flex-direction:column;gap:9px;">
-          <li style="font-size:0.83rem;color:var(--muted);display:flex;gap:8px;"><span style="color:#4ade80;">✓</span> Everything in Monthly</li>
-          <li style="font-size:0.83rem;color:var(--muted);display:flex;gap:8px;"><span style="color:#4ade80;">✓</span> 150 messages/day</li>
-          <li style="font-size:0.83rem;color:var(--muted);display:flex;gap:8px;"><span style="color:#4ade80;">✓</span> 10 photos/day</li>
-          <li style="font-size:0.83rem;color:var(--muted);display:flex;gap:8px;"><span style="color:#4ade80;">✓</span> Only ₹167/month effective</li>
+      <div class="pricing-card">
+        <div class="badge" style="background:var(--accent-crimson); color:#fff;">BEST VALUE</div>
+        <h4>Elite Patron</h4>
+        <div class="price">₹2000 <span>/year</span></div>
+        <ul>
+          <li><span class="check">✓</span> Everything in Private Member</li>
+          <li><span class="check">✓</span> 150 messages per day</li>
+          <li><span class="check">✓</span> 10 exclusive photos per day</li>
+          <li><span class="check">✓</span> Only ₹167/month effective</li>
         </ul>
-        <button class="upgrade-btn" style="width:100%;background:linear-gradient(135deg,#ec4899,#a855f7);" onclick="window.location.href='/pages/characters.html?plan=yearly'">Upgrade — ₹2000/yr</button>
+        <button class="upgrade-btn" style="width:100%; background:linear-gradient(135deg, #4A0A0A, #7A1212);" onclick="window.location.href='/pages/characters.html?plan=yearly'">Upgrade — ₹2000/yr</button>
       </div>
     </div>
   </div>
 
   <!-- ACCOUNT -->
   <div class="page" id="page-account">
-    <div class="page-title">Account Settings</div>
-    <div class="page-sub">Manage your profile and preferences.</div>
+    <div class="page-title">Sanctuary Settings</div>
+    <div class="page-sub">Manage your profile and privacy preferences.</div>
     <div class="account-grid">
       <div class="account-card">
         <h3>Profile Info</h3>
-        <div class="account-field"><label>Full Name</label><input type="text" id="accountName" placeholder="Your name"/></div>
+        <div class="account-field"><label>Display Name</label><input type="text" id="accountName" placeholder="Your name"/></div>
         <div class="account-field"><label>Email Address</label><input type="email" id="accountEmail" placeholder="your@email.com" disabled/></div>
         <button class="save-btn" onclick="saveProfile()">Save Changes</button>
-        <div class="success-msg" id="profileSuccess">✓ Profile updated!</div>
+        <div class="success-msg" id="profileSuccess">✓ Profile updated securely.</div>
       </div>
       <div class="account-card">
-        <h3>Change Password</h3>
+        <h3>Security</h3>
         <div class="account-field"><label>New Password</label><input type="password" id="newPassword" placeholder="Min 6 characters"/></div>
         <div class="account-field"><label>Confirm Password</label><input type="password" id="confirmPassword" placeholder="Repeat password"/></div>
         <button class="save-btn" onclick="changePassword()">Update Password</button>
-        <div class="success-msg" id="passwordSuccess">✓ Password updated!</div>
+        <div class="success-msg" id="passwordSuccess">✓ Password updated securely.</div>
       </div>
       <div class="account-card" style="grid-column:1/-1;">
-        <h3>Danger Zone</h3>
-        <p style="color:var(--muted);font-size:0.83rem;margin-bottom:14px;">These actions are permanent and cannot be undone.</p>
-        <button class="danger-btn" onclick="if(confirm('Delete your account? This cannot be undone.')) alert('Please contact support@sugarme.in to delete your account.')">Delete My Account</button>
+        <h3 style="color:#f87171;">Danger Zone</h3>
+        <p style="color:var(--text-secondary); font-size:0.85rem; margin-bottom:14px;">These actions are permanent and cannot be undone. All chat history will be erased.</p>
+        <button class="danger-btn" onclick="if(confirm('Delete your account? This will permanently erase all your conversations and cannot be undone.')) alert('Please contact support@sugarme.in to process account deletion.')">Delete My Account & Data</button>
       </div>
     </div>
   </div>
@@ -322,19 +366,22 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, signOut, onAuthStateChanged, updateProfile, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = { apiKey:"AIzaSyDUERWnHurjAPYm9N7P52sXYXLI2Npux54", authDomain:"sugarme-9a37d.firebaseapp.com", projectId:"sugarme-9a37d", storageBucket:"sugarme-9a37d.firebasestorage.app", messagingSenderId:"237083119168", appId:"1:237083119168:web:dded20690c03658a9259a5" };
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// Upgraded from emojis to actual image URLs for a premium look
 const charMap = {
-  char_1:{name:'Aarohi',emoji:'🌸'}, char_2:{name:'Alina',emoji:'🌺'}, char_3:{name:'Saruko',emoji:'🌙'},
-  char_4:{name:'Kavya',emoji:'💜'}, char_5:{name:'Ira',emoji:'❄️'}, char_6:{name:'Anaya',emoji:'⭐'},
-  char_7:{name:'Meher',emoji:'🌼'}, char_8:{name:'Riya',emoji:'🔮'}, char_9:{name:'Elara',emoji:'🎵'},
-  char_10:{name:'Luna',emoji:'🐱'}, char_11:{name:'Aria',emoji:'😂'}, char_12:{name:'Zara',emoji:'👑'},
-  char_13:{name:'Nyla',emoji:'🌷'}, char_14:{name:'Koyuki',emoji:'🌊'}, char_15:{name:'Sienna',emoji:'⚡'}
+  char_1:{name:'Aarohi', img:'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop'}, 
+  char_2:{name:'Alina', img:'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=100&h=100&fit=crop'}, 
+  char_3:{name:'Saruko', img:'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop'},
+  char_4:{name:'Kavya', img:'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=100&h=100&fit=crop'}, 
+  char_5:{name:'Ira', img:'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=100&h=100&fit=crop'}, 
+  char_6:{name:'Anaya', img:'https://images.unsplash.com/photo-1523264939339-c89f9dadde2e?w=100&h=100&fit=crop'}
+  // Add the rest of your 15 characters here with their image URLs
 };
 
 const isMobile = () => window.innerWidth <= 768;
@@ -343,7 +390,6 @@ onAuthStateChanged(auth, async (user) => {
   document.getElementById('loadingScreen').style.display = 'none';
   if (!user) { document.getElementById('notLoggedIn').style.display = 'flex'; return; }
 
-  // Show correct layout based on screen size
   if (isMobile()) {
     document.getElementById('mobileTopbar').style.display = 'flex';
     document.getElementById('bottomNav').style.display = 'flex';
@@ -367,10 +413,10 @@ async function loadChats(uid) {
   try {
     const chats = [];
     let totalMessages = 0;
-    const charIds = ['char_1','char_2','char_3','char_4','char_5','char_6','char_7','char_8','char_9','char_10','char_11','char_12','char_13','char_14','char_15'];
-    const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const charIds = Object.keys(charMap); // Dynamically get all character IDs
     const fetches = charIds.map(id => getDoc(doc(db, 'chats', `${uid}_${id}`)));
     const results = await Promise.all(fetches);
+    
     results.forEach(snap => {
       if (snap.exists()) {
         const data = snap.data();
@@ -379,6 +425,7 @@ async function loadChats(uid) {
         totalMessages += userMsgs.length;
       }
     });
+    
     chats.sort((a,b) => new Date(b.updatedAt||0) - new Date(a.updatedAt||0));
     document.getElementById('statChats').textContent = chats.length;
     document.getElementById('statMessages').textContent = totalMessages;
@@ -387,7 +434,7 @@ async function loadChats(uid) {
   } catch(e) {
     console.error(e);
     ['overviewChatsList','allChatsList'].forEach(id => {
-      document.getElementById(id).innerHTML = '<div class="empty-state"><div class="empty-icon">💬</div><div>Could not load chats.</div></div>';
+      document.getElementById(id).innerHTML = '<div class="empty-state"><div class="empty-icon">✉</div><p>Could not load conversations.</p><span>Please check your connection.</span></div>';
     });
   }
 }
@@ -395,21 +442,22 @@ async function loadChats(uid) {
 function renderChatList(chats, containerId) {
   const container = document.getElementById(containerId);
   if (!chats.length) {
-    container.innerHTML = `<div class="empty-state"><div class="empty-icon">💬</div><div>No chats yet. Start a conversation!</div><a href="/pages/characters.html">Browse Characters →</a></div>`;
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">✉</div><p>Your story starts here.</p><span>Choose a companion and send your first message.</span><a href="/pages/characters.html">Meet the Companions →</a></div>`;
     return;
   }
   container.innerHTML = chats.map(chat => {
-    const char = charMap[chat.charId] || { name: chat.charName||'?', emoji: '🌸' };
+    const char = charMap[chat.charId] || { name: chat.charName||'Unknown', img:'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop' };
     const messages = chat.messages || [];
     const lastMsg = messages[messages.length-1];
-    const lastText = lastMsg?.text || 'No messages yet';
-    const lastTime = lastMsg?.time ? new Date(lastMsg.time).toLocaleDateString() : '';
+    const lastText = lastMsg?.text || 'Start a conversation...';
+    const lastTime = lastMsg?.time ? new Date(lastMsg.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
     const userMsgCount = messages.filter(m=>m.role==='user').length;
+    
     return `<div class="chat-item" onclick="window.location.href='/pages/characters.html?openChat=${encodeURIComponent(chat.charId)}'">
-      <div class="chat-item-avatar">${char.emoji}</div>
+      <div class="chat-item-avatar" style="background-image: url('${char.img}');"></div>
       <div class="chat-item-info">
         <div class="chat-item-name">${char.name}</div>
-        <div class="chat-item-last">${lastText.slice(0,60)}${lastText.length>60?'...':''}</div>
+        <div class="chat-item-last">"${lastText.slice(0,50)}${lastText.length>50?'...':''}"</div>
       </div>
       <div class="chat-item-meta">
         <div class="chat-item-time">${lastTime}</div>
@@ -419,14 +467,16 @@ function renderChatList(chats, containerId) {
   }).join('');
 }
 
-window.showPage = (pageId, btn) => {
+window.showPage = (pageId, btn, bnavId) => {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.bottom-nav-item').forEach(b => b.classList.remove('active'));
   document.getElementById('page-' + pageId).classList.add('active');
   if (btn) btn.classList.add('active');
-  const bnav = document.getElementById('bnav-' + pageId);
-  if (bnav) bnav.classList.add('active');
+  if (bnavId) {
+    const bnav = document.getElementById(bnavId);
+    if (bnav) bnav.classList.add('active');
+  }
 };
 
 window.saveProfile = async () => {
