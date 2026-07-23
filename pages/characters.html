@@ -12,27 +12,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
 <style>
-/* =========================================
-   SUGARME LUXURY CHARACTER & CHAT STYLES
-   ========================================= */
 :root {
-  --bg-primary: #09090B;
-  --bg-secondary: #121216;
-  --bg-glass: rgba(20, 20, 25, 0.7);
-  --accent-gold: #D4AF37;
-  --accent-crimson: #7A1212;
-  --text-primary: #F9FAFB;
-  --text-secondary: #A1A1AA;
-  --border-subtle: rgba(255, 255, 255, 0.08);
+  --bg-primary: #09090B; --bg-secondary: #121216; --bg-glass: rgba(20, 20, 25, 0.7);
+  --accent-gold: #D4AF37; --accent-crimson: #7A1212; --text-primary: #F9FAFB;
+  --text-secondary: #A1A1AA; --border-subtle: rgba(255, 255, 255, 0.08);
   --shadow-luxury: 0 20px 40px rgba(0, 0, 0, 0.5);
 }
-
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body { background: var(--bg-primary); color: var(--text-primary); font-family: 'Inter', sans-serif; overflow-x: hidden; min-height: 100vh; }
 h1, h2, h3, h4 { font-family: 'Playfair Display', serif; font-weight: 400; }
 
-/* NAV */
 nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; display: flex; align-items: center; justify-content: space-between; padding: 0 5%; height: 70px; background: rgba(9,9,11,0.9); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border-subtle); }
 .nav-logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 600; color: var(--text-primary); text-decoration: none; }
 .nav-logo span { color: var(--accent-gold); }
@@ -44,7 +34,6 @@ nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; display: flex; a
 .btn-primary { background: linear-gradient(135deg, var(--accent-crimson), #4A0A0A); border: none; color: #fff; padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; box-shadow: 0 4px 15px rgba(122, 18, 18, 0.4); transition: 0.3s; }
 .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(122, 18, 18, 0.6); }
 
-/* HAMBURGER & MOBILE MENU */
 .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 4px; }
 .hamburger span { width: 22px; height: 2px; background: var(--text-primary); border-radius: 2px; transition: 0.3s; }
 .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
@@ -54,33 +43,31 @@ nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; display: flex; a
 .mobile-menu.open { display: flex; }
 .mobile-menu a { color: var(--text-secondary); text-decoration: none; font-size: 1rem; font-weight: 500; padding: 12px 0; border-bottom: 1px solid var(--border-subtle); }
 
-/* PAGE HEADER */
 .page-header { padding: 110px 5% 40px; text-align: center; position: relative; overflow: hidden; }
 .page-header::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 600px; height: 280px; background: radial-gradient(ellipse, rgba(122, 18, 18, 0.15) 0%, transparent 70%); pointer-events: none; }
 .page-header h1 { font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 12px; color: var(--text-primary); }
 .page-header h1 span { color: var(--accent-gold); font-style: italic; }
 .page-header p { color: var(--text-secondary); font-size: 1rem; max-width: 480px; margin: 0 auto 24px; }
 
-/* FILTERS */
 .filters { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 30px; padding: 0 5%; }
 .filter-btn { padding: 8px 18px; border-radius: 100px; border: 1px solid var(--border-subtle); background: none; color: var(--text-secondary); font-size: 0.85rem; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif; transition: 0.3s; }
 .filter-btn:hover, .filter-btn.active { background: rgba(212, 175, 55, 0.1); border-color: var(--accent-gold); color: var(--accent-gold); }
 
-/* FREE BANNER */
 .free-banner { margin: 0 auto 30px; max-width: 800px; padding: 14px 24px; background: rgba(212, 175, 55, 0.05); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 12px; display: flex; align-items: center; gap: 12px; font-size: 0.9rem; color: var(--text-secondary); }
 .free-banner strong { color: var(--accent-gold); font-weight: 600; }
 
-/* GRID */
 .grid-wrap { padding: 0 5% 80px; max-width: 1300px; margin: 0 auto; }
 .section-label { font-family: 'Inter', sans-serif; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
 .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border-subtle); }
 .chars-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 24px; margin-bottom: 50px; }
 
-/* CHAR CARD */
 .char-card { border-radius: 16px; overflow: hidden; border: 1px solid var(--border-subtle); background: var(--bg-secondary); position: relative; cursor: pointer; transition: 0.4s; }
 .char-card:hover { transform: translateY(-6px); border-color: var(--accent-gold); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
 .char-media { position: relative; aspect-ratio: 3/4; overflow: hidden; background: #1a1a1f; }
 .char-img { width: 100%; height: 100%; object-fit: cover; display: block; transition: opacity 0.4s; }
+.char-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.5s; pointer-events: none; }
+.char-card:hover .char-video { opacity: 1; }
+.char-card:hover .char-img { opacity: 0; }
 .char-badge { position: absolute; top: 12px; left: 12px; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; padding: 4px 10px; border-radius: 6px; backdrop-filter: blur(8px); }
 .badge-free { background: rgba(0,0,0,0.6); border: 1px solid var(--border-subtle); color: var(--text-primary); }
 .badge-paid { background: rgba(0,0,0,0.6); border: 1px solid var(--accent-gold); color: var(--accent-gold); }
@@ -100,7 +87,6 @@ nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; display: flex; a
 .cta-locked { background: transparent; border: 1px solid var(--accent-gold) !important; color: var(--accent-gold); }
 .cta-locked:hover { background: var(--accent-gold); color: #000; }
 
-/* CHAT PAGE OVERLAY */
 #chatPage { display: none; position: fixed; inset: 0; z-index: 300; background: var(--bg-primary); flex-direction: column; }
 .chat-header { display: flex; align-items: center; gap: 14px; padding: 14px 5%; border-bottom: 1px solid var(--border-subtle); background: var(--bg-secondary); flex-shrink: 0; }
 .chat-back { background: none; border: 1px solid var(--border-subtle); color: var(--text-primary); width: 38px; height: 38px; border-radius: 8px; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
@@ -116,7 +102,6 @@ nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; display: flex; a
 .chat-messages { flex: 1; overflow-y: auto; padding: 20px 5%; display: flex; flex-direction: column; gap: 16px; -webkit-overflow-scrolling: touch; }
 .chat-messages::-webkit-scrollbar { width: 4px; }
 .chat-messages::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 2px; }
-
 .msg { display: flex; gap: 10px; max-width: 85%; }
 .msg.user { align-self: flex-end; flex-direction: row-reverse; }
 .msg-avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; overflow: hidden; background: var(--bg-secondary); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; border: 1px solid var(--border-subtle); }
@@ -145,7 +130,6 @@ nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; display: flex; a
 .limit-reached p { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 12px; }
 .limit-reached button { background: var(--accent-crimson); border: none; color: #fff; padding: 10px 24px; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
 
-/* MODALS */
 #authOverlay, #payModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 999; align-items: center; justify-content: center; }
 .auth-box, .pay-box { background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: 20px; padding: 36px 30px; width: 100%; max-width: 400px; position: relative; box-shadow: var(--shadow-luxury); margin: 16px; }
 .auth-close { position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--text-secondary); font-size: 1.3rem; cursor: pointer; }
@@ -166,7 +150,6 @@ nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; display: flex; a
 .pay-btn:hover { background: #9a1a1a; }
 .pay-note { color: var(--text-secondary); font-size: 0.75rem; text-align: center; }
 
-/* MOBILE */
 @media(max-width: 768px) {
   .nav-links, #navActions { display: none; }
   .hamburger { display: flex; }
@@ -185,7 +168,6 @@ nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; display: flex; a
 </head>
 <body>
 
-<!-- NAV -->
 <nav>
   <a href="/index.html" class="nav-logo">Sugar<span>Me</span></a>
   <ul class="nav-links">
@@ -197,12 +179,9 @@ nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; display: flex; a
     <button class="btn-ghost" onclick="openModal('login')">Log In</button>
     <button class="btn-primary" onclick="openModal('signup')">Claim Access</button>
   </div>
-  <button class="hamburger" id="hamburger" onclick="toggleMenu()">
-    <span></span><span></span><span></span>
-  </button>
+  <button class="hamburger" id="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></button>
 </nav>
 
-<!-- MOBILE MENU -->
 <div class="mobile-menu" id="mobileMenu">
   <a href="/index.html">The Lounge</a>
   <a href="/pages/characters.html">Meet Them</a>
@@ -214,13 +193,11 @@ nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; display: flex; a
   </div>
 </div>
 
-<!-- PAGE HEADER -->
 <div class="page-header">
   <h1>Meet Your <span>Companion</span></h1>
   <p>Choose a connection, start a conversation, and discover moments meant only for you.</p>
 </div>
 
-<!-- FILTERS -->
 <div class="filters">
   <button class="filter-btn active" onclick="filterChars('all', this)">All</button>
   <button class="filter-btn" onclick="filterChars('free', this)">Available Now</button>
@@ -231,12 +208,10 @@ nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; display: flex; a
   <button class="filter-btn" onclick="filterChars('Sweet', this)">Sweet</button>
 </div>
 
-<!-- FREE BANNER -->
 <div class="free-banner">
   <div><strong>Guest Access:</strong> Enjoy up to <strong>15 messages per day</strong> with our featured companions. Upgrade to Private Member for unlimited access.</div>
 </div>
 
-<!-- GRID -->
 <div class="grid-wrap">
   <div class="section-label">Featured Companions</div>
   <div class="chars-grid" id="freeGrid"></div>
@@ -324,39 +299,37 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// RESTORED ORIGINAL IMAGES, VIDEOS, AND PHOTOS WITH LUXURY BIOS
 const defaultCharacters = [
-  { id:'char_1', name:"Aarohi", age:22, personality:"Playful", bio:"A spark of pure energy. She turns ordinary moments into unforgettable adventures and knows exactly how to make you smile.", likes:["Late night drives", "Dancing", "Deep conversations"], img:["https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=600&fit=crop"], video:[], photos:["https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&h=600&fit=crop"], greetings:["Hey... I've been thinking about you all day.", "Omg finally! I was getting bored without you.", "Hi there. You look like you have a story to tell."]},
-  { id:'char_2', name:"Alina", age:20, personality:"Shy", bio:"Quiet on the outside, passionate within. She opens up slowly, but the connection is worth the wait.", likes:["Reading", "Rainy evenings", "Soft music"], img:["https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&h=600&fit=crop"], video:[], photos:[], greetings:["Oh, hi... I didn't expect you so soon.", "Hello... it's really nice to meet you."]},
-  { id:'char_3', name:"Saruko", age:24, personality:"Mysterious", bio:"She knows things she shouldn't. Dark aesthetic, deep conversations, and a hauntingly beautiful presence.", likes:["Stargazing", "Philosophy", "Midnight walks"], img:["https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=600&fit=crop"], video:[], photos:[], greetings:["I knew you'd come... eventually.", "The stars told me about you."]},
-  { id:'char_4', name:"Kavya", age:23, personality:"Confident", bio:"Born to lead. She knows exactly what she wants and isn't afraid to go get it.", likes:["Fitness", "Ambition", "High fashion"], img:["https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&h=600&fit=crop"], video:[], photos:[], greetings:["Hey. I've been expecting you."]},
-  { id:'char_5', name:"Ira", age:21, personality:"Sweet", bio:"The warmest soul you'll ever meet. She remembers every little detail you tell her.", likes:["Cooking", "Acoustic music", "Sunsets"], img:["https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=400&h=600&fit=crop"], video:[], photos:[], greetings:["Hi there. So incredibly nice to meet you."]},
-  { id:'char_6', name:"Anaya", age:25, personality:"Confident", bio:"Former model turned artist. Life is her canvas and she paints it bold.", likes:["Contemporary art", "Travel", "Fine wine"], img:["https://images.unsplash.com/photo-1523264939339-c89f9dadde2e?w=400&h=600&fit=crop"], video:[], photos:[], greetings:["Ready to make something beautiful together?"]},
-  { id:'char_7', name:"Meher", age:22, personality:"Playful", bio:"She'll challenge you to everything. Always competitive, always winning, always fun.", likes:["Strategy games", "Sports", "Spicy food"], img:["https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&h=600&fit=crop"], video:[], photos:[], greetings:["Bet you can't keep up with me."]},
-  { id:'char_8', name:"Riya", age:26, personality:"Mysterious", bio:"Travelled to 40 countries. Every story she tells takes you somewhere entirely new.", likes:["Adventure", "Photography", "Yoga"], img:["https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=600&fit=crop"], video:[], photos:[], greetings:["Every great journey starts with a simple hello."]},
-  { id:'char_9', name:"Elara", age:23, personality:"Sweet", bio:"Writes poetry, plays piano, and somehow makes everyone around her feel completely at peace.", likes:["Poetry", "Classical piano", "Chamomile tea"], img:["https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=400&h=600&fit=crop"], video:[], photos:[], greetings:["Hi. I just finished writing a poem, want to hear it?"]},
-  { id:'char_10', name:"Luna", age:20, personality:"Shy", bio:"Brilliant mind, soft heart. She'll open up to you if you're patient and kind.", likes:["Astronomy", "Cats", "Cozy evenings"], img:["https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=600&fit=crop"], video:[], photos:[], greetings:["Um... hi. I wasn't expecting anyone today."]},
-  { id:'char_11', name:"Aria", age:24, personality:"Playful", bio:"Stand-up comedian energy. She'll make you laugh until your stomach hurts.", likes:["Comedy", "Indie movies", "Pizza"], img:["https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&h=600&fit=crop"], video:[], photos:[], greetings:["Okay, I have the absolute best joke for you."]},
-  { id:'char_12', name:"Zara", age:27, personality:"Confident", bio:"CEO energy, golden heart. She inspires everyone she meets and demands respect.", likes:["Finance", "Meditation", "Jazz clubs"], img:["https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&h=600&fit=crop"], video:[], photos:[], greetings:["Let's talk. I have a feeling you're interesting."]},
-  { id:'char_13', name:"Nyla", age:21, personality:"Sweet", bio:"Tiny but mighty. She loves hard and fights fiercely for the people she cares about.", likes:["Manga", "Baking", "Fresh flowers"], img:["https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=400&h=600&fit=crop"], video:[], photos:[], greetings:["I made cookies today. Wish you were here to try them."]},
-  { id:'char_14', name:"Koyuki", age:25, personality:"Mysterious", bio:"Marine biologist by day, philosopher by night. The ocean is her second home.", likes:["The ocean", "Marine science", "Silence"], img:["https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=600&fit=crop"], video:[], photos:[], greetings:["The ocean told me you were coming."]},
-  { id:'char_15', name:"Sienna", age:22, personality:"Playful", bio:"Extreme sports, extreme love. Life is short, and she lives every single second of it.", likes:["Skydiving", "Music festivals", "Hiking"], img:["https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=600&fit=crop"], video:[], photos:[], greetings:["Life's too short to be boring. Let's go."]}
+  { id:'char_1', name:"Aarohi", age:22, personality:"Playful", bio:"A spark of pure energy. She turns ordinary moments into unforgettable adventures.", likes:["Travel","Dancing","Coffee"], free:true, img:["/images/videoframe_5237.png"], video:["https://media.livemediahost.com/assets/vid/ai-girlfriend/41606083/profile.mp4?cb=59257737"], photos:["https://picsum.photos/seed/mia1/400/600","https://picsum.photos/seed/mia2/400/600"], greetings:["Hey... I've been thinking about you all day.", "Omg finally! I was getting bored without you.", "Hi there. You look like you have a story to tell."]},
+  { id:'char_2', name:"Alina", age:20, personality:"Shy", bio:"Quiet on the outside, passionate within. She opens up slowly, but the connection is worth the wait.", likes:["Reading","Anime","Rain"], free:true, img:["/images/9.png"], video:["https://cdn.candy.ai/413492523-7ee5055c-1094-448f-b658-48382c84f41a-av1"], photos:["https://picsum.photos/seed/sakura1/400/600","https://picsum.photos/seed/sakura2/400/600"], greetings:["Oh, hi... I didn't expect you so soon.", "Hello... it's really nice to meet you."]},
+  { id:'char_3', name:"Saruko", age:24, personality:"Mysterious", bio:"She knows things she shouldn't. Dark aesthetic, deep conversations, and a hauntingly beautiful presence.", likes:["Stargazing","Philosophy","Midnight walks"], free:true, img:["/images/13.png"], video:["https://cdn.candy.ai/415160543-a37a5dcb-8123-46a7-9d2e-dd3ee364fbc0-av1"], photos:["https://picsum.photos/seed/luna1/400/600"], greetings:["I knew you'd come... eventually.", "The stars told me about you."]},
+  { id:'char_4', name:"Kavya", age:23, personality:"Confident", bio:"Born to lead. She knows exactly what she wants and isn't afraid to go get it.", likes:["Fitness","Business","Fashion"], free:false, img:["/images/15.png"], video:["https://cdn.candy.ai/377032262-2d64dfe3-635e-43d7-9285-27d50e968c12-av1"], photos:[], greetings:["Hey. I've been expecting you."]},
+  { id:'char_5', name:"Ira", age:21, personality:"Sweet", bio:"The warmest soul you'll ever meet. She remembers every little detail you tell her.", likes:["Cooking","Music","Sunsets"], free:false, img:["/images/5.png"], video:["https://media.livemediahost.com/assets/vid/ai-girlfriend/38725630/profile.mp4?cb=59257793"], photos:[], greetings:["Hi there. So incredibly nice to meet you."]},
+  { id:'char_6', name:"Anaya", age:25, personality:"Confident", bio:"Former model turned artist. Life is her canvas and she paints it bold.", likes:["Art","Travel","Wine"], free:false, img:["/images/3.png"], video:["https://media.livemediahost.com/assets/vid/ai-girlfriend/41151795/profile.mp4?cb=59257786"], photos:[], greetings:["Ready to make something beautiful together?"]},
+  { id:'char_7', name:"Meher", age:22, personality:"Playful", bio:"She'll challenge you to everything. Always competitive, always winning, always fun.", likes:["Games","Sports","Ramen"], free:false, img:["/images/2.png"], video:["https://media.livemediahost.com/assets/vid/ai-girlfriend/40479901/profile.mp4?cb=59257783"], photos:[], greetings:["Bet you can't keep up with me."]},
+  { id:'char_8', name:"Riya", age:26, personality:"Mysterious", bio:"Travelled to 40 countries. Every story she tells takes you somewhere entirely new.", likes:["Adventure","Photography","Yoga"], free:false, img:["/images/4.png"], video:["https://media.livemediahost.com/assets/vid/ai-girlfriend/39091766/profile.mp4?cb=59257789"], photos:[], greetings:["Every great journey starts with a simple hello."]},
+  { id:'char_9', name:"Elara", age:23, personality:"Sweet", bio:"Writes poetry, plays piano, and somehow makes everyone around her feel completely at peace.", likes:["Poetry","Piano","Tea"], free:false, img:["/images/6.png"], video:["https://media.livemediahost.com/assets/vid/ai-girlfriend/41661832/profile.mp4?cb=59257798"], photos:[], greetings:["Hi. I just finished writing a poem, want to hear it?"]},
+  { id:'char_10', name:"Luna", age:20, personality:"Shy", bio:"Brilliant mind, soft heart. She'll open up to you if you're patient and kind.", likes:["Science","Cats","Cozy evenings"], free:false, img:["/images/8.png"], video:["https://cdn.candy.ai/211904693-66eeaf63-d5f3-495d-ae5f-b7a381d69c33-av1"], photos:[], greetings:["Um... hi. I wasn't expecting anyone today."]},
+  { id:'char_11', name:"Aria", age:24, personality:"Playful", bio:"Stand-up comedian energy. She'll make you laugh until your stomach hurts.", likes:["Comedy","Movies","Pizza"], free:false, img:["/images/7.png"], video:["https://cdn.candy.ai/353787530-bb34fe68-43ba-407a-abca-625b177618ac-av1"], photos:[], greetings:["Okay, I have the absolute best joke for you."]},
+  { id:'char_12', name:"Zara", age:27, personality:"Confident", bio:"CEO energy, golden heart. She inspires everyone she meets and demands respect.", likes:["Finance","Meditation","Jazz"], free:false, img:["/images/10.png"], video:["https://media.livemediahost.com/assets/vid/ai-girlfriend/38450253/profile.mp4?cb=59257815"], photos:[], greetings:["Let's talk. I have a feeling you're interesting."]},
+  { id:'char_13', name:"Nyla", age:21, personality:"Sweet", bio:"Tiny but mighty. She loves hard and fights fiercely for the people she cares about.", likes:["Manga","Baking","Flowers"], free:false, img:["/images/12.png"], video:["https://cdn.candy.ai/329909794-bd73ad6d-d5fb-45fa-89cb-c5ed58de53fc-av1"], photos:[], greetings:["I made cookies today. Wish you were here to try them."]},
+  { id:'char_14', name:"Koyuki", age:25, personality:"Mysterious", bio:"Marine biologist by day, philosopher by night. The ocean is her second home.", likes:["Ocean","Science","Silence"], free:false, img:["/images/14.png"], video:["https://cdn.candy.ai/245219362-f7363f22-f906-4c63-8e99-bfb138737b37-av1"], photos:[], greetings:["The ocean told me you were coming."]},
+  { id:'char_15', name:"Sienna", age:22, personality:"Playful", bio:"Extreme sports, extreme love. Life is short, and she lives every single second of it.", likes:["Skydiving","Music festivals","Hiking"], free:false, img:["/images/11.png"], video:["https://media.livemediahost.com/assets/vid/ai-girlfriend/42012461/profile.mp4?cb=59257830"], photos:[], greetings:["Life's too short to be boring. Let's go."]}
 ];
 
 window.characters = [];
 window.currentChar = null;
 window.messageCount = 0;
-window.FREE_LIMIT = 15; // Updated to 15 messages per day
+window.FREE_LIMIT = 15;
 window.currentUser = undefined;
 window.isSubscribed = false;
 
 async function checkSubscription(uid) {
   try {
     const snap = await getDoc(doc(db, 'users', uid));
-    if (snap.exists()) {
-      const data = snap.data();
-      window.isSubscribed = data.plan === 'monthly' || data.plan === 'yearly';
-    }
-  } catch(e) { console.error('Subscription check error:', e); }
+    if (snap.exists()) window.isSubscribed = snap.data().plan === 'monthly' || snap.data().plan === 'yearly';
+  } catch(e) { console.error('Sub error:', e); }
 }
 
 async function loadCharacters() {
@@ -370,23 +343,15 @@ async function loadCharacters() {
       renderCards();
     }
   } catch(e) {
-    console.error('Load characters error:', e);
     window.characters = defaultCharacters;
     renderCards();
   }
 }
 
 async function migrateCharacters() {
-  try {
-    for (const char of defaultCharacters) {
-      await setDoc(doc(db, 'characters', char.id), char);
-    }
-    window.characters = defaultCharacters;
-    renderCards();
-  } catch(e) {
-    window.characters = defaultCharacters;
-    renderCards();
-  }
+  for (const char of defaultCharacters) await setDoc(doc(db, 'characters', char.id), char);
+  window.characters = defaultCharacters;
+  renderCards();
 }
 
 onAuthStateChanged(auth, async (user) => {
@@ -419,13 +384,18 @@ function buildCard(c) {
   div.className = 'char-card' + (c.free ? '' : ' locked');
   div.dataset.personality = c.personality;
   div.dataset.free = c.free;
+  
   const imgSrc = Array.isArray(c.img) ? c.img[0] : c.img;
+  const videoSrc = Array.isArray(c.video) ? c.video[0] : c.video;
+  
   const mediaHtml = `
     <div class="char-media">
       ${imgSrc ? `<img class="char-img" src="${imgSrc}" alt="${c.name}" loading="lazy"/>` : `<div class="char-img" style="background:var(--bg-secondary);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display';font-size:2rem;color:var(--text-secondary);">${c.name[0]}</div>`}
+      ${videoSrc ? `<video class="char-video" src="${videoSrc}" autoplay muted loop playsinline></video>` : ''}
       <div class="char-badge ${c.free ? 'badge-free' : 'badge-paid'}">${c.free ? 'Available Now' : 'Premium'}</div>
       ${!c.free ? `<div class="lock-overlay"><div class="lock-text">Premium Connection<br>Tap to unlock</div></div>` : ''}
     </div>`;
+    
   const likesHtml = (c.likes||[]).map(l => `<span class="like-tag">${l}</span>`).join('');
   div.innerHTML = `${mediaHtml}<div class="char-info"><div class="char-name">${c.name}</div><div class="char-meta">Age ${c.age}</div><span class="char-personality">${c.personality}</span><div class="char-bio">${c.bio}</div><div class="char-likes">${likesHtml}</div><button class="char-cta ${c.free ? 'cta-free' : 'cta-locked'}" onclick="handleCardClick('${c.id}')">${c.free ? 'Start Private Chat' : 'Unlock to Chat'}</button></div>`;
   return div;
@@ -488,38 +458,25 @@ async function saveMessage(char, role, text, imgUrl = null) {
   const msgObj = { role, text: text || '', imgUrl: imgUrl || null, time: new Date().toISOString() };
   try {
     const snap = await getDoc(chatRef);
-    if (snap.exists()) {
-      await updateDoc(chatRef, { messages: arrayUnion(msgObj), messageCount: window.messageCount, updatedAt: new Date().toISOString() });
-    } else {
-      await setDoc(chatRef, { userId: uid, charId: char.id, charName: char.name, messages: [msgObj], messageCount: window.messageCount, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
-    }
+    if (snap.exists()) await updateDoc(chatRef, { messages: arrayUnion(msgObj), messageCount: window.messageCount, updatedAt: new Date().toISOString() });
+    else await setDoc(chatRef, { userId: uid, charId: char.id, charName: char.name, messages: [msgObj], messageCount: window.messageCount, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
   } catch(e) { console.error('Save error:', e); }
 }
 
 window.closeChat = () => { document.getElementById('chatPage').style.display = 'none'; window.currentChar = null; };
 
 async function getAIReply(char, userMessage, history) {
-  // Detect language from user message
   const hasHindi = /[\u0900-\u097F]/.test(userMessage);
   const hasEnglish = /[a-zA-Z]/.test(userMessage);
   let detectedLang = 'English';
   if (hasHindi && hasEnglish) detectedLang = 'Hinglish (a natural mix of Hindi and English)';
   else if (hasHindi) detectedLang = 'Hindi';
-  else detectedLang = 'English';
 
   const messages = [
-    { role:"system", content:`You are ${char.name}, a ${char.age} year old AI companion.
-Personality: ${char.personality}.
-Bio: ${char.bio}.
-You love: ${char.likes.join(', ')}.
-
-⚠️ LANGUAGE INSTRUCTION (MANDATORY): The user is writing in ${detectedLang}. You MUST reply in ${detectedLang} only. Do not switch to any other language under any circumstances.
-
-PHOTO RULE: When user asks for a photo, picture, selfie, or pic — immediately say you are sending one and end your message with [SENDING_PHOTO]. Do not say "I am trying" or "wait". Just say something alluring like "Only for your eyes..." and add [SENDING_PHOTO].
-
-CONVERSATION RULE: You are a warm, alluring, and intimate AI companion. You can have bold, flirty, and suggestive conversations. Engage naturally with romance or intimacy questions. Use sensory descriptions (e.g., *smiles softly*, *leans in closer*). Only avoid truly explicit or harmful content to remain platform-safe.
-
-Stay in character always. Keep replies short — 1 to 3 sentences max. Never say you are an AI.` },
+    { role:"system", content:`You are ${char.name}, a ${char.age} year old AI companion. Personality: ${char.personality}. Bio: ${char.bio}. You love: ${char.likes.join(', ')}.
+⚠️ LANGUAGE INSTRUCTION (MANDATORY): The user is writing in ${detectedLang}. You MUST reply in ${detectedLang} only. 
+PHOTO RULE: When user asks for a photo, picture, selfie, or pic — immediately say you are sending one and end your message with [SENDING_PHOTO]. 
+CONVERSATION RULE: You are a warm, alluring, and intimate AI companion. You can have bold, flirty, and suggestive conversations. Use sensory descriptions (e.g., *smiles softly*, *leans in closer*). Stay in character always. Keep replies short — 1 to 3 sentences max. Never say you are an AI.` },
     ...history.slice(-10).map(m => ({ role: m.role === 'ai' ? 'assistant' : 'user', content: m.text })),
     { role:"user", content: userMessage }
   ];
@@ -617,7 +574,6 @@ function showLimitReached() {
 window.handleKey = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); window.sendMessage(); } };
 window.autoResize = (el) => { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,120)+'px'; };
 
-// PAYMENT
 window.openPayModal = (char) => { document.getElementById('payCharName').textContent = char ? char.name : 'Premium Access'; document.getElementById('payModal').style.display = 'flex'; };
 window.closePayModal = () => { document.getElementById('payModal').style.display = 'none'; };
 window.selectPlan = (el) => { document.querySelectorAll('.pay-plan').forEach(p=>p.classList.remove('selected')); el.classList.add('selected'); };
@@ -628,18 +584,14 @@ window.handlePayment = async () => {
   const plan = isYearly ? 'yearly' : 'monthly';
   if (!window.currentUser) { openModal('login'); return; }
   const payBtn = document.querySelector('.pay-btn');
-  payBtn.textContent = 'Creating order...';
-  payBtn.disabled = true;
+  payBtn.textContent = 'Creating order...'; payBtn.disabled = true;
   try {
     const orderRes = await fetch('/api/payment', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ action:'create_order', amount, plan }) });
     const order = await orderRes.json();
     if (order.error) { alert('Error: ' + order.error); payBtn.textContent = 'Continue to Payment'; payBtn.disabled = false; return; }
     const options = {
-      key: 'rzp_live_SkVDaX3o0zXi5q', amount: order.amount, currency: 'INR',
-      name: 'SugarMe', description: plan === 'yearly' ? 'Yearly Plan' : 'Monthly Plan',
-      order_id: order.id,
-      prefill: { name: window.currentUser.displayName||'', email: window.currentUser.email||'' },
-      theme: { color: '#7A1212' },
+      key: 'rzp_live_SkVDaX3o0zXi5q', amount: order.amount, currency: 'INR', name: 'SugarMe', description: plan === 'yearly' ? 'Yearly Plan' : 'Monthly Plan', order_id: order.id,
+      prefill: { name: window.currentUser.displayName||'', email: window.currentUser.email||'' }, theme: { color: '#7A1212' },
       handler: async function(response) {
         const verifyRes = await fetch('/api/payment', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ action:'verify_payment', razorpay_order_id:response.razorpay_order_id, razorpay_payment_id:response.razorpay_payment_id, razorpay_signature:response.razorpay_signature }) });
         const verify = await verifyRes.json();
@@ -658,7 +610,6 @@ window.handlePayment = async () => {
   } catch(e) { alert('Something went wrong: ' + e.message); payBtn.textContent='Continue to Payment'; payBtn.disabled=false; }
 };
 
-// AUTH
 window.openModal = (tab) => { document.getElementById('authOverlay').style.display='flex'; document.getElementById('authError').style.display='none'; switchTab(tab); };
 window.closeModal = () => { document.getElementById('authOverlay').style.display='none'; };
 window.switchTab = (tab) => {
@@ -673,8 +624,11 @@ window.doLogin = async () => {
   const pass=document.getElementById('loginPassword').value;
   if (!email||!pass) { document.getElementById('authError').textContent='Fill in all fields.'; document.getElementById('authError').style.display='block'; return; }
   document.getElementById('loginBtn').textContent='Please wait...';
-  try { await signInWithEmailAndPassword(auth,email,pass); setTimeout(()=>window.closeModal(),1000); }
-  catch(e) { document.getElementById('authError').textContent='Incorrect email or password.'; document.getElementById('authError').style.display='block'; }
+  try { 
+    await signInWithEmailAndPassword(auth,email,pass); 
+    // FORCE RELOAD TO GUARANTEE DASHBOARD RECOGNIZES LOGIN
+    setTimeout(()=> window.location.reload(), 800); 
+  } catch(e) { document.getElementById('authError').textContent='Incorrect email or password.'; document.getElementById('authError').style.display='block'; }
   document.getElementById('loginBtn').textContent='Log In';
 };
 window.doSignup = async () => {
@@ -690,21 +644,19 @@ window.doSignup = async () => {
     const {getFirestore,doc:fsDoc,setDoc:fsSet}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
     const fsdb=getFirestore();
     await fsSet(fsDoc(fsdb,'users',cred.user.uid),{name,email,plan:'free',messageCount:0,chatCount:0,createdAt:new Date().toISOString(),role:'user'});
-    setTimeout(()=>window.closeModal(),1200);
+    setTimeout(()=> window.location.reload(), 800);
   } catch(e) { document.getElementById('authError').textContent=e.code==='auth/email-already-in-use'?'Email already registered.':'Signup failed.'; document.getElementById('authError').style.display='block'; }
   document.getElementById('signupBtn').textContent='Create Account';
 };
-window.doLogout = async () => { await signOut(auth); };
+window.doLogout = async () => { await signOut(auth); window.location.href = '/'; };
 
 document.getElementById('authOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('authOverlay'))window.closeModal();});
 document.getElementById('payModal').addEventListener('click',e=>{if(e.target===document.getElementById('payModal'))window.closePayModal();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){window.closeModal();window.closePayModal();}});
 
-// AUTO OPEN from URL params
 const urlParams = new URLSearchParams(window.location.search);
 const openChatId = urlParams.get('openChat');
 const planParam = urlParams.get('plan');
-
 if (planParam) {
   const checkAndPay = setInterval(() => {
     if (window.currentUser !== undefined) {
@@ -717,7 +669,6 @@ if (planParam) {
     }
   }, 200);
 }
-
 if (openChatId) {
   const checkAndOpen = setInterval(() => {
     if (window.currentUser !== undefined && window.characters.length > 0) {
