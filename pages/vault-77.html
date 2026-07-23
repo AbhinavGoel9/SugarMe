@@ -110,7 +110,7 @@ textarea.form-input { min-height: 80px; resize: vertical; }
   .char-grid { grid-template-columns: 1fr; }
   .data-table { font-size: 0.8rem; }
   .data-table th, .data-table td { padding: 10px 8px; }
-}
+
 }
 </style>
 </head>
@@ -141,7 +141,8 @@ textarea.form-input { min-height: 80px; resize: vertical; }
       <button class="admin-nav-btn active" onclick="showPanel('dashboard', this)">⌂ Dashboard</button>
       <button class="admin-nav-btn" onclick="showPanel('characters', this)">✦ Characters</button>
       <button class="admin-nav-btn" onclick="showPanel('users', this)">◉ Users</button>
-      <button class="admin-nav-btn" onclick="window.doLogout()" style="margin-top:auto; color:#f87171;">← Log Out</button>
+<button class="admin-nav-btn" onclick="showPanel('chats', this)">💬 View Chats</button>
+<button class="admin-nav-btn" onclick="window.doLogout()" style="margin-top:auto; color:#f87171;">← Log Out</button>
     </nav>
   </aside>
 
@@ -194,6 +195,25 @@ textarea.form-input { min-height: 80px; resize: vertical; }
         </thead>
         <tbody id="usersTableBody"></tbody>
       </table>
+        </div>
+
+    <!-- CHATS PANEL -->
+    <div class="admin-panel" id="panel-chats">
+      <div class="admin-header">
+        <h1>User <span>Conversations</span></h1>
+        <div style="display:flex; gap:10px;">
+          <select id="chatUserFilter" class="form-input" style="width:250px;" onchange="loadUserChats()">
+            <option value="">Select a user...</option>
+          </select>
+          <select id="chatCharFilter" class="form-input" style="width:200px;" onchange="loadUserChats()">
+            <option value="">All characters</option>
+          </select>
+        </div>
+      </div>
+      
+      <div id="chatsContent" style="background:var(--bg-secondary); border:1px solid var(--border-subtle); border-radius:12px; padding:24px; min-height:400px;">
+        <p style="color:var(--text-secondary); text-align:center; padding:40px;">Select a user to view their conversations.</p>
+      </div>
     </div>
   </main>
 </div>
@@ -265,9 +285,10 @@ onAuthStateChanged(auth, async (user) => {
   document.getElementById('adminName').textContent = user.displayName || user.email.split('@')[0];
   document.getElementById('statRole').textContent = currentUserData.role === 'super_admin' ? 'Super Admin' : 'Admin';
   
-  await loadDashboardStats();
-  await loadCharacters();
-  await loadUsers();
+ await loadDashboardStats();
+await loadCharacters();
+await loadUsers();
+await loadChatFilters();
 });
 
 async function loadDashboardStats() {
@@ -417,6 +438,119 @@ window.toggleBlock = async (uid, currentlyBlocked) => {
   await loadUsers();
 };
 
+  // Load users into the chat filter dropdown
+async function loadChatFilters() {
+  const userSelect = document.getElementById('chatUserFilter');
+  const charSelect = document.getElementById('chatCharFilter');
+  
+  // Load users
+  const usersSnap = await getDocs(collection(db, 'users'));
+  userSelect.innerHTML = '<option value="">Select a user...</option>';
+  usersSnap.forEach(docSnap => {
+    const u = docSnap.data();
+    if (u.role !== 'super_admin') {
+      const option = document.createElement('option');
+      option.value = docSnap.id;
+      option.textContent = `${u.name || 'Unknown'} (${u.email || 'No email'})`;
+      userSelect.appendChild(option);
+    }
+  });
+  
+  // Load characters
+  const charsSnap = await getDocs(collection(db, 'characters'));
+  charSelect.innerHTML = '<option value="">All characters</option>';
+  charsSnap.forEach(docSnap => {
+    const c = docSnap.data();
+    const option = document.createElement('option');
+    option.value = docSnap.id;
+    option.textContent = c.name;
+    charSelect.appendChild(option);
+  });
+}
+
+// Load and display user chats
+window.loadUserChats = async () => {
+  const userId = document.getElementById('chatUserFilter').value;
+  const charFilter = document.getElementById('chatCharFilter').value;
+  const content = document.getElementById('chatsContent');
+  
+  if (!userId) {
+    content.innerHTML = '<p style="color:var(--text-secondary); text-align:center; padding:40px;">Select a user to view their conversations.</p>';
+    return;
+  }
+  
+  content.innerHTML = '<p style="color:var(--text-secondary);">Loading conversations...</p>';
+  
+  try {
+    // Get all chats for this user
+    const chatsSnap = await getDocs(collection(db, 'chats'));
+    const userChats = [];
+    
+    chatsSnap.forEach(docSnap => {
+      const chatId = docSnap.id;
+      if (chatId.startsWith(userId + '_')) {
+        userChats.push({ id: chatId, ...docSnap.data() });
+      }
+    });
+    
+    // Filter by character if selected
+    const filteredChats = charFilter 
+      ? userChats.filter(c => c.charId === charFilter)
+      : userChats;
+    
+    if (filteredChats.length === 0) {
+      content.innerHTML = '<p style="color:var(--text-secondary); text-align:center; padding:40px;">No conversations found for this user.</p>';
+      return;
+    }
+    
+    // Sort by most recent
+    filteredChats.sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
+    
+    // Display chats
+    let html = '<div style="display:flex; flex-direction:column; gap:20px;">';
+    
+    filteredChats.forEach(chat => {
+      const messages = chat.messages || [];
+      const lastMsg = messages[messages.length - 1];
+      const msgCount = messages.length;
+      const lastTime = lastMsg?.time ? new Date(lastMsg.time).toLocaleString() : 'No messages';
+      
+      html += `
+        <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-subtle); border-radius:12px; padding:20px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--border-subtle);">
+            <div>
+              <h3 style="font-size:1.2rem; margin-bottom:4px;">${chat.charName || 'Unknown Character'}</h3>
+              <div style="color:var(--text-secondary); font-size:0.85rem;">${msgCount} messages · Last activity: ${lastTime}</div>
+            </div>
+            <button class="btn-ghost" onclick="toggleChatDetails('${chat.id}')">View Messages</button>
+          </div>
+          <div id="chat-${chat.id}" style="display:none; max-height:400px; overflow-y:auto;">
+            ${messages.map(m => `
+              <div style="margin-bottom:12px; padding:12px; background:rgba(0,0,0,0.2); border-radius:8px; ${m.role === 'user' ? 'margin-left:40px;' : 'margin-right:40px;'}">
+                <div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:4px;">
+                  ${m.role === 'user' ? '👤 User' : '🤖 ' + (chat.charName || 'AI')} · ${new Date(m.time).toLocaleTimeString()}
+                </div>
+                <div style="color:var(--text-primary); font-size:0.9rem; line-height:1.5;">${m.text || '[Image]'}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    });
+    
+    html += '</div>';
+    content.innerHTML = html;
+    
+  } catch (e) {
+    console.error(e);
+    content.innerHTML = '<p style="color:#f87171; text-align:center; padding:40px;">Error loading conversations.</p>';
+  }
+};
+
+window.toggleChatDetails = (chatId) => {
+  const el = document.getElementById('chat-' + chatId);
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+};
 window.doLogout = async () => {
   await signOut(auth);
   window.location.href = '/';
