@@ -475,14 +475,12 @@ footer { background: var(--bg-secondary); border-top: 1px solid var(--border-sub
     if (user) {
       const firstName = (user.displayName || user.email).split(' ')[0];
       navActions.innerHTML = `
-        <a href="/pages/dashboard.html" class="btn-ghost" style="display:inline-block;">My Space</a>
         <button class="btn-primary" onclick="doLogout()">Log Out</button>
       `;
       if (mobileMenuActions) {
         mobileMenuActions.innerHTML = `
           <div style="padding: 8px 16px; color: var(--text-primary); font-weight: 600; font-size: 0.9rem;">Hi, ${firstName}</div>
-          <button onclick="closeMenu(); window.location.href='/pages/dashboard.html';" style="color: var(--accent-gold);">My Space</button>
-          <button onclick="doLogout()" style="color: #f87171;">Log Out</button>
+  <button onclick="doLogout()" style="color: #f87171;">Log Out</button>
         `;
       }
     } else {
