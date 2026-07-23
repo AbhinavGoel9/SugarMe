@@ -358,11 +358,34 @@ onAuthStateChanged(auth, async (user) => {
   window.currentUser = user;
   if (user) await checkSubscription(user.uid);
   const nav = document.getElementById('navActions');
+  const mobileMenu = document.getElementById('mobileMenu');
+  
   if (user) {
     const firstName = (user.displayName || user.email).split(' ')[0];
     nav.innerHTML = `<div style="display:flex;align-items:center;gap:10px;"><div style="width:34px;height:34px;border-radius:50%;background:var(--accent-crimson);border:1px solid var(--accent-gold);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;color:#fff;">${firstName[0].toUpperCase()}</div><span style="font-size:0.9rem;color:var(--text-primary);font-weight:500;">Hi, ${firstName}</span><button onclick="window.doLogout()" style="background:none;border:1px solid var(--border-subtle);color:var(--text-secondary);padding:6px 14px;border-radius:8px;font-size:0.8rem;cursor:pointer;font-family:'Inter',sans-serif;margin-left:8px;">Log out</button></div>`;
+    // UPDATE MOBILE MENU TOO
+    if (mobileMenu) {
+      const mobileActions = mobileMenu.querySelector('div[style*="display:flex"]');
+      if (mobileActions) {
+        mobileActions.innerHTML = `
+          <div style="padding: 8px 16px; color: var(--text-primary); font-weight: 600; font-size: 0.9rem;">Hi, ${firstName}</div>
+          <button onclick="closeMenu(); window.location.href='/pages/dashboard.html';" style="color: var(--accent-gold); flex:1; background:none; border:1px solid var(--border-subtle); padding:10px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif;">My Space</button>
+          <button onclick="doLogout()" style="color: #f87171; flex:1; background:none; border:1px solid var(--border-subtle); padding:10px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif;">Log Out</button>
+        `;
+      }
+    }
   } else {
     nav.innerHTML = `<button class="btn-ghost" onclick="openModal('login')">Log In</button><button class="btn-primary" onclick="openModal('signup')">Claim Access</button>`;
+    // RESET MOBILE MENU
+    if (mobileMenu) {
+      const mobileActions = mobileMenu.querySelector('div[style*="display:flex"]');
+      if (mobileActions) {
+        mobileActions.innerHTML = `
+          <button class="btn-ghost" style="flex:1;" onclick="closeMenu();openModal('login')">Log In</button>
+          <button class="btn-primary" style="flex:1;" onclick="closeMenu();openModal('signup')">Claim Access</button>
+        `;
+      }
+    }
   }
   await loadCharacters();
 });
