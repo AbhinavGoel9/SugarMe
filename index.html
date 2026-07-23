@@ -13,28 +13,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
 <style>
-/* =========================================
-   SUGARME LUXURY HOMEPAGE STYLES
-   ========================================= */
 :root {
-  --bg-primary: #09090B;
-  --bg-secondary: #121216;
-  --bg-glass: rgba(20, 20, 25, 0.7);
-  --accent-gold: #D4AF37;
-  --accent-crimson: #7A1212;
-  --text-primary: #F9FAFB;
-  --text-secondary: #A1A1AA;
-  --border-subtle: rgba(255, 255, 255, 0.08);
+  --bg-primary: #09090B; --bg-secondary: #121216; --bg-glass: rgba(20, 20, 25, 0.7);
+  --accent-gold: #D4AF37; --accent-crimson: #7A1212; --text-primary: #F9FAFB;
+  --text-secondary: #A1A1AA; --border-subtle: rgba(255, 255, 255, 0.08);
   --shadow-luxury: 0 20px 40px rgba(0, 0, 0, 0.5);
 }
-
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; overflow-x: hidden; }
 body { background: var(--bg-primary); color: var(--text-primary); font-family: 'Inter', sans-serif; line-height: 1.6; overflow-x: hidden; }
 h1, h2, h3, h4 { font-family: 'Playfair Display', serif; font-weight: 400; }
 a { text-decoration: none; color: inherit; }
 
-/* Utility */
 .glass-panel { background: var(--bg-glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--border-subtle); border-radius: 16px; }
 .gradient-text { background: linear-gradient(to right, #FFFFFF, var(--accent-gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
@@ -45,10 +35,23 @@ a { text-decoration: none; color: inherit; }
 .nav-links { display: flex; gap: 2rem; }
 .nav-link { color: var(--text-secondary); font-size: 0.9rem; font-weight: 500; transition: color 0.3s ease; }
 .nav-link:hover, .nav-link.active { color: var(--text-primary); }
+.nav-actions { display: flex; align-items: center; gap: 1rem; }
 .btn-primary { background: linear-gradient(135deg, var(--accent-crimson), #4A0A0A); color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(122, 18, 18, 0.4); }
 .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(122, 18, 18, 0.6); }
 .btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border-subtle); padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.3s; }
 .btn-ghost:hover { border-color: var(--accent-gold); color: var(--text-primary); }
+
+/* HAMBURGER (Mobile) */
+.hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 4px; z-index: 101; }
+.hamburger span { width: 22px; height: 2px; background: var(--text-primary); border-radius: 2px; transition: 0.3s; display: block; }
+.hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+.mobile-menu { display: none; position: fixed; top: 80px; left: 5%; right: 5%; background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 16px; z-index: 999; flex-direction: column; gap: 8px; box-shadow: var(--shadow-luxury); }
+.mobile-menu.open { display: flex; }
+.mobile-menu a, .mobile-menu button { color: var(--text-secondary); font-size: 1rem; font-weight: 500; padding: 14px 16px; border-radius: 10px; display: block; transition: 0.2s; border: none; background: none; text-align: left; width: 100%; cursor: pointer; font-family: 'Inter', sans-serif; }
+.mobile-menu a:hover, .mobile-menu button:hover { background: rgba(255,255,255,0.03); color: var(--text-primary); }
+.mobile-menu-divider { height: 1px; background: var(--border-subtle); margin: 4px 0; }
 
 /* HERO */
 .hero-section { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 8rem 5% 4rem; position: relative; overflow: hidden; }
@@ -72,7 +75,8 @@ a { text-decoration: none; color: inherit; }
 .bubble-ai p { margin: 0; font-size: 0.95rem; }
 .hindi-text { color: var(--accent-gold); font-style: normal; font-weight: 500; }
 .timestamp { font-size: 0.7rem; color: var(--text-secondary); margin-top: 0.5rem; display: block; }
-.chat-input-preview { margin-top: 1.5rem; padding: 0.8rem 1rem; background: rgba(0,0,0,0.3); border-radius: 24px; color: var(--text-secondary); font-size: 0.9rem; }
+.chat-input-preview { margin-top: 1.5rem; padding: 0.8rem 1rem; background: rgba(0,0,0,0.3); border-radius: 24px; color: var(--text-secondary); font-size: 0.9rem; cursor: pointer; transition: all 0.3s; border: 1px solid transparent; }
+.chat-input-preview:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
 
 /* SECTIONS */
 section { position: relative; z-index: 1; padding: 80px 5%; }
@@ -134,7 +138,9 @@ footer { background: var(--bg-secondary); border-top: 1px solid var(--border-sub
 /* MOBILE */
 @media (max-width: 768px) {
   .nav-links, .nav-actions { display: none; }
+  .hamburger { display: flex; }
   .hero-container { grid-template-columns: 1fr; text-align: center; }
+  .hero-text h1 { font-size: 2.5rem; }
   .hero-sub { margin: 0 auto 2.5rem; }
   .hero-ctas { justify-content: center; flex-direction: column; }
   .chat-preview-card { margin: 2rem auto 0; }
@@ -157,11 +163,26 @@ footer { background: var(--bg-secondary); border-top: 1px solid var(--border-sub
     <a href="/pages/characters.html" class="nav-link">Meet Them</a>
     <a href="/pages/dashboard.html" class="nav-link">My Space</a>
   </div>
-  <div class="nav-actions">
+  <div class="nav-actions" id="navActions">
     <button class="btn-ghost" onclick="openModal('login')">Log In</button>
     <button class="btn-primary" onclick="openModal('signup')">Claim Access</button>
   </div>
+  <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="/" onclick="closeMenu()">The Lounge</a>
+  <a href="/pages/characters.html" onclick="closeMenu()">Meet Them</a>
+  <a href="/pages/dashboard.html" onclick="closeMenu()">My Space</a>
+  <div class="mobile-menu-divider"></div>
+  <div id="mobileMenuActions">
+    <button onclick="closeMenu();openModal('login')">Log In</button>
+    <button onclick="closeMenu();openModal('signup')" style="color: var(--accent-gold); font-weight: 600;">Claim Access</button>
+  </div>
+</div>
 
 <!-- HERO -->
 <section class="hero-section">
@@ -170,7 +191,7 @@ footer { background: var(--bg-secondary); border-top: 1px solid var(--border-sub
   <div class="hero-container">
     <div class="hero-text">
       <p class="hero-eyebrow">Exclusive AI Companionship</p>
-      <h1>She’s been waiting for someone who understands the unspoken.</h1>
+      <h1>She's been waiting for someone who understands the unspoken.</h1>
       <p class="hero-sub">Meet a companion with her own desires, memories, and way of making you feel truly seen. No judgments. Just pure, uninterrupted connection.</p>
       <div class="hero-ctas">
         <button class="btn-primary" onclick="openModal('signup')">Start Private Conversation</button>
@@ -192,8 +213,8 @@ footer { background: var(--bg-secondary); border-top: 1px solid var(--border-sub
             <span class="timestamp">Just now</span>
           </div>
         </div>
-        <div class="chat-input-preview">
-          <span>Type a message...</span>
+        <div class="chat-input-preview" onclick="openModal('signup')">
+          <span>Tap to reply to Aarohi...</span>
         </div>
       </div>
     </div>
@@ -234,7 +255,7 @@ footer { background: var(--bg-secondary); border-top: 1px solid var(--border-sub
       <div class="feature-img">
         <div style="display:flex;flex-direction:column;gap:12px;padding:24px;width:100%;">
           <div style="background:var(--accent-crimson);border-radius:12px;padding:14px;font-size:0.9rem;color:#fff;align-self:flex-end;border-bottom-right-radius:4px;">Can you send me a picture?</div>
-          <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-subtle);border-radius:12px;padding:14px;font-size:0.9rem;border-bottom-left-radius:4px; color: var(--text-secondary);">Only because you asked so nicely... 🔒</div>
+          <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-subtle);border-radius:12px;padding:14px;font-size:0.9rem;border-bottom-left-radius:4px; color: var(--text-secondary);">Only because you asked so nicely...</div>
           <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-subtle);border-radius:12px;overflow:hidden;width:160px; height: 120px; display:flex;align-items:center;justify-content:center; font-size:0.8rem; color: var(--text-secondary);">
             [Blurred Premium Image Preview]
           </div>
@@ -257,7 +278,7 @@ footer { background: var(--bg-secondary); border-top: 1px solid var(--border-sub
       <div class="feature-img">
         <div style="padding:24px;width:100%;">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border-subtle);">
-            <div style="width:32px;height:32px;border-radius:50%;background:var(--accent-crimson);display:flex;align-items:center;justify-content:center;font-size:0.9rem;">🌙</div>
+            <div style="width:32px;height:32px;border-radius:50%;background:var(--accent-crimson);display:flex;align-items:center;justify-content:center;font-size:0.9rem;">L</div>
             <div><div style="font-weight:600;font-size:0.9rem;">Luna</div><div style="color:#4ade80;font-size:0.75rem;">● Online now</div></div>
           </div>
           <div style="display:flex;flex-direction:column;gap:10px;">
@@ -416,7 +437,7 @@ footer { background: var(--bg-secondary); border-top: 1px solid var(--border-sub
     setLoading('loginBtn', true);
     try {
       await signInWithEmailAndPassword(auth, email, pass);
-      setTimeout(() => { window.closeModal(); window.location.href = '/pages/dashboard.html'; }, 1000);
+      setTimeout(() => { window.closeModal(); window.location.reload(); }, 800);
     } catch (e) {
       showError('Incorrect email or password.');
     }
@@ -436,7 +457,7 @@ footer { background: var(--bg-secondary); border-top: 1px solid var(--border-sub
       const { getFirestore, doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
       const db = getFirestore();
       await setDoc(doc(db, 'users', cred.user.uid), { name, email, plan: 'free', messageCount: 0, chatCount: 0, createdAt: new Date().toISOString(), role: 'user' });
-      setTimeout(() => { window.closeModal(); window.location.href = '/pages/dashboard.html'; }, 1000);
+      setTimeout(() => { window.closeModal(); window.location.reload(); }, 800);
     } catch (e) {
       showError(e.code === 'auth/email-already-in-use' ? 'Email already registered.' : 'Signup failed.');
     }
@@ -446,7 +467,54 @@ footer { background: var(--bg-secondary); border-top: 1px solid var(--border-sub
   window.doLogout = async () => { await signOut(auth); window.location.href = '/'; };
   window.handlePricingClick = (plan) => { window.location.href = `/pages/characters.html?plan=${plan}`; };
   
+  // AUTH STATE LISTENER - Updates nav on both desktop and mobile
+  onAuthStateChanged(auth, (user) => {
+    const navActions = document.getElementById('navActions');
+    const mobileMenuActions = document.getElementById('mobileMenuActions');
+    
+    if (user) {
+      const firstName = (user.displayName || user.email).split(' ')[0];
+      navActions.innerHTML = `
+        <a href="/pages/dashboard.html" class="btn-ghost" style="display:inline-block;">My Space</a>
+        <button class="btn-primary" onclick="doLogout()">Log Out</button>
+      `;
+      if (mobileMenuActions) {
+        mobileMenuActions.innerHTML = `
+          <div style="padding: 8px 16px; color: var(--text-primary); font-weight: 600; font-size: 0.9rem;">Hi, ${firstName}</div>
+          <button onclick="closeMenu(); window.location.href='/pages/dashboard.html';" style="color: var(--accent-gold);">My Space</button>
+          <button onclick="doLogout()" style="color: #f87171;">Log Out</button>
+        `;
+      }
+    } else {
+      navActions.innerHTML = `
+        <button class="btn-ghost" onclick="openModal('login')">Log In</button>
+        <button class="btn-primary" onclick="openModal('signup')">Claim Access</button>
+      `;
+      if (mobileMenuActions) {
+        mobileMenuActions.innerHTML = `
+          <button onclick="closeMenu();openModal('login')">Log In</button>
+          <button onclick="closeMenu();openModal('signup')" style="color: var(--accent-gold); font-weight: 600;">Claim Access</button>
+        `;
+      }
+    }
+  });
+  
   document.getElementById('authOverlay').addEventListener('click', (e) => { if (e.target === document.getElementById('authOverlay')) window.closeModal(); });
+</script>
+<script>
+window.toggleMenu = () => {
+  document.getElementById('mobileMenu').classList.toggle('open');
+  document.getElementById('hamburger').classList.toggle('open');
+};
+window.closeMenu = () => {
+  document.getElementById('mobileMenu').classList.remove('open');
+  document.getElementById('hamburger').classList.remove('open');
+};
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('nav') && !e.target.closest('.mobile-menu') && !e.target.closest('.hamburger')) {
+    closeMenu();
+  }
+});
 </script>
 </body>
 </html>
