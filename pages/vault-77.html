@@ -90,9 +90,27 @@ textarea.form-input { min-height: 80px; resize: vertical; }
 .badge-user { background: rgba(255,255,255,0.05); color: var(--text-secondary); border: 1px solid var(--border-subtle); }
 .badge-blocked { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
 
+.mobile-admin-header { display: none; position: fixed; top: 0; left: 0; right: 0; height: 60px; background: var(--bg-secondary); border-bottom: 1px solid var(--border-subtle); padding: 0 20px; align-items: center; justify-content: space-between; z-index: 200; }
+.mobile-admin-header .admin-logo { font-size: 1.2rem; margin: 0; border: none; padding: 0; }
+.admin-hamburger { background: none; border: none; color: var(--text-primary); font-size: 1.5rem; cursor: pointer; padding: 8px; }
+
+.admin-sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 150; }
+.admin-sidebar-overlay.open { display: block; }
+
 @media (max-width: 768px) {
-  .admin-sidebar { display: none; }
-  .admin-main { margin-left: 0; padding: 20px; }
+  .mobile-admin-header { display: flex; }
+  .admin-sidebar { 
+    transform: translateX(-100%); 
+    transition: transform 0.3s ease; 
+    z-index: 160; 
+    padding-top: 80px;
+  }
+  .admin-sidebar.open { transform: translateX(0); }
+  .admin-main { margin-left: 0; padding: 80px 20px 20px; }
+  .char-grid { grid-template-columns: 1fr; }
+  .data-table { font-size: 0.8rem; }
+  .data-table th, .data-table td { padding: 10px 8px; }
+}
 }
 </style>
 </head>
@@ -107,7 +125,17 @@ textarea.form-input { min-height: 80px; resize: vertical; }
 
 <!-- ADMIN LAYOUT -->
 <div class="admin-layout" id="adminLayout" style="display:none;">
-  <aside class="admin-sidebar">
+  <!-- MOBILE HEADER -->
+  <div class="mobile-admin-header">
+    <button class="admin-hamburger" onclick="toggleAdminSidebar()">☰</button>
+    <div class="admin-logo">Sugar<span>Me</span> Vault</div>
+    <button class="admin-hamburger" onclick="doLogout()" style="color:#f87171;">⎋</button>
+  </div>
+  
+  <!-- SIDEBAR OVERLAY (closes sidebar on tap) -->
+  <div class="admin-sidebar-overlay" id="adminSidebarOverlay" onclick="toggleAdminSidebar()"></div>
+  
+  <aside class="admin-sidebar" id="adminSidebar">
     <div class="admin-logo">Sugar<span>Me</span> Vault</div>
     <nav class="admin-nav">
       <button class="admin-nav-btn active" onclick="showPanel('dashboard', this)">⌂ Dashboard</button>
@@ -305,6 +333,15 @@ window.showPanel = (panelId, btn) => {
   document.querySelectorAll('.admin-nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('panel-' + panelId).classList.add('active');
   btn.classList.add('active');
+  // Close sidebar on mobile after clicking
+  if (window.innerWidth <= 768) {
+    toggleAdminSidebar();
+  }
+};
+
+window.toggleAdminSidebar = () => {
+  document.getElementById('adminSidebar').classList.toggle('open');
+  document.getElementById('adminSidebarOverlay').classList.toggle('open');
 };
 
 window.openCharModal = (char = null) => {
