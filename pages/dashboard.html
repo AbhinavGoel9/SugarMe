@@ -35,7 +35,7 @@ h1, h2, h3, h4 { font-family: 'Playfair Display', serif; font-weight: 400; }
 .mobile-topbar-logo span { color: var(--accent-gold); }
 
 .bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 200; background: var(--bg-secondary); border-top: 1px solid var(--border-subtle); padding: 8px 0 max(8px, env(safe-area-inset-bottom)); flex-direction: row; }
-.bottom-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 4px; cursor: pointer; background: none; border: none; color: var(--text-secondary); font-family: 'Inter', sans-serif; font-size: 0.7rem; font-weight: 500; transition: .2s; }
+.bottom-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 4px; cursor: pointer; background: none; border: none; color: var(--text-secondary); font-family: 'Inter', sans-serif; font-size: 0.65rem; font-weight: 500; transition: .2s; text-decoration: none; }
 .bottom-nav-item.active { color: var(--accent-gold); }
 .bottom-nav-item .bnav-icon { font-size: 1.2rem; }
 
@@ -163,6 +163,7 @@ h1, h2, h3, h4 { font-family: 'Playfair Display', serif; font-weight: 400; }
 </div>
 
 <nav class="bottom-nav" id="bottomNav" style="display:none;">
+  <a href="/pages/characters.html" class="bottom-nav-item"><span class="bnav-icon">✦</span>Browse</a>
   <button class="bottom-nav-item active" id="bnav-overview" onclick="showPage('overview', this, 'bnav-overview')"><span class="bnav-icon">⌂</span>Overview</button>
   <button class="bottom-nav-item" id="bnav-chats" onclick="showPage('chats', this, 'bnav-chats')"><span class="bnav-icon">✉</span>Chats</button>
   <button class="bottom-nav-item" id="bnav-subscription" onclick="showPage('subscription', this, 'bnav-subscription')"><span class="bnav-icon">♛</span>Plan</button>
@@ -209,7 +210,7 @@ h1, h2, h3, h4 { font-family: 'Playfair Display', serif; font-weight: 400; }
       <button class="upgrade-btn" onclick="showPage('subscription', null)">Claim Private Access</button>
     </div>
     <div class="section-title">Recent Conversations <a href="#" onclick="showPage('chats', null)">View all →</a></div>
-    <div class="chats-list" id="overviewChatsList"><div class="empty-state"><div class="empty-icon">✉</div><p>Your story starts here.</p><span>Choose a companion and send your first message.</span></div></div>
+    <div class="chats-list" id="overviewChatsList"><div class="empty-state"><div class="empty-icon">✉</div><p>Your story starts here.</p><span>Choose a companion and send your first message.</span><a href="/pages/characters.html">Meet the Companions →</a></div></div>
   </div>
 
   <div class="page" id="page-chats">
@@ -297,19 +298,28 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// FIXED: Now uses your ORIGINAL image paths from /images/ folder
 const charMap = {
-  char_1:{name:'Aarohi', img:'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop'}, 
-  char_2:{name:'Alina', img:'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=100&h=100&fit=crop'}, 
-  char_3:{name:'Saruko', img:'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop'},
-  char_4:{name:'Kavya', img:'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=100&h=100&fit=crop'}, 
-  char_5:{name:'Ira', img:'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=100&h=100&fit=crop'}, 
-  char_6:{name:'Anaya', img:'https://images.unsplash.com/photo-1523264939339-c89f9dadde2e?w=100&h=100&fit=crop'}
+  char_1:{name:'Aarohi', img:'/images/videoframe_5237.png'}, 
+  char_2:{name:'Alina', img:'/images/9.png'}, 
+  char_3:{name:'Saruko', img:'/images/13.png'},
+  char_4:{name:'Kavya', img:'/images/15.png'}, 
+  char_5:{name:'Ira', img:'/images/5.png'}, 
+  char_6:{name:'Anaya', img:'/images/3.png'},
+  char_7:{name:'Meher', img:'/images/2.png'},
+  char_8:{name:'Riya', img:'/images/4.png'},
+  char_9:{name:'Elara', img:'/images/6.png'},
+  char_10:{name:'Luna', img:'/images/8.png'},
+  char_11:{name:'Aria', img:'/images/7.png'},
+  char_12:{name:'Zara', img:'/images/10.png'},
+  char_13:{name:'Nyla', img:'/images/12.png'},
+  char_14:{name:'Koyuki', img:'/images/14.png'},
+  char_15:{name:'Sienna', img:'/images/11.png'}
 };
 
 const isMobile = () => window.innerWidth <= 768;
 
 onAuthStateChanged(auth, async (user) => {
-  console.log("Dashboard Auth State Changed. User:", user ? "LOGGED IN (" + user.email + ")" : "LOGGED OUT");
   document.getElementById('loadingScreen').style.display = 'none';
   
   if (!user) { 
@@ -373,7 +383,7 @@ function renderChatList(chats, containerId) {
     return;
   }
   container.innerHTML = chats.map(chat => {
-    const char = charMap[chat.charId] || { name: chat.charName||'Unknown', img:'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop' };
+    const char = charMap[chat.charId] || { name: chat.charName||'Unknown', img:'/images/videoframe_5237.png' };
     const messages = chat.messages || [];
     const lastMsg = messages[messages.length-1];
     const lastText = lastMsg?.text || 'Start a conversation...';
