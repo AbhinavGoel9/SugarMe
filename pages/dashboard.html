@@ -11,34 +11,18 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-/* =========================================
-   SUGARME LUXURY DASHBOARD STYLES
-   ========================================= */
 :root {
-  --bg-primary: #09090B;
-  --bg-secondary: #121216;
-  --bg-glass: rgba(20, 20, 25, 0.7);
-  --accent-gold: #D4AF37;
-  --accent-crimson: #7A1212;
-  --text-primary: #F9FAFB;
-  --text-secondary: #A1A1AA;
-  --border-subtle: rgba(255, 255, 255, 0.08);
+  --bg-primary: #09090B; --bg-secondary: #121216; --bg-glass: rgba(20, 20, 25, 0.7);
+  --accent-gold: #D4AF37; --accent-crimson: #7A1212; --text-primary: #F9FAFB;
+  --text-secondary: #A1A1AA; --border-subtle: rgba(255, 255, 255, 0.08);
   --shadow-luxury: 0 20px 40px rgba(0, 0, 0, 0.5);
 }
-
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
-body { 
-  background: var(--bg-primary); color: var(--text-primary); font-family: 'Inter', sans-serif; 
-  overflow-x: hidden; min-height: 100vh; display: flex; flex-direction: column; 
-}
+body { background: var(--bg-primary); color: var(--text-primary); font-family: 'Inter', sans-serif; overflow-x: hidden; min-height: 100vh; display: flex; flex-direction: column; }
 h1, h2, h3, h4 { font-family: 'Playfair Display', serif; font-weight: 400; }
 
-/* Loading & Auth Screens */
-#loadingScreen, #notLoggedIn { 
-  position: fixed; inset: 0; background: var(--bg-primary); display: flex; 
-  align-items: center; justify-content: center; z-index: 999; flex-direction: column; gap: 16px; 
-}
+#loadingScreen, #notLoggedIn { position: fixed; inset: 0; background: var(--bg-primary); display: flex; align-items: center; justify-content: center; z-index: 999; flex-direction: column; gap: 16px; }
 .loading-logo { font-family: 'Playfair Display', serif; font-size: 2.2rem; color: var(--accent-gold); font-style: italic; }
 .loading-dots { display: flex; gap: 6px; }
 .loading-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-gold); animation: typingBounce 1.2s infinite; }
@@ -46,49 +30,23 @@ h1, h2, h3, h4 { font-family: 'Playfair Display', serif; font-weight: 400; }
 .loading-dot:nth-child(3) { animation-delay: .4s; }
 @keyframes typingBounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-8px)} }
 
-/* Mobile Topbar */
-.mobile-topbar {
-  display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-  background: var(--bg-secondary); border-bottom: 1px solid var(--border-subtle);
-  padding: 12px 20px; align-items: center; justify-content: space-between; height: 60px;
-}
+.mobile-topbar { display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: var(--bg-secondary); border-bottom: 1px solid var(--border-subtle); padding: 12px 20px; align-items: center; justify-content: space-between; height: 60px; }
 .mobile-topbar-logo { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 600; color: var(--text-primary); text-decoration: none; }
 .mobile-topbar-logo span { color: var(--accent-gold); }
 
-/* Bottom Nav (Mobile) */
-.bottom-nav {
-  display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
-  background: var(--bg-secondary); border-top: 1px solid var(--border-subtle);
-  padding: 8px 0 max(8px, env(safe-area-inset-bottom)); flex-direction: row;
-}
-.bottom-nav-item {
-  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
-  padding: 8px 4px; cursor: pointer; background: none; border: none;
-  color: var(--text-secondary); font-family: 'Inter', sans-serif; font-size: 0.7rem; font-weight: 500; transition: .2s;
-}
+.bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 200; background: var(--bg-secondary); border-top: 1px solid var(--border-subtle); padding: 8px 0 max(8px, env(safe-area-inset-bottom)); flex-direction: row; }
+.bottom-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 4px; cursor: pointer; background: none; border: none; color: var(--text-secondary); font-family: 'Inter', sans-serif; font-size: 0.7rem; font-weight: 500; transition: .2s; }
 .bottom-nav-item.active { color: var(--accent-gold); }
 .bottom-nav-item .bnav-icon { font-size: 1.2rem; }
 
-/* Sidebar (Desktop) */
-.sidebar {
-  width: 260px; flex-shrink: 0; background: var(--bg-secondary); border-right: 1px solid var(--border-subtle);
-  display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; padding: 24px 0;
-}
-.sidebar-logo { 
-  font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 600; 
-  color: var(--text-primary); padding: 0 24px; margin-bottom: 40px; text-decoration: none; 
-}
+.sidebar { width: 260px; flex-shrink: 0; background: var(--bg-secondary); border-right: 1px solid var(--border-subtle); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; padding: 24px 0; }
+.sidebar-logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 600; color: var(--text-primary); padding: 0 24px; margin-bottom: 40px; text-decoration: none; }
 .sidebar-logo span { color: var(--accent-gold); }
 .sidebar-nav { display: flex; flex-direction: column; gap: 4px; padding: 0 12px; flex: 1; }
-.nav-item { 
-  display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 10px; 
-  color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; font-weight: 500; 
-  cursor: pointer; transition: .2s; border: none; background: none; width: 100%; text-align: left; 
-}
+.nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 10px; color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: .2s; border: none; background: none; width: 100%; text-align: left; }
 .nav-item:hover { background: rgba(255,255,255,0.03); color: var(--text-primary); }
 .nav-item.active { background: rgba(212, 175, 55, 0.08); color: var(--accent-gold); border-left: 3px solid var(--accent-gold); border-radius: 0 10px 10px 0; }
 .nav-item .icon { font-size: 1.1rem; width: 24px; text-align: center; }
-
 .sidebar-bottom { padding: 0 12px; }
 .user-card { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); margin-bottom: 12px; }
 .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent-crimson); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.9rem; color: #fff; flex-shrink: 0; border: 1px solid var(--accent-gold); }
@@ -97,7 +55,6 @@ h1, h2, h3, h4 { font-family: 'Playfair Display', serif; font-weight: 400; }
 .logout-btn { width: 100%; padding: 10px; border-radius: 10px; background: none; border: 1px solid var(--border-subtle); color: var(--text-secondary); font-size: 0.85rem; cursor: pointer; font-family: 'Inter', sans-serif; transition: .2s; }
 .logout-btn:hover { border-color: var(--accent-crimson); color: #f87171; }
 
-/* Main Content */
 .main { margin-left: 260px; flex: 1; padding: 40px; min-height: 100vh; }
 .page { display: none; animation: fadeIn 0.3s ease; }
 .page.active { display: block; }
@@ -107,7 +64,6 @@ h1, h2, h3, h4 { font-family: 'Playfair Display', serif; font-weight: 400; }
 .page-title span { color: var(--accent-gold); font-style: italic; }
 .page-sub { color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 32px; }
 
-/* Stats */
 .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
 .stat-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 24px; transition: .3s; }
 .stat-card:hover { border-color: var(--accent-gold); transform: translateY(-2px); }
@@ -115,32 +71,18 @@ h1, h2, h3, h4 { font-family: 'Playfair Display', serif; font-weight: 400; }
 .stat-value { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 600; margin-bottom: 4px; color: var(--text-primary); }
 .stat-label { color: var(--text-secondary); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
 
-/* Subscription Card */
-.sub-card { 
-  background: linear-gradient(135deg, rgba(122, 18, 18, 0.15), rgba(20, 20, 25, 0.8)); 
-  border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 20px; padding: 28px; 
-  display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; flex-wrap: wrap; gap: 20px; 
-}
+.sub-card { background: linear-gradient(135deg, rgba(122, 18, 18, 0.15), rgba(20, 20, 25, 0.8)); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 20px; padding: 28px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; flex-wrap: wrap; gap: 20px; }
 .sub-info h3 { font-family: 'Playfair Display', serif; font-weight: 400; font-size: 1.2rem; margin-bottom: 8px; color: var(--text-primary); }
 .sub-info p { color: var(--text-secondary); font-size: 0.9rem; }
 .sub-badge { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 12px; border-radius: 100px; margin-bottom: 10px; display: inline-block; }
 .badge-free-plan { background: rgba(255,255,255,0.05); border: 1px solid var(--border-subtle); color: var(--text-secondary); }
-
-.upgrade-btn { 
-  background: linear-gradient(135deg, var(--accent-crimson), #4A0A0A); border: none; color: #fff; 
-  padding: 12px 28px; border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; 
-  font-family: 'Inter', sans-serif; box-shadow: 0 4px 20px rgba(122, 18, 18, 0.4); transition: .3s; 
-}
+.upgrade-btn { background: linear-gradient(135deg, var(--accent-crimson), #4A0A0A); border: none; color: #fff; padding: 12px 28px; border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; box-shadow: 0 4px 20px rgba(122, 18, 18, 0.4); transition: .3s; text-decoration: none; display: inline-block; text-align: center;}
 .upgrade-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(122, 18, 18, 0.6); }
 
-/* Chats List */
 .section-title { font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-secondary); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
 .section-title a { font-size: 0.8rem; color: var(--accent-gold); text-decoration: none; font-weight: 500; text-transform: none; letter-spacing: 0; }
 .chats-list { display: flex; flex-direction: column; gap: 12px; }
-.chat-item { 
-  background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: 14px; 
-  padding: 16px 20px; display: flex; align-items: center; gap: 16px; cursor: pointer; transition: .2s; 
-}
+.chat-item { background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; cursor: pointer; transition: .2s; }
 .chat-item:hover { border-color: var(--accent-gold); background: rgba(255,255,255,0.04); }
 .chat-item-avatar { width: 48px; height: 48px; border-radius: 50%; background-color: #222; background-size: cover; background-position: center; flex-shrink: 0; border: 2px solid var(--border-subtle); }
 .chat-item-info { flex: 1; min-width: 0; }
@@ -157,16 +99,12 @@ h1, h2, h3, h4 { font-family: 'Playfair Display', serif; font-weight: 400; }
 .empty-state a { display: inline-block; margin-top: 20px; background: var(--accent-crimson); color: #fff; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-size: 0.9rem; font-weight: 600; transition: .3s; }
 .empty-state a:hover { background: #9a1a1a; }
 
-/* Account Grid */
 .account-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .account-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 28px; }
 .account-card h3 { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-gold); margin-bottom: 20px; }
 .account-field { margin-bottom: 18px; }
 .account-field label { display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px; }
-.account-field input { 
-  width: 100%; background: rgba(0,0,0,0.2); border: 1px solid var(--border-subtle); color: var(--text-primary); 
-  padding: 12px 16px; border-radius: 10px; font-size: 0.9rem; font-family: 'Inter', sans-serif; outline: none; transition: border .2s; 
-}
+.account-field input { width: 100%; background: rgba(0,0,0,0.2); border: 1px solid var(--border-subtle); color: var(--text-primary); padding: 12px 16px; border-radius: 10px; font-size: 0.9rem; font-family: 'Inter', sans-serif; outline: none; transition: border .2s; }
 .account-field input:focus { border-color: var(--accent-gold); }
 .account-field input:disabled { opacity: 0.4; cursor: not-allowed; }
 .save-btn { background: var(--accent-gold); border: none; color: #000; padding: 12px 24px; border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: .2s; margin-top: 8px; }
@@ -175,7 +113,6 @@ h1, h2, h3, h4 { font-family: 'Playfair Display', serif; font-weight: 400; }
 .danger-btn:hover { background: rgba(239,68,68,0.08); }
 .success-msg { color: #4ade80; font-size: 0.85rem; margin-top: 12px; display: none; }
 
-/* Pricing Grid */
 .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; max-width: 1000px; }
 .pricing-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: 20px; padding: 28px; position: relative; transition: .3s; }
 .pricing-card:hover { border-color: var(--accent-gold); transform: translateY(-4px); }
@@ -187,7 +124,6 @@ h1, h2, h3, h4 { font-family: 'Playfair Display', serif; font-weight: 400; }
 .pricing-card ul { list-style: none; margin: 20px 0 24px; display: flex; flex-direction: column; gap: 12px; }
 .pricing-card li { font-size: 0.9rem; color: var(--text-secondary); display: flex; gap: 10px; align-items: center; }
 
-/* Mobile Responsiveness */
 @media (max-width: 768px) {
   .sidebar { display: none; }
   .mobile-topbar { display: flex; }
@@ -206,21 +142,18 @@ h1, h2, h3, h4 { font-family: 'Playfair Display', serif; font-weight: 400; }
 </head>
 <body>
 
-<!-- LOADING -->
 <div id="loadingScreen">
   <div class="loading-logo">SugarMe</div>
   <div class="loading-dots"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div>
 </div>
 
-<!-- NOT LOGGED IN -->
-<div id="notLoggedIn">
+<div id="notLoggedIn" style="display:none;">
   <div style="font-size:3rem; opacity:0.5;">🔒</div>
   <h2 style="font-family:'Playfair Display',serif; font-size:1.5rem; color:var(--text-primary);">Private Access Required</h2>
-  <p style="color:var(--text-secondary); font-size:0.9rem;">Please log in to access your personal space.</p>
-  <a href="/index.html" class="upgrade-btn" style="text-decoration:none; display:inline-block; margin-top:10px;">Return to Lounge</a>
+  <p style="color:var(--text-secondary); font-size:0.9rem; text-align:center; max-width: 300px;">Your session may have expired. Please log in to access your personal space.</p>
+  <a href="/index.html" class="upgrade-btn" style="text-decoration:none; display:inline-block; margin-top:10px;">Return to Lounge & Log In</a>
 </div>
 
-<!-- MOBILE TOP BAR -->
 <div class="mobile-topbar" id="mobileTopbar" style="display:none;">
   <a href="/index.html" class="mobile-topbar-logo">Sugar<span>Me</span></a>
   <div style="display:flex; align-items:center; gap:10px;">
@@ -229,7 +162,6 @@ h1, h2, h3, h4 { font-family: 'Playfair Display', serif; font-weight: 400; }
   </div>
 </div>
 
-<!-- BOTTOM NAV (mobile) -->
 <nav class="bottom-nav" id="bottomNav" style="display:none;">
   <button class="bottom-nav-item active" id="bnav-overview" onclick="showPage('overview', this, 'bnav-overview')"><span class="bnav-icon">⌂</span>Overview</button>
   <button class="bottom-nav-item" id="bnav-chats" onclick="showPage('chats', this, 'bnav-chats')"><span class="bnav-icon">✉</span>Chats</button>
@@ -237,7 +169,6 @@ h1, h2, h3, h4 { font-family: 'Playfair Display', serif; font-weight: 400; }
   <button class="bottom-nav-item" id="bnav-account" onclick="showPage('account', this, 'bnav-account')"><span class="bnav-icon">◉</span>Account</button>
 </nav>
 
-<!-- SIDEBAR (desktop) -->
 <aside class="sidebar" id="sidebar" style="display:none;">
   <a href="/index.html" class="sidebar-logo">Sugar<span>Me</span></a>
   <nav class="sidebar-nav">
@@ -259,10 +190,7 @@ h1, h2, h3, h4 { font-family: 'Playfair Display', serif; font-weight: 400; }
   </div>
 </aside>
 
-<!-- MAIN CONTENT -->
 <main class="main" id="mainContent" style="display:none;">
-
-  <!-- OVERVIEW -->
   <div class="page active" id="page-overview">
     <div class="page-title">Welcome back, <span id="welcomeName">there</span></div>
     <div class="page-sub">Here is a glimpse into your private world.</div>
@@ -284,14 +212,12 @@ h1, h2, h3, h4 { font-family: 'Playfair Display', serif; font-weight: 400; }
     <div class="chats-list" id="overviewChatsList"><div class="empty-state"><div class="empty-icon">✉</div><p>Your story starts here.</p><span>Choose a companion and send your first message.</span></div></div>
   </div>
 
-  <!-- CHATS -->
   <div class="page" id="page-chats">
     <div class="page-title">My Connections</div>
     <div class="page-sub">All your intimate conversations in one secure place.</div>
     <div class="chats-list" id="allChatsList"><div class="empty-state"><div class="empty-icon">✉</div><p>No conversations yet.</p><span>She is waiting for you.</span><a href="/pages/characters.html">Meet the Companions →</a></div></div>
   </div>
 
-  <!-- SUBSCRIPTION -->
   <div class="page" id="page-subscription">
     <div class="page-title">Membership Tiers</div>
     <div class="page-sub">Choose the level of access that suits your desires.</div>
@@ -300,10 +226,10 @@ h1, h2, h3, h4 { font-family: 'Playfair Display', serif; font-weight: 400; }
         <h4>Guest</h4>
         <div class="price">₹0 <span>/forever</span></div>
         <ul>
-          <li><span class="check">✓</span> 3 free companions</li>
-          <li><span class="check">✓</span> 15 messages per day</li>
-          <li><span class="cross">✗</span> Premium companions</li>
-          <li><span class="cross">✗</span> Exclusive photo requests</li>
+          <li><span>✓</span> 3 free companions</li>
+          <li><span>✓</span> 15 messages per day</li>
+          <li><span>✗</span> Premium companions</li>
+          <li><span>✗</span> Exclusive photo requests</li>
         </ul>
         <div style="width:100%; padding:12px; border-radius:10px; background:rgba(255,255,255,0.05); border:1px solid var(--border-subtle); color:var(--text-secondary); font-size:0.85rem; font-weight:600; text-align:center;">Current Tier ✓</div>
       </div>
@@ -312,10 +238,10 @@ h1, h2, h3, h4 { font-family: 'Playfair Display', serif; font-weight: 400; }
         <h4>Private Member</h4>
         <div class="price">₹199 <span>/month</span></div>
         <ul>
-          <li><span class="check">✓</span> All 15+ companions</li>
-          <li><span class="check">✓</span> 100 messages per day</li>
-          <li><span class="check">✓</span> 5 exclusive photos per day</li>
-          <li><span class="check">✓</span> Priority AI responses</li>
+          <li><span>✓</span> All 15+ companions</li>
+          <li><span>✓</span> 100 messages per day</li>
+          <li><span>✓</span> 5 exclusive photos per day</li>
+          <li><span>✓</span> Priority AI responses</li>
         </ul>
         <button class="upgrade-btn" style="width:100%;" onclick="window.location.href='/pages/characters.html?plan=monthly'">Upgrade — ₹199/mo</button>
       </div>
@@ -324,17 +250,16 @@ h1, h2, h3, h4 { font-family: 'Playfair Display', serif; font-weight: 400; }
         <h4>Elite Patron</h4>
         <div class="price">₹2000 <span>/year</span></div>
         <ul>
-          <li><span class="check">✓</span> Everything in Private Member</li>
-          <li><span class="check">✓</span> 150 messages per day</li>
-          <li><span class="check">✓</span> 10 exclusive photos per day</li>
-          <li><span class="check">✓</span> Only ₹167/month effective</li>
+          <li><span>✓</span> Everything in Private Member</li>
+          <li><span>✓</span> 150 messages per day</li>
+          <li><span>✓</span> 10 exclusive photos per day</li>
+          <li><span>✓</span> Only ₹167/month effective</li>
         </ul>
         <button class="upgrade-btn" style="width:100%; background:linear-gradient(135deg, #4A0A0A, #7A1212);" onclick="window.location.href='/pages/characters.html?plan=yearly'">Upgrade — ₹2000/yr</button>
       </div>
     </div>
   </div>
 
-  <!-- ACCOUNT -->
   <div class="page" id="page-account">
     <div class="page-title">Sanctuary Settings</div>
     <div class="page-sub">Manage your profile and privacy preferences.</div>
@@ -360,7 +285,6 @@ h1, h2, h3, h4 { font-family: 'Playfair Display', serif; font-weight: 400; }
       </div>
     </div>
   </div>
-
 </main>
 
 <script type="module">
@@ -373,7 +297,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Upgraded from emojis to actual image URLs for a premium look
 const charMap = {
   char_1:{name:'Aarohi', img:'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop'}, 
   char_2:{name:'Alina', img:'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=100&h=100&fit=crop'}, 
@@ -381,14 +304,18 @@ const charMap = {
   char_4:{name:'Kavya', img:'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=100&h=100&fit=crop'}, 
   char_5:{name:'Ira', img:'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=100&h=100&fit=crop'}, 
   char_6:{name:'Anaya', img:'https://images.unsplash.com/photo-1523264939339-c89f9dadde2e?w=100&h=100&fit=crop'}
-  // Add the rest of your 15 characters here with their image URLs
 };
 
 const isMobile = () => window.innerWidth <= 768;
 
 onAuthStateChanged(auth, async (user) => {
+  console.log("Dashboard Auth State Changed. User:", user ? "LOGGED IN (" + user.email + ")" : "LOGGED OUT");
   document.getElementById('loadingScreen').style.display = 'none';
-  if (!user) { document.getElementById('notLoggedIn').style.display = 'flex'; return; }
+  
+  if (!user) { 
+    document.getElementById('notLoggedIn').style.display = 'flex'; 
+    return; 
+  }
 
   if (isMobile()) {
     document.getElementById('mobileTopbar').style.display = 'flex';
@@ -413,7 +340,7 @@ async function loadChats(uid) {
   try {
     const chats = [];
     let totalMessages = 0;
-    const charIds = Object.keys(charMap); // Dynamically get all character IDs
+    const charIds = Object.keys(charMap);
     const fetches = charIds.map(id => getDoc(doc(db, 'chats', `${uid}_${id}`)));
     const results = await Promise.all(fetches);
     
@@ -511,7 +438,7 @@ window.changePassword = async () => {
   }
 };
 
-window.doLogout = async () => { await signOut(auth); window.location.href = '/index.html'; };
+window.doLogout = async () => { await signOut(auth); window.location.href = '/'; };
 </script>
 </body>
 </html>
