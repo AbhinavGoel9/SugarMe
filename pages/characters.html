@@ -368,10 +368,9 @@ onAuthStateChanged(auth, async (user) => {
       const mobileActions = mobileMenu.querySelector('div[style*="display:flex"]');
       if (mobileActions) {
         mobileActions.innerHTML = `
-          <div style="padding: 8px 16px; color: var(--text-primary); font-weight: 600; font-size: 0.9rem;">Hi, ${firstName}</div>
-          <button onclick="closeMenu(); window.location.href='/pages/dashboard.html';" style="color: var(--accent-gold); flex:1; background:none; border:1px solid var(--border-subtle); padding:10px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif;">My Space</button>
-          <button onclick="doLogout()" style="color: #f87171; flex:1; background:none; border:1px solid var(--border-subtle); padding:10px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif;">Log Out</button>
-        `;
+  <div style="padding: 8px 16px; color: var(--text-primary); font-weight: 600; font-size: 0.9rem;">Hi, ${firstName}</div>
+  <button onclick="doLogout()" style="color: #f87171; flex:1; background:none; border:1px solid var(--border-subtle); padding:10px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif;">Log Out</button>
+`;
       }
     }
   } else {
