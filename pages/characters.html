@@ -496,21 +496,43 @@ window.openChat = async (char) => {
   const chatRef = doc(db, 'chats', `${uid}_${char.id}`);
   const chatSnap = await getDoc(chatRef);
   msgs.innerHTML = '';
+    const isAnon = window.currentUser && window.currentUser.isAnonymous;
+  const limit = isAnon ? window.GUEST_LIMIT : window.FREE_LIMIT;
+
   if (chatSnap.exists()) {
     const data = chatSnap.data();
     window.messageCount = data.messageCount || 0;
     (data.messages || []).forEach(m => renderMessage(m.role, m.text, m.imgUrl || null));
-    if (char.free && window.messageCount >= window.FREE_LIMIT) { showLimitReached(); }
-    else { document.getElementById('chatInput').disabled = false; document.getElementById('sendBtn').disabled = false; }
+    
+    // Check limits on load
+    if (isAnon && window.messageCount >= window.GUEST_LIMIT) {
+      showLinkAccountModal();
+    } else if (char.free && !isAnon && window.messageCount >= window.FREE_LIMIT) {
+      showLimitReached();
+    } else {
+      document.getElementById('chatInput').disabled = false;
+      document.getElementById('sendBtn').disabled = false;
+    }
   } else {
     document.getElementById('chatInput').disabled = false;
     document.getElementById('sendBtn').disabled = false;
     const greeting = char.greetings[Math.floor(Math.random()*char.greetings.length)];
     setTimeout(async () => { renderMessage('ai', greeting); await saveMessage(char, 'ai', greeting); }, 600);
   }
+
+  // Update counter display on load
   const counter = document.getElementById('freeCounter');
-  if (char.free) { counter.style.display='block'; counter.textContent=`${Math.max(0, window.FREE_LIMIT - window.messageCount)} msgs left today`; }
-  else { counter.style.display='none'; }
+  if (isAnon) {
+    counter.style.display = 'block';
+    counter.textContent = `${Math.max(0, window.GUEST_LIMIT - window.messageCount)} guest msgs left`;
+    counter.style.color = '#f59e0b';
+  } else if (char.free) { 
+    counter.style.display = 'block'; 
+    counter.textContent = `${Math.max(0, window.FREE_LIMIT - window.messageCount)} msgs left today`; 
+    counter.style.color = 'var(--accent-gold)';
+  } else { 
+    counter.style.display = 'none'; 
+  }
 };
 
 async function getAIReply(char, userMessage, history) {
