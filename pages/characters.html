@@ -130,7 +130,7 @@ nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; display: flex; a
 .limit-reached p { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 12px; }
 .limit-reached button { background: var(--accent-crimson); border: none; color: #fff; padding: 10px 24px; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
 
-#authOverlay, #payModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 999; align-items: center; justify-content: center; }
+#authOverlay, #payModal, #linkAccountModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 999; align-items: center; justify-content: center; }
 .auth-box, .pay-box { background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: 20px; padding: 36px 30px; width: 100%; max-width: 400px; position: relative; box-shadow: var(--shadow-luxury); margin: 16px; }
 .auth-close { position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--text-secondary); font-size: 1.3rem; cursor: pointer; }
 .auth-tabs { display: flex; gap: 0; margin-bottom: 24px; background: rgba(255,255,255,0.03); border-radius: 10px; padding: 4px; }
@@ -268,6 +268,24 @@ nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; display: flex; a
   </div>
 </div>
 
+
+  <!-- LINK ACCOUNT MODAL (for anonymous guests) -->
+<div id="linkAccountModal">
+  <div class="pay-box" style="text-align:center;">
+    <button class="auth-close" onclick="closeLinkModal()">✕</button>
+    <div style="font-size:3rem; margin-bottom:12px;">💫</div>
+    <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:8px;">She doesn't want you to leave.</h2>
+    <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:20px;line-height:1.6;">Create a free account to save this conversation, unlock 15 daily messages, and continue your connection with <span id="linkCharName" style="color:var(--accent-gold);font-style:italic;"></span>.</p>
+    <div style="display:flex; flex-direction:column; gap:10px; text-align:left;">
+      <input id="linkEmail" type="email" class="auth-input" placeholder="Your email" style="margin-bottom:0;"/>
+      <input id="linkPassword" type="password" class="auth-input" placeholder="Create a password (min 6 chars)" style="margin-bottom:0;"/>
+      <input id="linkName" type="text" class="auth-input" placeholder="Your name" style="margin-bottom:0;"/>
+    </div>
+    <div id="linkError" style="display:none;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);color:#f87171;padding:10px 14px;border-radius:9px;font-size:0.85rem;margin-top:12px;"></div>
+    <button class="pay-btn" style="margin-top:16px;" onclick="linkAccount()">Save My Conversation</button>
+    <p style="color:var(--text-secondary);font-size:0.75rem;margin-top:8px;">Your chat history will be preserved. No payment needed.</p>
+  </div>
+</div>
 <!-- PAYMENT MODAL -->
 <div id="payModal">
   <div class="pay-box">
@@ -291,7 +309,7 @@ nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; display: flex; a
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInAnonymously, signOut, onAuthStateChanged, updateProfile, EmailAuthProvider, linkWithCredential } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = { apiKey:"AIzaSyDUERWnHurjAPYm9N7P52sXYXLI2Npux54", authDomain:"sugarme-9a37d.firebaseapp.com", projectId:"sugarme-9a37d", storageBucket:"sugarme-9a37d.firebasestorage.app", messagingSenderId:"237083119168", appId:"1:237083119168:web:dded20690c03658a9259a5" };
@@ -321,6 +339,7 @@ window.characters = [];
 window.currentChar = null;
 window.messageCount = 0;
 window.FREE_LIMIT = 15;
+window.GUEST_LIMIT = 5; // Messages allowed for anonymous guests
 window.currentUser = undefined;
 window.isSubscribed = false;
 
@@ -420,13 +439,36 @@ function buildCard(c) {
   return div;
 }
 
-window.handleCardClick = (id) => {
+window.handleCardClick = async (id) => {
   const char = window.characters.find(c => String(c.id) === String(id));
   if (!char) return;
-  if (!window.currentUser) { openModal('login'); return; }
+  
+  // If not logged in and it's a FREE character → allow anonymous guest chat
+  if (!window.currentUser) {
+    if (char.free) {
+      await startAnonymousSession(char);
+      return;
+    }
+    // Premium character → require login
+    openModal('login');
+    return;
+  }
+  
   if (!char.free && !window.isSubscribed) { openPayModal(char); return; }
   openChat(char);
 };
+
+async function startAnonymousSession(char) {
+  try {
+    await signInAnonymously(auth);
+    // Small delay to let Firebase sync
+    await new Promise(r => setTimeout(r, 300));
+    openChat(char);
+  } catch (e) {
+    console.error('Anonymous auth failed:', e);
+    openModal('login');
+  }
+}
 
 window.filterChars = (filter, btn) => {
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -568,14 +610,15 @@ function renderMessage(role, text, imgUrl) {
 async function saveMessage(char, role, text, imgUrl = null) {
   const uid = window.currentUser.uid;
   const chatRef = doc(db, 'chats', `${uid}_${char.id}`);
-  const msgObj = { role, text: text || '', imgUrl: imgUrl || null, time: new Date().toISOString() };
+const msgObj = { role, text: text || '', imgUrl: imgUrl || null, time: new Date().toISOString() };
+const now = new Date().toISOString();
   try {
     const snap = await getDoc(chatRef);
     if (snap.exists()) {
-      await updateDoc(chatRef, { messages: arrayUnion(msgObj), messageCount: window.messageCount, updatedAt: new Date().toISOString() });
-    } else {
-      await setDoc(chatRef, { userId: uid, charId: char.id, charName: char.name, messages: [msgObj], messageCount: window.messageCount, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
-    }
+await updateDoc(chatRef, { messages: arrayUnion(msgObj), messageCount: window.messageCount, updatedAt: now, lastChatTime: now });  
+    } 
+    else {
+await setDoc(chatRef, { userId: uid, charId: char.id, charName: char.name, messages: [msgObj], messageCount: window.messageCount, createdAt: now, updatedAt: now, lastChatTime: now });    }
   } catch(e) { console.error('Save error:', e); }
 }
 
@@ -584,7 +627,16 @@ window.sendMessage = async () => {
   const text = input.value.trim();
   if (!text || !window.currentChar) return;
   const char = window.currentChar;
-  if (char.free && window.messageCount >= window.FREE_LIMIT) return;
+  // Check if anonymous guest has hit their limit
+const isAnonymous = window.currentUser && window.currentUser.isAnonymous;
+const effectiveLimit = isAnonymous ? window.GUEST_LIMIT : window.FREE_LIMIT;
+
+if (isAnonymous && window.messageCount >= window.GUEST_LIMIT) {
+  showLinkAccountModal();
+  return;
+}
+
+if (char.free && !isAnonymous && window.messageCount >= window.FREE_LIMIT) return;
   
   input.value = ''; 
   input.style.height = 'auto';
@@ -593,10 +645,14 @@ window.sendMessage = async () => {
   window.messageCount++;
   await saveMessage(char, 'user', text);
   
-  if (char.free) { 
-    const remaining = Math.max(0, window.FREE_LIMIT - window.messageCount); 
-    document.getElementById('freeCounter').textContent = `${remaining} msgs left today`; 
-  }
+  if (isAnonymous) {
+  const remaining = Math.max(0, window.GUEST_LIMIT - window.messageCount);
+  document.getElementById('freeCounter').textContent = `${remaining} guest msgs left`;
+  document.getElementById('freeCounter').style.color = '#f59e0b';
+} else if (char.free) { 
+  const remaining = Math.max(0, window.FREE_LIMIT - window.messageCount); 
+  document.getElementById('freeCounter').textContent = `${remaining} msgs left today`; 
+}
   
   const typingId = showTyping();
   const wantsPhoto = /pic|photo|image|show|send|see you|look like|selfie|tasveer|photo bhejo|dikha|dikhao|apni photo|teri photo/i.test(text);
@@ -714,6 +770,63 @@ window.doLogin = async () => {
   } catch(e) { document.getElementById('authError').textContent='Incorrect email or password.'; document.getElementById('authError').style.display='block'; }
   document.getElementById('loginBtn').textContent='Log In';
 };
+
+window.showLinkAccountModal = () => {
+  document.getElementById('linkCharName').textContent = window.currentChar?.name || 'her';
+  document.getElementById('linkAccountModal').style.display = 'flex';
+  document.getElementById('linkError').style.display = 'none';
+};
+
+window.closeLinkModal = () => {
+  document.getElementById('linkAccountModal').style.display = 'none';
+};
+
+window.linkAccount = async () => {
+  const email = document.getElementById('linkEmail').value.trim();
+  const password = document.getElementById('linkPassword').value;
+  const name = document.getElementById('linkName').value.trim();
+  const errorEl = document.getElementById('linkError');
+  
+  if (!email || !password || !name) {
+    errorEl.textContent = 'Please fill in all fields.';
+    errorEl.style.display = 'block';
+    return;
+  }
+  if (password.length < 6) {
+    errorEl.textContent = 'Password must be at least 6 characters.';
+    errorEl.style.display = 'block';
+    return;
+  }
+  
+  try {
+    // Link the anonymous account to a real email/password
+    const credential = EmailAuthProvider.credential(email, password);
+    await linkWithCredential(window.currentUser, credential);
+    await updateProfile(window.currentUser, { displayName: name });
+    
+    // Update Firestore user document
+    const { getFirestore, doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const db = getFirestore();
+    await setDoc(doc(db, 'users', window.currentUser.uid), {
+      name, email, plan: 'free', messageCount: 0, chatCount: 0,
+      createdAt: new Date().toISOString(), role: 'user'
+    }, { merge: true });
+    
+    closeLinkModal();
+    alert('✨ Account created! Your conversation is saved. Welcome to SugarMe.');
+    window.location.reload();
+  } catch (e) {
+    console.error('Link error:', e);
+    if (e.code === 'auth/email-already-in-use') {
+      errorEl.textContent = 'This email is already registered. Please log in instead.';
+    } else if (e.code === 'auth/invalid-email') {
+      errorEl.textContent = 'Please enter a valid email address.';
+    } else {
+      errorEl.textContent = 'Something went wrong. Please try again.';
+    }
+    errorEl.style.display = 'block';
+  }
+};  
 window.doSignup = async () => {
   const name=document.getElementById('signupName').value.trim();
   const email=document.getElementById('signupEmail').value.trim();
