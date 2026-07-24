@@ -98,6 +98,52 @@ h1, h2, h3, h4 { font-family: 'Playfair Display', serif; font-weight: 400; }
 .empty-state span { font-size: 0.9rem; }
 .empty-state a { display: inline-block; margin-top: 20px; background: var(--accent-crimson); color: #fff; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-size: 0.9rem; font-weight: 600; transition: .3s; }
 .empty-state a:hover { background: #9a1a1a; }
+  .misses-you-card { 
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.08), rgba(122, 18, 18, 0.05)); 
+  border: 1px solid rgba(212, 175, 55, 0.3); 
+  border-radius: 14px; 
+  padding: 16px 20px; 
+  display: flex; 
+  align-items: center; 
+  gap: 16px; 
+  cursor: pointer; 
+  transition: 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+.misses-you-card:hover { 
+  border-color: var(--accent-gold); 
+  transform: translateX(4px);
+  box-shadow: 0 8px 24px rgba(212, 175, 55, 0.15);
+}
+.misses-you-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--accent-gold);
+  animation: pulseGold 2s infinite;
+}
+@keyframes pulseGold {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.misses-you-avatar { 
+  width: 48px; 
+  height: 48px; 
+  border-radius: 50%; 
+  background-size: cover; 
+  background-position: center;
+  flex-shrink: 0; 
+  border: 2px solid var(--accent-gold); 
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.4);
+}
+.misses-you-info { flex: 1; }
+.misses-you-name { font-weight: 600; font-size: 0.95rem; color: var(--text-primary); margin-bottom: 2px; }
+.misses-you-msg { color: var(--accent-gold); font-size: 0.85rem; font-style: italic; }
+.misses-you-time { color: var(--text-secondary); font-size: 0.75rem; }
 
 .account-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .account-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 28px; }
@@ -209,6 +255,13 @@ h1, h2, h3, h4 { font-family: 'Playfair Display', serif; font-weight: 400; }
       </div>
       <button class="upgrade-btn" onclick="showPage('subscription', null)">Claim Private Access</button>
     </div>
+<div id="missesYouSection" style="display:none; margin-bottom:32px;">
+  <div class="section-title" style="color:var(--accent-gold);">
+    <span>💫 She's Waiting For You</span>
+  </div>
+  <div id="missesYouList" style="display:flex; flex-direction:column; gap:12px;"></div>
+</div>
+    
     <div class="section-title">Recent Conversations <a href="#" onclick="showPage('chats', null)">View all →</a></div>
     <div class="chats-list" id="overviewChatsList"><div class="empty-state"><div class="empty-icon">✉</div><p>Your story starts here.</p><span>Choose a companion and send your first message.</span><a href="/pages/characters.html">Meet the Companions →</a></div></div>
   </div>
@@ -362,12 +415,61 @@ async function loadChats(uid) {
         totalMessages += userMsgs.length;
       }
     });
+    function renderMissesYouSection(chats) {
+  const section = document.getElementById('missesYouSection');
+  const list = document.getElementById('missesYouList');
+  
+  const now = new Date();
+  const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  
+  // Find characters not chatted in 24+ hours
+  const missedChats = chats.filter(chat => {
+    const lastTime = chat.lastChatTime || chat.updatedAt;
+    return lastTime && new Date(lastTime) < twentyFourHoursAgo;
+  });
+  
+  if (missedChats.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+  
+  section.style.display = 'block';
+  list.innerHTML = missedChats.map(chat => {
+    const char = charMap[chat.charId] || { name: chat.charName || 'Unknown', img: '/images/videoframe_5237.png' };
+    const lastTime = chat.lastChatTime || chat.updatedAt;
+    const hoursAgo = Math.floor((now - new Date(lastTime)) / (1000 * 60 * 60));
+    const timeText = hoursAgo < 48 ? `${hoursAgo} hours ago` : `${Math.floor(hoursAgo/24)} days ago`;
+    
+    // Rotate through different "misses you" messages
+    const messages = [
+      "is waiting for you...",
+      "has been thinking about you...",
+      "misses your messages...",
+      "wonders where you've been..."
+    ];
+    const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+    
+    return `
+      <div class="misses-you-card" onclick="window.location.href='/pages/characters.html?openChat=${encodeURIComponent(chat.charId)}'">
+        <div class="misses-you-avatar" style="background-image: url('${char.img}');"></div>
+        <div class="misses-you-info">
+          <div class="misses-you-name">${char.name}</div>
+          <div class="misses-you-msg">${char.name} ${randomMsg}</div>
+        </div>
+        <div class="misses-you-time">${timeText}</div>
+      </div>
+    `;
+  }).join('');
+}
     
     chats.sort((a,b) => new Date(b.updatedAt||0) - new Date(a.updatedAt||0));
-    document.getElementById('statChats').textContent = chats.length;
-    document.getElementById('statMessages').textContent = totalMessages;
-    renderChatList(chats.slice(0,3), 'overviewChatsList');
-    renderChatList(chats, 'allChatsList');
+document.getElementById('statChats').textContent = chats.length;
+document.getElementById('statMessages').textContent = totalMessages;
+renderChatList(chats.slice(0,3), 'overviewChatsList');
+renderChatList(chats, 'allChatsList');
+
+// Show "She Misses You" section for characters not chatted in 24+ hours
+renderMissesYouSection(chats);
   } catch(e) {
     console.error(e);
     ['overviewChatsList','allChatsList'].forEach(id => {
