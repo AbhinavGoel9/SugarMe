@@ -64,7 +64,6 @@ nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; display: flex; a
 .char-card { border-radius: 16px; overflow: hidden; border: 1px solid var(--border-subtle); background: var(--bg-secondary); position: relative; cursor: pointer; transition: 0.4s; }
 .char-card:hover { transform: translateY(-6px); border-color: var(--accent-gold); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
 .char-media { position: relative; aspect-ratio: 3/4; overflow: hidden; background: #1a1a1f; }
-.char-img { width: 100%; height: 100%; object-fit: cover; display: block; transition: opacity 0.4s; }
 .char-img {
   width: 100%;
   height: 100%;
@@ -72,6 +71,7 @@ nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; display: flex; a
   display: block;
   transition: opacity 0.4s;
   opacity: 0; /* Start hidden, fade in when loaded */
+
 }
 
 .char-img[src] {
@@ -339,6 +339,13 @@ const firebaseConfig = { apiKey:"AIzaSyDUERWnHurjAPYm9N7P52sXYXLI2Npux54", authD
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+  // Helper function to get current date in IST (Indian Standard Time)
+function getCurrentDateIST() {
+  const now = new Date();
+  const istOffset = 5.5 * 60 * 60 * 1000; // IST is UTC+5:30
+  const istTime = new Date(now.getTime() + istOffset);
+  return istTime.toISOString().split('T')[0]; // Returns "2026-07-30"
+}
 
 const defaultCharacters = [
   { id:'char_1', name:"Aarohi", age:22, personality:"Playful", bio:"A spark of pure energy. She turns ordinary moments into unforgettable adventures.", likes:["Travel","Dancing","Coffee"], free:true, img:["/images/videoframe_5237.png"], video:["https://media.livemediahost.com/assets/vid/ai-girlfriend/41606083/profile.mp4?cb=59257737"], photos:["https://picsum.photos/seed/mia1/400/600","https://picsum.photos/seed/mia2/400/600"], greetings:["Hey... I've been thinking about you all day.", "Omg finally! I was getting bored without you.", "Hi there. You look like you have a story to tell."]},
@@ -505,6 +512,11 @@ async function startAnonymousSession(char) {
     openModal('login');
   }
 }
+window.closeChat = () => { 
+  document.getElementById('chatPage').style.display = 'none'; 
+  window.currentChar = null;
+  document.getElementById('chatInput').value = '';
+};
 
 window.filterChars = (filter, btn) => {
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -535,9 +547,19 @@ window.openChat = async (char) => {
     const isAnon = window.currentUser && window.currentUser.isAnonymous;
   const limit = isAnon ? window.GUEST_LIMIT : window.FREE_LIMIT;
 
-  if (chatSnap.exists()) {
+   if (chatSnap.exists()) {
     const data = chatSnap.data();
-    window.messageCount = data.messageCount || 0;
+    const today = getCurrentDateIST();
+    
+    // CHECK FOR DAILY RESET ON LOAD
+    if (data.lastResetDate !== today) {
+      await updateDoc(chatRef, { messageCount: 0, lastResetDate: today });
+      window.messageCount = 0;
+      console.log('Daily reset triggered on chat open');
+    } else {
+      window.messageCount = data.messageCount || 0;
+    }
+    
     (data.messages || []).forEach(m => renderMessage(m.role, m.text, m.imgUrl || null));
     
     // Check limits on load
@@ -549,11 +571,15 @@ window.openChat = async (char) => {
       document.getElementById('chatInput').disabled = false;
       document.getElementById('sendBtn').disabled = false;
     }
-  } else {
+  }  else {
+    // New conversation - enable input and send greeting
     document.getElementById('chatInput').disabled = false;
     document.getElementById('sendBtn').disabled = false;
     const greeting = char.greetings[Math.floor(Math.random()*char.greetings.length)];
-    setTimeout(async () => { renderMessage('ai', greeting); await saveMessage(char, 'ai', greeting); }, 600);
+    setTimeout(async () => { 
+      renderMessage('ai', greeting); 
+      await saveMessage(char, 'ai', greeting); 
+    }, 600);
   }
 
   // Update counter display on load
@@ -668,16 +694,34 @@ function renderMessage(role, text, imgUrl) {
 async function saveMessage(char, role, text, imgUrl = null) {
   const uid = window.currentUser.uid;
   const chatRef = doc(db, 'chats', `${uid}_${char.id}`);
-const msgObj = { role, text: text || '', imgUrl: imgUrl || null, time: new Date().toISOString() };
-const now = new Date().toISOString();
+  const msgObj = { role, text: text || '', imgUrl: imgUrl || null, time: new Date().toISOString() };
+  const now = new Date().toISOString();
+  
   try {
     const snap = await getDoc(chatRef);
     if (snap.exists()) {
-await updateDoc(chatRef, { messages: arrayUnion(msgObj), messageCount: window.messageCount, updatedAt: now, lastChatTime: now });  
-    } 
-    else {
-await setDoc(chatRef, { userId: uid, charId: char.id, charName: char.name, messages: [msgObj], messageCount: window.messageCount, createdAt: now, updatedAt: now, lastChatTime: now });    }
-  } catch(e) { console.error('Save error:', e); }
+      await updateDoc(chatRef, { 
+        messages: arrayUnion(msgObj), 
+        messageCount: window.messageCount, 
+        updatedAt: now, 
+        lastChatTime: now 
+      });  
+    } else {
+      await setDoc(chatRef, { 
+        userId: uid, 
+        charId: char.id, 
+        charName: char.name, 
+        messages: [msgObj], 
+        messageCount: window.messageCount, 
+        createdAt: now, 
+        updatedAt: now, 
+        lastChatTime: now,
+        lastResetDate: getCurrentDateIST()
+      }); 
+    }
+  } catch(e) { 
+    console.error('Save error:', e); 
+  }
 }
 
 window.sendMessage = async () => {
@@ -685,6 +729,20 @@ window.sendMessage = async () => {
   const text = input.value.trim();
   if (!text || !window.currentChar) return;
   const char = window.currentChar;
+    // Check if we need to reset (in case user has the chat open overnight)
+  const today = getCurrentDateIST();
+  const uid = window.currentUser.uid;
+  const chatRef = doc(db, 'chats', `${uid}_${char.id}`);
+  const chatSnap = await getDoc(chatRef);
+  
+  if (chatSnap.exists() && chatSnap.data().lastResetDate !== today) {
+    await updateDoc(chatRef, { 
+      messageCount: 0, 
+      lastResetDate: today 
+    });
+    window.messageCount = 0;
+    console.log('Daily reset triggered during message send');
+  }
   // Check if anonymous guest has hit their limit
 const isAnonymous = window.currentUser && window.currentUser.isAnonymous;
 const effectiveLimit = isAnonymous ? window.GUEST_LIMIT : window.FREE_LIMIT;
