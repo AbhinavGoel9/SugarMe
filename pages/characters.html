@@ -316,18 +316,99 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInAnonymously, signOut, onAuthStateChanged, updateProfile, EmailAuthProvider, linkWithCredential } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const firebaseConfig = { apiKey:"AIzaSyDUERWnHurjAPYm9N7P52sXYXLI2Npux54", authDomain:"sugarme-9a37d.firebaseapp.com", projectId:"sugarme-9a37d", storageBucket:"sugarme-9a37d.firebasestorage.app", messagingSenderId:"237083119168", appId:"1:237083119168:web:dded20690c03658a9259a5" };
+const firebaseConfig = { 
+  apiKey: "AIzaSyDUERWnHurjAPYm9N7P52sXYXLI2Npux54", 
+  authDomain: "sugarme-9a37d.firebaseapp.com", 
+  projectId: "sugarme-9a37d", 
+  storageBucket: "sugarme-9a37d.firebasestorage.app", 
+  messagingSenderId: "237083119168", 
+  appId: "1:237083119168:web:dded20690c03658a9259a5" 
+};
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// --- GLOBAL STATE ---
+window.characters = [];
+window.currentChar = null;
+window.messageCount = 0;
+window.FREE_LIMIT = 15;
+window.GUEST_LIMIT = 5;
+window.currentUser = null; // Initialized to null, updated by auth listener
+window.isSubscribed = false;
+
+// --- HELPER FUNCTIONS ---
 function getCurrentDateIST() {
   const now = new Date();
   const istOffset = 5.5 * 60 * 60 * 1000;
-  const istTime = new Date(now.getTime() + istOffset);
-  return istTime.toISOString().split('T')[0];
+  return new Date(now.getTime() + istOffset).toISOString().split('T')[0];
 }
 
+function updateNavUI(isLoggedIn) {
+  const navActions = document.getElementById('navActions');
+  const mobileMenuActions = document.getElementById('mobileMenuActions');
+  
+  if (isLoggedIn && window.currentUser) {
+    const userName = window.currentUser.displayName || window.currentUser.email?.split('@')[0] || 'User';
+    if (navActions) {
+      navActions.innerHTML = `
+        <a href="/pages/dashboard.html" class="btn-ghost" style="text-decoration:none; display:inline-block; text-align:center; width:auto;">My Space</a>
+        <button class="btn-primary" onclick="window.doLogout()">Log Out</button>
+      `;
+    }
+    if (mobileMenuActions) {
+      mobileMenuActions.innerHTML = `
+        <a href="/pages/dashboard.html" class="btn-ghost" style="flex:1; text-decoration:none; display:flex; align-items:center; justify-content:center;">My Space</a>
+        <button class="btn-primary" style="flex:1;" onclick="window.doLogout()">Log Out</button>
+      `;
+    }
+  } else {
+    if (navActions) {
+      navActions.innerHTML = `
+        <button class="btn-ghost" onclick="window.openModal('login')">Log In</button>
+        <button class="btn-primary" onclick="window.openModal('signup')">Claim Access</button>
+      `;
+    }
+    if (mobileMenuActions) {
+      mobileMenuActions.innerHTML = `
+        <button class="btn-ghost" style="flex:1;" onclick="window.closeMenu(); window.openModal('login')">Log In</button>
+        <button class="btn-primary" style="flex:1;" onclick="window.closeMenu(); window.openModal('signup')">Claim Access</button>
+      `;
+    }
+  }
+}
+
+async function checkSubscription(uid) {
+  try {
+    const snap = await getDoc(doc(db, 'users', uid));
+    if (snap.exists()) {
+      const data = snap.data();
+      window.isSubscribed = data.plan === 'monthly' || data.plan === 'yearly';
+    }
+  } catch(e) { 
+    console.error('Subscription check error:', e); 
+  }
+}
+
+// --- CORE AUTH LISTENER (THE FIX) ---
+onAuthStateChanged(auth, async (user) => {
+  window.currentUser = user;
+  
+  if (user) {
+    console.log("✅ Auth state resolved: User is logged in", user.uid);
+    updateNavUI(true);
+    await checkSubscription(user.uid);
+    await loadCharacters();
+    handleUrlParams(); // Safely handle ?openChat= or ?plan= now that user is ready
+  } else {
+    console.log("⚠️ Auth state resolved: No user (Guest mode)");
+    updateNavUI(false);
+    await loadCharacters(); // Still load characters for guests
+  }
+});
+
+// --- CHARACTER LOADING ---
 const defaultCharacters = [
   { id:'char_1', name:"Aarohi", age:22, personality:"Playful", bio:"A spark of pure energy. She turns ordinary moments into unforgettable adventures.", likes:["Travel","Dancing","Coffee"], free:true, img:["/images/videoframe_5237.png"], video:["https://media.livemediahost.com/assets/vid/ai-girlfriend/41606083/profile.mp4?cb=59257737"], photos:["https://picsum.photos/seed/mia1/400/600","https://picsum.photos/seed/mia2/400/600"], greetings:["Hey... I've been thinking about you all day.", "Omg finally! I was getting bored without you.", "Hi there. You look like you have a story to tell."]},
   { id:'char_2', name:"Alina", age:20, personality:"Shy", bio:"Quiet on the outside, passionate within. She opens up slowly, but the connection is worth the wait.", likes:["Reading","Anime","Rain"], free:true, img:["/images/9.png"], video:["https://cdn.candy.ai/413492523-7ee5055c-1094-448f-b658-48382c84f41a-av1"], photos:["https://picsum.photos/seed/sakura1/400/600","https://picsum.photos/seed/sakura2/400/600"], greetings:["Oh, hi... I didn't expect you so soon.", "Hello... it's really nice to meet you."]},
@@ -345,21 +426,6 @@ const defaultCharacters = [
   { id:'char_14', name:"Koyuki", age:25, personality:"Mysterious", bio:"Marine biologist by day, philosopher by night. The ocean is her second home.", likes:["Ocean","Science","Silence"], free:false, img:["/images/14.png"], video:["https://cdn.candy.ai/245219362-f7363f22-f906-4c63-8e99-bfb138737b37-av1"], photos:[], greetings:["The ocean told me you were coming."]},
   { id:'char_15', name:"Sienna", age:22, personality:"Playful", bio:"Extreme sports, extreme love. Life is short, and she lives every single second of it.", likes:["Skydiving","Music festivals","Hiking"], free:false, img:["/images/11.png"], video:["https://media.livemediahost.com/assets/vid/ai-girlfriend/42012461/profile.mp4?cb=59257830"], photos:[], greetings:["Life's too short to be boring. Let's go."]}
 ];
-
-window.characters = [];
-window.currentChar = null;
-window.messageCount = 0;
-window.FREE_LIMIT = 15;
-window.GUEST_LIMIT = 5;
-window.currentUser = undefined;
-window.isSubscribed = false;
-
-async function checkSubscription(uid) {
-  try {
-    const snap = await getDoc(doc(db, 'users', uid));
-    if (snap.exists()) window.isSubscribed = snap.data().plan === 'monthly' || snap.data().plan === 'yearly';
-  } catch(e) { console.error('Sub error:', e); }
-}
 
 async function loadCharacters() {
   try {
@@ -380,6 +446,8 @@ async function loadCharacters() {
 function renderCards() {
   const freeGrid = document.getElementById('freeGrid');
   const paidGrid = document.getElementById('paidGrid');
+  if(!freeGrid || !paidGrid) return;
+  
   freeGrid.innerHTML = '';
   paidGrid.innerHTML = '';
   window.characters.forEach(c => {
@@ -411,29 +479,39 @@ function buildCard(c) {
     </div>`;
     
   const likesHtml = (c.likes||[]).map(l => `<span class="like-tag">${l}</span>`).join('');
-  div.innerHTML = `${mediaHtml}<div class="char-info"><div class="char-name">${c.name}</div><div class="char-meta">Age ${c.age}</div><span class="char-personality">${c.personality}</span><div class="char-bio">${c.bio}</div><div class="char-likes">${likesHtml}</div><button class="char-cta ${c.free ? 'cta-free' : 'cta-locked'}" onclick="handleCardClick('${c.id}')">${c.free ? 'Start Private Chat' : 'Unlock to Chat'}</button></div>`;
+  div.innerHTML = `${mediaHtml}<div class="char-info"><div class="char-name">${c.name}</div><div class="char-meta">Age ${c.age}</div><span class="char-personality">${c.personality}</span><div class="char-bio">${c.bio}</div><div class="char-likes">${likesHtml}</div><button class="char-cta ${c.free ? 'cta-free' : 'cta-locked'}" onclick="window.handleCardClick('${c.id}')">${c.free ? 'Start Private Chat' : 'Unlock to Chat'}</button></div>`;
   return div;
 }
 
+// --- CHAT & INTERACTION LOGIC ---
 window.handleCardClick = async (id) => {
   const char = window.characters.find(c => String(c.id) === String(id));
   if (!char) return;
+  
   if (!window.currentUser) {
-    if (char.free) { await startAnonymousSession(char); return; }
-    openModal('login'); return;
+    if (char.free) { 
+      await startAnonymousSession(char); 
+      return; 
+    }
+    window.openModal('login'); 
+    return;
   }
-  if (!char.free && !window.isSubscribed) { openPayModal(char); return; }
-  openChat(char);
+  
+  if (!char.free && !window.isSubscribed) { 
+    window.openPayModal(char); 
+    return; 
+  }
+  
+  window.openChat(char);
 };
 
 async function startAnonymousSession(char) {
   try {
     await signInAnonymously(auth);
-    await new Promise(r => setTimeout(r, 300));
-    openChat(char);
+    // onAuthStateChanged will handle the rest and open the chat
   } catch (e) {
     console.error('Anonymous auth failed:', e);
-    openModal('login');
+    window.openModal('login');
   }
 }
 
@@ -454,13 +532,20 @@ window.closeChat = () => {
 };
 
 window.openChat = async (char) => {
+  if (!window.currentUser) {
+    console.error("Cannot open chat: No user session");
+    return;
+  }
+
   window.currentChar = char;
   window.messageCount = 0;
   document.getElementById('chatPage').style.display = 'flex';
   document.getElementById('chatName').textContent = char.name;
+  
   const imgSrc = Array.isArray(char.img) ? char.img[0] : char.img;
   const avatarEl = document.getElementById('chatAvatar');
   avatarEl.innerHTML = imgSrc ? `<img src="${imgSrc}" alt="${char.name}"/>` : `<span style="font-family:'Playfair Display';font-size:1.2rem;color:var(--text-secondary);">${char.name[0]}</span>`;
+  
   const msgs = document.getElementById('chatMessages');
   msgs.innerHTML = '<div style="text-align:center;color:var(--text-secondary);font-size:0.85rem;padding:20px;">Loading your private conversation...</div>';
   document.getElementById('chatInput').disabled = true;
@@ -470,7 +555,7 @@ window.openChat = async (char) => {
   const chatRef = doc(db, 'chats', `${uid}_${char.id}`);
   const chatSnap = await getDoc(chatRef);
   msgs.innerHTML = '';
-  const isAnon = window.currentUser && window.currentUser.isAnonymous;
+  const isAnon = window.currentUser.isAnonymous;
 
   if (chatSnap.exists()) {
     const data = chatSnap.data();
@@ -511,6 +596,7 @@ window.openChat = async (char) => {
 };
 
 async function saveMessage(char, role, text, imgUrl = null) {
+  if (!window.currentUser) return;
   const uid = window.currentUser.uid;
   const chatRef = doc(db, 'chats', `${uid}_${char.id}`);
   const msgObj = { role, text: text || '', imgUrl: imgUrl || null, time: new Date().toISOString() };
@@ -526,11 +612,13 @@ async function saveMessage(char, role, text, imgUrl = null) {
 }
 
 window.sendMessage = async () => {
+  if (!window.currentUser || !window.currentChar) return;
+  
   const input = document.getElementById('chatInput');
   const text = input.value.trim();
-  if (!text || !window.currentChar) return;
-  const char = window.currentChar;
+  if (!text) return;
   
+  const char = window.currentChar;
   const today = getCurrentDateIST();
   const uid = window.currentUser.uid;
   const chatRef = doc(db, 'chats', `${uid}_${char.id}`);
@@ -541,7 +629,7 @@ window.sendMessage = async () => {
     window.messageCount = 0;
   }
   
-  const isAnonymous = window.currentUser && window.currentUser.isAnonymous;
+  const isAnonymous = window.currentUser.isAnonymous;
   if (isAnonymous && window.messageCount >= window.GUEST_LIMIT) { showLinkAccountModal(); return; }
   if (char.free && !isAnonymous && window.messageCount >= window.FREE_LIMIT) return;
   
@@ -665,7 +753,7 @@ function showLimitReached() {
   const msgs = document.getElementById('chatMessages');
   const div = document.createElement('div');
   div.className = 'limit-reached';
-  div.innerHTML = `<p>You've reached your daily guest limit with ${window.currentChar.name}. Upgrade to Private Member to keep the conversation going.</p><button onclick="openPayModal(window.currentChar)">Upgrade Access</button>`;
+  div.innerHTML = `<p>You've reached your daily guest limit with ${window.currentChar.name}. Upgrade to Private Member to keep the conversation going.</p><button onclick="window.openPayModal(window.currentChar)">Upgrade Access</button>`;
   msgs.appendChild(div);
   msgs.scrollTop = msgs.scrollHeight;
   document.getElementById('chatInput').disabled = true;
@@ -675,21 +763,27 @@ function showLimitReached() {
 window.handleKey = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); window.sendMessage(); } };
 window.autoResize = (el) => { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,120)+'px'; };
 
+// --- MODAL & PAYMENT LOGIC ---
 window.openPayModal = (char) => { document.getElementById('payCharName').textContent = char ? char.name : 'Premium Access'; document.getElementById('payModal').style.display = 'flex'; };
 window.closePayModal = () => { document.getElementById('payModal').style.display = 'none'; };
 window.selectPlan = (el) => { document.querySelectorAll('.pay-plan').forEach(p=>p.classList.remove('selected')); el.classList.add('selected'); };
+
 window.handlePayment = async () => {
+  if (!window.currentUser) { window.openModal('login'); return; }
+  
   const selectedPlan = document.querySelector('.pay-plan.selected');
   const isYearly = selectedPlan?.querySelector('.pay-plan-name')?.textContent?.includes('Yearly');
   const amount = isYearly ? 2000 : 199;
   const plan = isYearly ? 'yearly' : 'monthly';
-  if (!window.currentUser) { openModal('login'); return; }
+  
   const payBtn = document.querySelector('.pay-btn');
   payBtn.textContent = 'Creating order...'; payBtn.disabled = true;
+  
   try {
     const orderRes = await fetch('/api/payment', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ action:'create_order', amount, plan }) });
     const order = await orderRes.json();
     if (order.error) { alert('Error: ' + order.error); payBtn.textContent = 'Continue to Payment'; payBtn.disabled = false; return; }
+    
     const options = {
       key: 'rzp_live_SkVDaX3o0zXi5q', amount: order.amount, currency: 'INR', name: 'SugarMe', description: plan === 'yearly' ? 'Yearly Plan' : 'Monthly Plan', order_id: order.id,
       prefill: { name: window.currentUser.displayName||'', email: window.currentUser.email||'' }, theme: { color: '#7A1212' },
@@ -699,7 +793,7 @@ window.handlePayment = async () => {
         if (verify.verified) {
           await updateDoc(doc(db, 'users', window.currentUser.uid), { plan, planActivatedAt:new Date().toISOString(), paymentId:response.razorpay_payment_id });
           window.isSubscribed = true;
-          closePayModal();
+          window.closePayModal();
           alert('Payment successful. You now have full access.');
           window.location.reload();
         } else { alert('Payment verification failed. Please contact support.'); }
@@ -711,7 +805,7 @@ window.handlePayment = async () => {
   } catch(e) { alert('Something went wrong: ' + e.message); payBtn.textContent='Continue to Payment'; payBtn.disabled=false; }
 };
 
-window.openModal = (tab) => { document.getElementById('authOverlay').style.display='flex'; document.getElementById('authError').style.display='none'; switchTab(tab); };
+window.openModal = (tab) => { document.getElementById('authOverlay').style.display='flex'; document.getElementById('authError').style.display='none'; window.switchTab(tab); };
 window.closeModal = () => { document.getElementById('authOverlay').style.display='none'; };
 window.switchTab = (tab) => {
   const isLogin=tab==='login';
@@ -720,21 +814,30 @@ window.switchTab = (tab) => {
   document.getElementById('tabLogin').classList.toggle('active', isLogin);
   document.getElementById('tabSignup').classList.toggle('active', !isLogin);
 };
+
 window.doLogin = async () => {
   const email=document.getElementById('loginEmail').value.trim();
   const pass=document.getElementById('loginPassword').value;
   if (!email||!pass) { document.getElementById('authError').textContent='Fill in all fields.'; document.getElementById('authError').style.display='block'; return; }
   document.getElementById('loginBtn').textContent='Please wait...';
-  try { await signInWithEmailAndPassword(auth,email,pass); setTimeout(()=> window.location.reload(), 800); } 
-  catch(e) { document.getElementById('authError').textContent='Incorrect email or password.'; document.getElementById('authError').style.display='block'; }
+  try { 
+    await signInWithEmailAndPassword(auth,email,pass); 
+    window.closeModal();
+    // onAuthStateChanged will handle the UI update and reload
+  } catch(e) { 
+    document.getElementById('authError').textContent='Incorrect email or password.'; 
+    document.getElementById('authError').style.display='block'; 
+  }
   document.getElementById('loginBtn').textContent='Log In';
 };
+
 window.showLinkAccountModal = () => {
   document.getElementById('linkCharName').textContent = window.currentChar?.name || 'her';
   document.getElementById('linkAccountModal').style.display = 'flex';
   document.getElementById('linkError').style.display = 'none';
 };
 window.closeLinkModal = () => { document.getElementById('linkAccountModal').style.display = 'none'; };
+
 window.linkAccount = async () => {
   const email = document.getElementById('linkEmail').value.trim();
   const password = document.getElementById('linkPassword').value;
@@ -747,7 +850,7 @@ window.linkAccount = async () => {
     await linkWithCredential(window.currentUser, credential);
     await updateProfile(window.currentUser, { displayName: name });
     await setDoc(doc(db, 'users', window.currentUser.uid), { name, email, plan: 'free', messageCount: 0, chatCount: 0, createdAt: new Date().toISOString(), role: 'user' }, { merge: true });
-    closeLinkModal();
+    window.closeLinkModal();
     alert('✨ Account created! Your conversation is saved. Welcome to SugarMe.');
     window.location.reload();
   } catch (e) {
@@ -757,6 +860,7 @@ window.linkAccount = async () => {
     errorEl.style.display = 'block';
   }
 };  
+
 window.doSignup = async () => {
   const name=document.getElementById('signupName').value.trim();
   const email=document.getElementById('signupEmail').value.trim();
@@ -768,44 +872,46 @@ window.doSignup = async () => {
     const cred=await createUserWithEmailAndPassword(auth,email,pass);
     await updateProfile(cred.user,{displayName:name});
     await setDoc(doc(db, 'users', cred.user.uid), {name,email,plan:'free',messageCount:0,chatCount:0,createdAt:new Date().toISOString(),role:'user'});
-    setTimeout(()=> window.location.reload(), 800);
-  } catch(e) { document.getElementById('authError').textContent=e.code==='auth/email-already-in-use'?'Email already registered.':'Signup failed.'; document.getElementById('authError').style.display='block'; }
+    window.closeModal();
+    // onAuthStateChanged will handle the UI update
+  } catch(e) { 
+    document.getElementById('authError').textContent=e.code==='auth/email-already-in-use'?'Email already registered.':'Signup failed.'; 
+    document.getElementById('authError').style.display='block'; 
+  }
   document.getElementById('signupBtn').textContent='Create Account';
 };
-window.doLogout = async () => { await signOut(auth); window.location.href = '/'; };
 
+window.doLogout = async () => { 
+  await signOut(auth); 
+  window.location.href = '/'; 
+};
+
+// --- CLEAN URL PARAMETER HANDLING (No more setInterval) ---
+function handleUrlParams() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const openChatId = urlParams.get('openChat');
+  const planParam = urlParams.get('plan');
+
+  if (planParam && !window.currentUser.isAnonymous) {
+    document.querySelectorAll('.pay-plan').forEach(p=>p.classList.remove('selected'));
+    if (planParam === 'yearly') document.querySelectorAll('.pay-plan')[1]?.classList.add('selected');
+    else document.querySelectorAll('.pay-plan')[0]?.classList.add('selected');
+    window.openPayModal(null);
+  }
+
+  if (openChatId && window.currentUser) {
+    const char = window.characters.find(c => String(c.id) === String(openChatId));
+    if (char) {
+      if (!char.free && !window.isSubscribed) { window.openPayModal(char); return; }
+      window.openChat(char);
+    }
+  }
+}
+
+// --- EVENT LISTENERS ---
 document.getElementById('authOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('authOverlay'))window.closeModal();});
 document.getElementById('payModal').addEventListener('click',e=>{if(e.target===document.getElementById('payModal'))window.closePayModal();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){window.closeModal();window.closePayModal();}});
-
-const urlParams = new URLSearchParams(window.location.search);
-const openChatId = urlParams.get('openChat');
-const planParam = urlParams.get('plan');
-if (planParam) {
-  const checkAndPay = setInterval(() => {
-    if (window.currentUser !== undefined) {
-      clearInterval(checkAndPay);
-      if (!window.currentUser) { openModal('login'); return; }
-      document.querySelectorAll('.pay-plan').forEach(p=>p.classList.remove('selected'));
-      if (planParam === 'yearly') document.querySelectorAll('.pay-plan')[1]?.classList.add('selected');
-      else document.querySelectorAll('.pay-plan')[0]?.classList.add('selected');
-      openPayModal(null);
-    }
-  }, 200);
-}
-if (openChatId) {
-  const checkAndOpen = setInterval(() => {
-    if (window.currentUser !== undefined && window.characters.length > 0) {
-      clearInterval(checkAndOpen);
-      if (!window.currentUser) { openModal('login'); return; }
-      const char = window.characters.find(c => String(c.id) === String(openChatId));
-      if (char) {
-        if (!char.free && !window.isSubscribed) { openPayModal(char); return; }
-        openChat(char);
-      }
-    }
-  }, 200);
-}
 </script>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
