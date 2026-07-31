@@ -346,32 +346,40 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getAuth, signOut, onAuthStateChanged, updateProfile, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const firebaseConfig = { apiKey:"AIzaSyDUERWnHurjAPYm9N7P52sXYXLI2Npux54", authDomain:"sugarme-9a37d.firebaseapp.com", projectId:"sugarme-9a37d", storageBucket:"sugarme-9a37d.firebasestorage.app", messagingSenderId:"237083119168", appId:"1:237083119168:web:dded20690c03658a9259a5" };
+const firebaseConfig = { 
+  apiKey: "AIzaSyDUERWnHurjAPYm9N7P52sXYXLI2Npux54", 
+  authDomain: "sugarme-9a37d.firebaseapp.com", 
+  projectId: "sugarme-9a37d", 
+  storageBucket: "sugarme-9a37d.firebasestorage.app", 
+  messagingSenderId: "237083119168", 
+  appId: "1:237083119168:web:dded20690c03658a9259a5" 
+};
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// FIXED: Now uses your ORIGINAL image paths from /images/ folder
+// Character fallback map (Dashboard will use DB charName if ID is missing)
 const charMap = {
-  char_1:{name:'Aarohi', img:'/images/videoframe_5237.png'}, 
-  char_2:{name:'Alina', img:'/images/9.png'}, 
-  char_3:{name:'Saruko', img:'/images/13.png'},
-  char_4:{name:'Kavya', img:'/images/15.png'}, 
-  char_5:{name:'Ira', img:'/images/5.png'}, 
-  char_6:{name:'Anaya', img:'/images/3.png'},
-  char_7:{name:'Meher', img:'/images/2.png'},
-  char_8:{name:'Riya', img:'/images/4.png'},
-  char_9:{name:'Elara', img:'/images/6.png'},
-  char_10:{name:'Luna', img:'/images/8.png'},
-  char_11:{name:'Aria', img:'/images/7.png'},
-  char_12:{name:'Zara', img:'/images/10.png'},
-  char_13:{name:'Nyla', img:'/images/12.png'},
-  char_14:{name:'Koyuki', img:'/images/14.png'},
+  char_1:{name:'Aarohi', img:'/images/videoframe_5237.png'}, char_2:{name:'Alina', img:'/images/9.png'}, 
+  char_3:{name:'Saruko', img:'/images/13.png'}, char_4:{name:'Kavya', img:'/images/15.png'}, 
+  char_5:{name:'Ira', img:'/images/5.png'}, char_6:{name:'Anaya', img:'/images/3.png'},
+  char_7:{name:'Meher', img:'/images/2.png'}, char_8:{name:'Riya', img:'/images/4.png'},
+  char_9:{name:'Elara', img:'/images/6.png'}, char_10:{name:'Luna', img:'/images/8.png'},
+  char_11:{name:'Aria', img:'/images/7.png'}, char_12:{name:'Zara', img:'/images/10.png'},
+  char_13:{name:'Nyla', img:'/images/12.png'}, char_14:{name:'Koyuki', img:'/images/14.png'},
   char_15:{name:'Sienna', img:'/images/11.png'}
 };
 
 const isMobile = () => window.innerWidth <= 768;
 
+// --- SECURITY: Prevent XSS by escaping HTML in chat previews ---
+function escapeHtml(unsafe) {
+  if (!unsafe) return '';
+  return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+
+// --- CORE AUTH LISTENER ---
 onAuthStateChanged(auth, async (user) => {
   document.getElementById('loadingScreen').style.display = 'none';
   
@@ -380,49 +388,83 @@ onAuthStateChanged(auth, async (user) => {
     return; 
   }
 
+  // Show appropriate UI based on device
   if (isMobile()) {
     document.getElementById('mobileTopbar').style.display = 'flex';
     document.getElementById('bottomNav').style.display = 'flex';
-    document.getElementById('mobileAvatar').textContent = (user.displayName||user.email)[0].toUpperCase();
+    const initial = (user.displayName || user.email || '?')[0].toUpperCase();
+    document.getElementById('mobileAvatar').textContent = initial;
   } else {
     document.getElementById('sidebar').style.display = 'flex';
   }
   document.getElementById('mainContent').style.display = 'block';
 
+  // Populate user data
   const name = user.displayName || user.email.split('@')[0];
   const firstName = name.split(' ')[0];
-  if(document.getElementById('sidebarAvatar')) document.getElementById('sidebarAvatar').textContent = firstName[0].toUpperCase();
-  if(document.getElementById('sidebarName')) document.getElementById('sidebarName').textContent = name;
+  const initial = name[0].toUpperCase();
+  
+  const sidebarAvatar = document.getElementById('sidebarAvatar');
+  const sidebarName = document.getElementById('sidebarName');
+  if (sidebarAvatar) sidebarAvatar.textContent = initial;
+  if (sidebarName) sidebarName.textContent = name;
+  
   document.getElementById('welcomeName').textContent = firstName;
   document.getElementById('accountName').value = name;
-  document.getElementById('accountEmail').value = user.email;
+  document.getElementById('accountEmail').value = user.email || '';
+
   await loadChats(user.uid);
 });
 
+// --- DATA LOADING ---
 async function loadChats(uid) {
   try {
     const chats = [];
     let totalMessages = 0;
     const charIds = Object.keys(charMap);
+    
+    // Fetch all potential chat documents concurrently
     const fetches = charIds.map(id => getDoc(doc(db, 'chats', `${uid}_${id}`)));
     const results = await Promise.all(fetches);
     
     results.forEach(snap => {
       if (snap.exists()) {
         const data = snap.data();
-        chats.push(data);
+        chats.push({ id: snap.id, ...data });
         const userMsgs = (data.messages || []).filter(m => m.role === 'user');
         totalMessages += userMsgs.length;
       }
     });
-    function renderMissesYouSection(chats) {
+    
+    // Sort by most recent first
+    chats.sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
+
+    // Update stats
+    document.getElementById('statChats').textContent = chats.length;
+    document.getElementById('statMessages').textContent = totalMessages;
+    
+    // Render lists
+    renderChatList(chats.slice(0, 3), 'overviewChatsList');
+    renderChatList(chats, 'allChatsList');
+    renderMissesYouSection(chats);
+
+  } catch(e) {
+    console.error("Error loading chats:", e);
+    ['overviewChatsList', 'allChatsList'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.innerHTML = '<div class="empty-state"><div class="empty-icon">✉</div><p>Could not load conversations.</p><span>Please check your internet connection.</span></div>';
+    });
+  }
+}
+
+function renderMissesYouSection(chats) {
   const section = document.getElementById('missesYouSection');
   const list = document.getElementById('missesYouList');
-  
+  if (!section || !list) return;
+
   const now = new Date();
   const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
   
-  // Find characters not chatted in 24+ hours
   const missedChats = chats.filter(chat => {
     const lastTime = chat.lastChatTime || chat.updatedAt;
     return lastTime && new Date(lastTime) < twentyFourHoursAgo;
@@ -434,83 +476,71 @@ async function loadChats(uid) {
   }
   
   section.style.display = 'block';
+  const messages = ["is waiting for you...", "has been thinking about you...", "misses your messages...", "wonders where you've been..."];
+  
   list.innerHTML = missedChats.map(chat => {
-    const char = charMap[chat.charId] || { name: chat.charName || 'Unknown', img: '/images/videoframe_5237.png' };
+    const charData = charMap[chat.charId] || { name: chat.charName || 'Companion', img: '/images/videoframe_5237.png' };
     const lastTime = chat.lastChatTime || chat.updatedAt;
     const hoursAgo = Math.floor((now - new Date(lastTime)) / (1000 * 60 * 60));
     const timeText = hoursAgo < 48 ? `${hoursAgo} hours ago` : `${Math.floor(hoursAgo/24)} days ago`;
-    
-    // Rotate through different "misses you" messages
-    const messages = [
-      "is waiting for you...",
-      "has been thinking about you...",
-      "misses your messages...",
-      "wonders where you've been..."
-    ];
     const randomMsg = messages[Math.floor(Math.random() * messages.length)];
     
     return `
       <div class="misses-you-card" onclick="window.location.href='/pages/characters.html?openChat=${encodeURIComponent(chat.charId)}'">
-        <div class="misses-you-avatar" style="background-image: url('${char.img}');"></div>
+        <div class="misses-you-avatar" style="background-image: url('${charData.img}');"></div>
         <div class="misses-you-info">
-          <div class="misses-you-name">${char.name}</div>
-          <div class="misses-you-msg">${char.name} ${randomMsg}</div>
+          <div class="misses-you-name">${escapeHtml(charData.name)}</div>
+          <div class="misses-you-msg">${escapeHtml(charData.name)} ${randomMsg}</div>
         </div>
         <div class="misses-you-time">${timeText}</div>
       </div>
     `;
   }).join('');
 }
-    
-    chats.sort((a,b) => new Date(b.updatedAt||0) - new Date(a.updatedAt||0));
-document.getElementById('statChats').textContent = chats.length;
-document.getElementById('statMessages').textContent = totalMessages;
-renderChatList(chats.slice(0,3), 'overviewChatsList');
-renderChatList(chats, 'allChatsList');
-
-// Show "She Misses You" section for characters not chatted in 24+ hours
-renderMissesYouSection(chats);
-  } catch(e) {
-    console.error(e);
-    ['overviewChatsList','allChatsList'].forEach(id => {
-      document.getElementById(id).innerHTML = '<div class="empty-state"><div class="empty-icon">✉</div><p>Could not load conversations.</p><span>Please check your connection.</span></div>';
-    });
-  }
-}
 
 function renderChatList(chats, containerId) {
   const container = document.getElementById(containerId);
+  if (!container) return;
+
   if (!chats.length) {
     container.innerHTML = `<div class="empty-state"><div class="empty-icon">✉</div><p>Your story starts here.</p><span>Choose a companion and send your first message.</span><a href="/pages/characters.html">Meet the Companions →</a></div>`;
     return;
   }
+
   container.innerHTML = chats.map(chat => {
-    const char = charMap[chat.charId] || { name: chat.charName||'Unknown', img:'/images/videoframe_5237.png' };
+    const charData = charMap[chat.charId] || { name: chat.charName || 'Unknown', img: '/images/videoframe_5237.png' };
     const messages = chat.messages || [];
-    const lastMsg = messages[messages.length-1];
-    const lastText = lastMsg?.text || 'Start a conversation...';
+    const lastMsg = messages[messages.length - 1];
+    const rawLastText = lastMsg?.text || 'Start a conversation...';
+    const safeLastText = escapeHtml(rawLastText);
+    const displayText = safeLastText.length > 50 ? safeLastText.slice(0, 50) + '...' : safeLastText;
     const lastTime = lastMsg?.time ? new Date(lastMsg.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
-    const userMsgCount = messages.filter(m=>m.role==='user').length;
+    const userMsgCount = messages.filter(m => m.role === 'user').length;
     
-    return `<div class="chat-item" onclick="window.location.href='/pages/characters.html?openChat=${encodeURIComponent(chat.charId)}'">
-      <div class="chat-item-avatar" style="background-image: url('${char.img}');"></div>
-      <div class="chat-item-info">
-        <div class="chat-item-name">${char.name}</div>
-        <div class="chat-item-last">"${lastText.slice(0,50)}${lastText.length>50?'...':''}"</div>
+    return `
+      <div class="chat-item" onclick="window.location.href='/pages/characters.html?openChat=${encodeURIComponent(chat.charId)}'">
+        <div class="chat-item-avatar" style="background-image: url('${charData.img}');"></div>
+        <div class="chat-item-info">
+          <div class="chat-item-name">${escapeHtml(charData.name)}</div>
+          <div class="chat-item-last">"${displayText}"</div>
+        </div>
+        <div class="chat-item-meta">
+          <div class="chat-item-time">${lastTime}</div>
+          <div class="chat-item-count">${userMsgCount} msgs</div>
+        </div>
       </div>
-      <div class="chat-item-meta">
-        <div class="chat-item-time">${lastTime}</div>
-        <div class="chat-item-count">${userMsgCount} msgs</div>
-      </div>
-    </div>`;
+    `;
   }).join('');
 }
 
+// --- UI INTERACTIONS ---
 window.showPage = (pageId, btn, bnavId) => {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.bottom-nav-item').forEach(b => b.classList.remove('active'));
-  document.getElementById('page-' + pageId).classList.add('active');
+  
+  const targetPage = document.getElementById('page-' + pageId);
+  if (targetPage) targetPage.classList.add('active');
   if (btn) btn.classList.add('active');
   if (bnavId) {
     const bnav = document.getElementById(bnavId);
@@ -520,37 +550,59 @@ window.showPage = (pageId, btn, bnavId) => {
 
 window.saveProfile = async () => {
   const name = document.getElementById('accountName').value.trim();
-  if (!name) return;
+  if (!name || !auth.currentUser) return;
+  
   try {
     await updateProfile(auth.currentUser, { displayName: name });
-    if(document.getElementById('sidebarName')) document.getElementById('sidebarName').textContent = name;
-    document.getElementById('welcomeName').textContent = name.split(' ')[0];
-    if(document.getElementById('sidebarAvatar')) document.getElementById('sidebarAvatar').textContent = name[0].toUpperCase();
-    if(document.getElementById('mobileAvatar')) document.getElementById('mobileAvatar').textContent = name[0].toUpperCase();
+    const initial = name[0].toUpperCase();
+    const firstName = name.split(' ')[0];
+    
+    const sidebarName = document.getElementById('sidebarName');
+    const sidebarAvatar = document.getElementById('sidebarAvatar');
+    const mobileAvatar = document.getElementById('mobileAvatar');
+    
+    if (sidebarName) sidebarName.textContent = name;
+    if (sidebarAvatar) sidebarAvatar.textContent = initial;
+    if (mobileAvatar) mobileAvatar.textContent = initial;
+    document.getElementById('welcomeName').textContent = firstName;
+    
     const s = document.getElementById('profileSuccess');
-    s.style.display = 'block'; setTimeout(() => s.style.display = 'none', 3000);
-  } catch(e) { alert('Error: ' + e.message); }
+    s.style.display = 'block'; 
+    setTimeout(() => s.style.display = 'none', 3000);
+  } catch(e) { 
+    alert('Error updating profile: ' + e.message); 
+  }
 };
 
 window.changePassword = async () => {
   const newPass = document.getElementById('newPassword').value;
   const confirmPass = document.getElementById('confirmPassword').value;
-  if (!newPass||!confirmPass) return alert('Fill in both fields.');
+  
+  if (!newPass || !confirmPass) return alert('Please fill in both fields.');
   if (newPass !== confirmPass) return alert('Passwords do not match.');
   if (newPass.length < 6) return alert('Password must be at least 6 characters.');
+  
   try {
     await updatePassword(auth.currentUser, newPass);
     document.getElementById('newPassword').value = '';
     document.getElementById('confirmPassword').value = '';
+    
     const s = document.getElementById('passwordSuccess');
-    s.style.display = 'block'; setTimeout(() => s.style.display = 'none', 3000);
+    s.style.display = 'block'; 
+    setTimeout(() => s.style.display = 'none', 3000);
   } catch(e) {
-    if (e.code === 'auth/requires-recent-login') alert('Please log out and log back in before changing your password.');
-    else alert('Error: ' + e.message);
+    if (e.code === 'auth/requires-recent-login') {
+      alert('For security, please log out and log back in before changing your password.');
+    } else {
+      alert('Error: ' + e.message);
+    }
   }
 };
 
-window.doLogout = async () => { await signOut(auth); window.location.href = '/'; };
+window.doLogout = async () => { 
+  await signOut(auth); 
+  window.location.href = '/'; 
+};
 </script>
 </body>
 </html>
