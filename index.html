@@ -416,7 +416,16 @@ footer { background: var(--bg-secondary); border-top: 1px solid var(--border-sub
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   
-  window.openModal = (tab) => { document.getElementById('authOverlay').style.display='flex'; switchTab(tab); };
+  // Security: Prevent XSS from malicious display names
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+  }
+
+  window.openModal = (tab) => { 
+    document.getElementById('authOverlay').style.display='flex'; 
+    switchTab(tab); 
+  };
   window.closeModal = () => { document.getElementById('authOverlay').style.display='none'; };
   window.switchTab = (tab) => {
     const isLogin = tab === 'login';
@@ -427,8 +436,18 @@ footer { background: var(--bg-secondary); border-top: 1px solid var(--border-sub
     document.getElementById('authError').style.display = 'none';
   };
   
-  function showError(msg) { const el = document.getElementById('authError'); el.textContent = msg; el.style.display = 'block'; }
-  function setLoading(btnId, loading) { const btn = document.getElementById(btnId); btn.disabled = loading; btn.style.opacity = loading ? '0.6' : '1'; btn.textContent = loading ? 'Please wait...' : (btnId === 'loginBtn' ? 'Log In' : 'Create Account'); }
+  function showError(msg) { 
+    const el = document.getElementById('authError'); 
+    el.textContent = msg; 
+    el.style.display = 'block'; 
+  }
+  
+  function setLoading(btnId, loading) { 
+    const btn = document.getElementById(btnId); 
+    btn.disabled = loading; 
+    btn.style.opacity = loading ? '0.6' : '1'; 
+    btn.textContent = loading ? 'Please wait...' : (btnId === 'loginBtn' ? 'Log In' : 'Create Account'); 
+  }
   
   window.doLogin = async () => {
     const email = document.getElementById('loginEmail').value.trim();
@@ -440,8 +459,8 @@ footer { background: var(--bg-secondary); border-top: 1px solid var(--border-sub
       setTimeout(() => { window.closeModal(); window.location.reload(); }, 800);
     } catch (e) {
       showError('Incorrect email or password.');
+      setLoading('loginBtn', false);
     }
-    setLoading('loginBtn', false);
   };
   
   window.doSignup = async () => {
@@ -454,18 +473,48 @@ footer { background: var(--bg-secondary); border-top: 1px solid var(--border-sub
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, pass);
       await updateProfile(cred.user, { displayName: name });
+      
+      // Dynamically import Firestore to save user profile
       const { getFirestore, doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
       const db = getFirestore();
-      await setDoc(doc(db, 'users', cred.user.uid), { name, email, plan: 'free', messageCount: 0, chatCount: 0, createdAt: new Date().toISOString(), role: 'user' });
+      await setDoc(doc(db, 'users', cred.user.uid), { 
+        name, 
+        email, 
+        plan: 'free', 
+        messageCount: 0, 
+        chatCount: 0, 
+        createdAt: new Date().toISOString(), 
+        role: 'user' 
+      });
+      
       setTimeout(() => { window.closeModal(); window.location.reload(); }, 800);
     } catch (e) {
-      showError(e.code === 'auth/email-already-in-use' ? 'Email already registered.' : 'Signup failed.');
+      console.error("Signup error:", e);
+      if (e.code === 'auth/email-already-in-use') {
+        showError('Email already registered. Please log in.');
+      } else if (e.code === 'permission-denied') {
+        showError('Account created, but failed to save profile. Please contact support.');
+      } else {
+        showError('Signup failed. Please try again.');
+      }
+      setLoading('signupBtn', false);
     }
-    setLoading('signupBtn', false);
   };
   
-  window.doLogout = async () => { await signOut(auth); window.location.href = '/'; };
-  window.handlePricingClick = (plan) => { window.location.href = `/pages/characters.html?plan=${plan}`; };
+  window.doLogout = async () => { 
+    await signOut(auth); 
+    window.location.href = '/'; 
+  };
+  
+  window.handlePricingClick = (plan) => { 
+    // If user is not logged in, prompt them to sign up first for a better UX
+    if (!auth.currentUser) {
+      openModal('signup');
+      showError('Please create an account to upgrade your membership.');
+      return;
+    }
+    window.location.href = `/pages/characters.html?plan=${plan}`; 
+  };
   
   // AUTH STATE LISTENER - Updates nav on both desktop and mobile
   onAuthStateChanged(auth, (user) => {
@@ -473,14 +522,18 @@ footer { background: var(--bg-secondary); border-top: 1px solid var(--border-sub
     const mobileMenuActions = document.getElementById('mobileMenuActions');
     
     if (user) {
-      const firstName = (user.displayName || user.email).split(' ')[0];
+      // Use escapeHtml to prevent XSS from malicious display names
+      const rawName = user.displayName || user.email || 'User';
+      const firstName = escapeHtml(rawName.split(' ')[0]);
+      
       navActions.innerHTML = `
+        <a href="/pages/dashboard.html" class="btn-ghost" style="text-decoration:none; display:inline-flex; align-items:center;">My Space</a>
         <button class="btn-primary" onclick="doLogout()">Log Out</button>
       `;
       if (mobileMenuActions) {
         mobileMenuActions.innerHTML = `
-          <div style="padding: 8px 16px; color: var(--text-primary); font-weight: 600; font-size: 0.9rem;">Hi, ${firstName}</div>
-  <button onclick="doLogout()" style="color: #f87171;">Log Out</button>
+          <a href="/pages/dashboard.html" style="padding: 14px 16px; color: var(--accent-gold); font-weight: 600; font-size: 0.9rem; display:block; text-decoration:none;">My Space (Hi, ${firstName})</a>
+          <button onclick="doLogout()" style="color: #f87171;">Log Out</button>
         `;
       }
     } else {
@@ -497,7 +550,12 @@ footer { background: var(--bg-secondary); border-top: 1px solid var(--border-sub
     }
   });
   
-  document.getElementById('authOverlay').addEventListener('click', (e) => { if (e.target === document.getElementById('authOverlay')) window.closeModal(); });
+  document.getElementById('authOverlay').addEventListener('click', (e) => { 
+    if (e.target === document.getElementById('authOverlay')) window.closeModal(); 
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') window.closeModal();
+  });
 </script>
 <script>
 window.toggleMenu = () => {
