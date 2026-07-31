@@ -316,7 +316,15 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInAnonymously, signOut, onAuthStateChanged, updateProfile, EmailAuthProvider, linkWithCredential } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const firebaseConfig = { apiKey:"AIzaSyDUERWnHurjAPYm9N7P52sXYXLI2Npux54", authDomain:"sugarme-9a37d.firebaseapp.com", projectId:"sugarme-9a37d", storageBucket:"sugarme-9a37d.firebasestorage.app", messagingSenderId:"237083119168", appId:"1:237083119168:web:dded20690c03658a9259a5" };
+// Firebase configuration - In production, use environment variables via Vercel dashboard
+const firebaseConfig = { 
+  apiKey: "AIzaSyDUERWnHurjAPYm9N7P52sXYXLI2Npux54", 
+  authDomain: "sugarme-9a37d.firebaseapp.com", 
+  projectId: "sugarme-9a37d", 
+  storageBucket: "sugarme-9a37d.firebasestorage.app", 
+  messagingSenderId: "237083119168", 
+  appId: "1:237083119168:web:dded20690c03658a9259a5" 
+};
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
