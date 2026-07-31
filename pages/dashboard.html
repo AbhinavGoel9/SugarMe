@@ -419,6 +419,23 @@ onAuthStateChanged(auth, async (user) => {
 // --- DATA LOADING ---
 async function loadChats(uid) {
   try {
+    // 1. Fetch user profile to get their actual plan
+    const userSnap = await getDoc(doc(db, 'users', uid));
+    const userData = userSnap.exists() ? userSnap.data() : { plan: 'free' };
+    
+    // 2. Update Stats dynamically based on plan
+    const plan = userData.plan || 'free';
+    const planDisplay = plan === 'monthly' ? 'Private' : (plan === 'yearly' ? 'Elite' : 'Free');
+    const charsUnlocked = (plan === 'monthly' || plan === 'yearly') ? '15+' : '3';
+    
+    document.getElementById('statPlan').textContent = planDisplay;
+    document.getElementById('statCharsUnlocked').textContent = charsUnlocked;
+    
+    // Update sidebar plan badge as well
+    const sidebarPlan = document.getElementById('sidebarPlan');
+    if (sidebarPlan) sidebarPlan.textContent = planDisplay === 'Free' ? 'Guest Access' : `${planDisplay} Member`;
+
+    // 3. Fetch chats
     const chats = [];
     let totalMessages = 0;
     const charIds = Object.keys(charMap);
@@ -439,7 +456,7 @@ async function loadChats(uid) {
     // Sort by most recent first
     chats.sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
 
-    // Update stats
+    // Update message stats
     document.getElementById('statChats').textContent = chats.length;
     document.getElementById('statMessages').textContent = totalMessages;
     
@@ -449,7 +466,7 @@ async function loadChats(uid) {
     renderMissesYouSection(chats);
 
   } catch(e) {
-    console.error("Error loading chats:", e);
+    console.error("Error loading dashboard data:", e);
     ['overviewChatsList', 'allChatsList'].forEach(id => {
       const el = document.getElementById(id);
       if(el) el.innerHTML = '<div class="empty-state"><div class="empty-icon">✉</div><p>Could not load conversations.</p><span>Please check your internet connection.</span></div>';
