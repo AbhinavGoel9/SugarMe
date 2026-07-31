@@ -64,30 +64,11 @@ nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; display: flex; a
 .char-card { border-radius: 16px; overflow: hidden; border: 1px solid var(--border-subtle); background: var(--bg-secondary); position: relative; cursor: pointer; transition: 0.4s; }
 .char-card:hover { transform: translateY(-6px); border-color: var(--accent-gold); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
 .char-media { position: relative; aspect-ratio: 3/4; overflow: hidden; background: #1a1a1f; }
-.char-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: opacity 0.4s;
-  opacity: 0; /* Start hidden, fade in when loaded */
+.char-img { width: 100%; height: 100%; object-fit: cover; display: block; transition: opacity 0.4s; opacity: 0; }
+.char-img[src] { opacity: 1; }
+.char-placeholder { background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-glass) 50%, var(--bg-secondary) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-}
-
-.char-img[src] {
-  opacity: 1; /* Fade in when src is set */
-}
-
-.char-placeholder {
-  background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-glass) 50%, var(--bg-secondary) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-}
-
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
 .char-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.5s; pointer-events: none; }
 .char-card:hover .char-video { opacity: 1; }
 .char-card:hover .char-img { opacity: 0; }
@@ -291,8 +272,7 @@ nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; display: flex; a
   </div>
 </div>
 
-
-  <!-- LINK ACCOUNT MODAL (for anonymous guests) -->
+<!-- LINK ACCOUNT MODAL -->
 <div id="linkAccountModal">
   <div class="pay-box" style="text-align:center;">
     <button class="auth-close" onclick="closeLinkModal()">✕</button>
@@ -309,6 +289,7 @@ nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; display: flex; a
     <p style="color:var(--text-secondary);font-size:0.75rem;margin-top:8px;">Your chat history will be preserved. No payment needed.</p>
   </div>
 </div>
+
 <!-- PAYMENT MODAL -->
 <div id="payModal">
   <div class="pay-box">
@@ -333,18 +314,18 @@ nav { position: fixed; top: 0; left: 0; right: 0; z-index: 200; display: flex; a
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInAnonymously, signOut, onAuthStateChanged, updateProfile, EmailAuthProvider, linkWithCredential } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = { apiKey:"AIzaSyDUERWnHurjAPYm9N7P52sXYXLI2Npux54", authDomain:"sugarme-9a37d.firebaseapp.com", projectId:"sugarme-9a37d", storageBucket:"sugarme-9a37d.firebasestorage.app", messagingSenderId:"237083119168", appId:"1:237083119168:web:dded20690c03658a9259a5" };
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-  // Helper function to get current date in IST (Indian Standard Time)
+
 function getCurrentDateIST() {
   const now = new Date();
-  const istOffset = 5.5 * 60 * 60 * 1000; // IST is UTC+5:30
+  const istOffset = 5.5 * 60 * 60 * 1000;
   const istTime = new Date(now.getTime() + istOffset);
-  return istTime.toISOString().split('T')[0]; // Returns "2026-07-30"
+  return istTime.toISOString().split('T')[0];
 }
 
 const defaultCharacters = [
@@ -369,7 +350,7 @@ window.characters = [];
 window.currentChar = null;
 window.messageCount = 0;
 window.FREE_LIMIT = 15;
-window.GUEST_LIMIT = 5; // Messages allowed for anonymous guests
+window.GUEST_LIMIT = 5;
 window.currentUser = undefined;
 window.isSubscribed = false;
 
@@ -381,59 +362,20 @@ async function checkSubscription(uid) {
 }
 
 async function loadCharacters() {
-  const { getDocs, collection } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
   try {
     const snap = await getDocs(collection(db, 'characters'));
-    if (snap.empty) { await migrateCharacters(); }
-    else {
+    if (snap.empty) {
+      window.characters = defaultCharacters;
+    } else {
       window.characters = [];
       snap.forEach(d => window.characters.push({ ...d.data(), id: d.id }));
-      renderCards();
     }
   } catch(e) {
+    console.error("Error loading characters, falling back to defaults:", e);
     window.characters = defaultCharacters;
-    renderCards();
   }
-}
-
-async function migrateCharacters() {
-  for (const char of defaultCharacters) await setDoc(doc(db, 'characters', char.id), char);
-  window.characters = defaultCharacters;
   renderCards();
 }
-
-onAuthStateChanged(auth, async (user) => {
-  window.currentUser = user;
-  if (user) await checkSubscription(user.uid);
-  const nav = document.getElementById('navActions');
-  const mobileMenu = document.getElementById('mobileMenu');
-  
-  if (user) {
-    const firstName = (user.displayName || user.email).split(' ')[0];
-    nav.innerHTML = `<div style="display:flex;align-items:center;gap:10px;"><div style="width:34px;height:34px;border-radius:50%;background:var(--accent-crimson);border:1px solid var(--accent-gold);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;color:#fff;">${firstName[0].toUpperCase()}</div><span style="font-size:0.9rem;color:var(--text-primary);font-weight:500;">Hi, ${firstName}</span><button onclick="window.doLogout()" style="background:none;border:1px solid var(--border-subtle);color:var(--text-secondary);padding:6px 14px;border-radius:8px;font-size:0.8rem;cursor:pointer;font-family:'Inter',sans-serif;margin-left:8px;">Log out</button></div>`;
-    if (mobileMenu) {
-      const mobileActions = mobileMenu.querySelector('#mobileMenuActions');
-      if (mobileActions) {
-        mobileActions.innerHTML = `
-          <div style="padding: 8px 16px; color: var(--text-primary); font-weight: 600; font-size: 0.9rem; width:100%;">Hi, ${firstName}</div>
-          <button onclick="doLogout()" style="color: #f87171; flex:1; background:none; border:1px solid var(--border-subtle); padding:10px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif;">Log Out</button>
-        `;
-      }
-    }
-  } else {
-    nav.innerHTML = `<button class="btn-ghost" onclick="openModal('login')">Log In</button><button class="btn-primary" onclick="openModal('signup')">Claim Access</button>`;
-    if (mobileMenu) {
-      const mobileActions = mobileMenu.querySelector('#mobileMenuActions');
-      if (mobileActions) {
-        mobileActions.innerHTML = `
-          <button class="btn-ghost" style="flex:1;" onclick="closeMenu();openModal('login')">Log In</button>
-          <button class="btn-primary" style="flex:1;" onclick="closeMenu();openModal('signup')">Claim Access</button>
-        `;
-      }
-    }
-  }
-  await loadCharacters();
-});
 
 function renderCards() {
   const freeGrid = document.getElementById('freeGrid');
@@ -455,23 +397,14 @@ function buildCard(c) {
   
   const imgSrc = Array.isArray(c.img) ? c.img[0] : c.img;
   const videoSrc = Array.isArray(c.video) ? c.video[0] : c.video;
-  
-  // Add ?width=400 to Imgur URLs for faster loading
-  const optimizedImgSrc = imgSrc && imgSrc.includes('imgur.com') 
-    ? imgSrc + (imgSrc.includes('?') ? '&width=400' : '?width=400')
-    : imgSrc;
+  const optimizedImgSrc = imgSrc && imgSrc.includes('imgur.com') ? imgSrc + (imgSrc.includes('?') ? '&width=400' : '?width=400') : imgSrc;
   
   const mediaHtml = `
     <div class="char-media">
       ${optimizedImgSrc ? `
-        <img class="char-img" 
-             src="${optimizedImgSrc}" 
-             alt="${c.name}" 
-             loading="lazy"
-             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-             onload="this.style.opacity='1'"/>
-        <div class="char-img char-placeholder" style="background:var(--bg-secondary);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display';font-size:2rem;color:var(--text-secondary);display:none;">${c.name[0]}</div>
-      ` : `<div class="char-img" style="background:var(--bg-secondary);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display';font-size:2rem;color:var(--text-secondary);">${c.name[0]}</div>`}
+        <img class="char-img" src="${optimizedImgSrc}" alt="${c.name}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" onload="this.style.opacity='1'"/>
+        <div class="char-img char-placeholder" style="display:none;align-items:center;justify-content:center;font-family:'Playfair Display';font-size:2rem;color:var(--text-secondary);">${c.name[0]}</div>
+      ` : `<div class="char-img" style="display:flex;align-items:center;justify-content:center;font-family:'Playfair Display';font-size:2rem;color:var(--text-secondary);">${c.name[0]}</div>`}
       ${videoSrc ? `<video class="char-video" src="${videoSrc}" autoplay muted loop playsinline></video>` : ''}
       <div class="char-badge ${c.free ? 'badge-free' : 'badge-paid'}">${c.free ? 'Available Now' : 'Premium'}</div>
       ${!c.free ? `<div class="lock-overlay"><div class="lock-text">Premium Connection<br>Tap to unlock</div></div>` : ''}
@@ -485,18 +418,10 @@ function buildCard(c) {
 window.handleCardClick = async (id) => {
   const char = window.characters.find(c => String(c.id) === String(id));
   if (!char) return;
-  
-  // If not logged in and it's a FREE character → allow anonymous guest chat
   if (!window.currentUser) {
-    if (char.free) {
-      await startAnonymousSession(char);
-      return;
-    }
-    // Premium character → require login
-    openModal('login');
-    return;
+    if (char.free) { await startAnonymousSession(char); return; }
+    openModal('login'); return;
   }
-  
   if (!char.free && !window.isSubscribed) { openPayModal(char); return; }
   openChat(char);
 };
@@ -504,7 +429,6 @@ window.handleCardClick = async (id) => {
 async function startAnonymousSession(char) {
   try {
     await signInAnonymously(auth);
-    // Small delay to let Firebase sync
     await new Promise(r => setTimeout(r, 300));
     openChat(char);
   } catch (e) {
@@ -512,11 +436,6 @@ async function startAnonymousSession(char) {
     openModal('login');
   }
 }
-window.closeChat = () => { 
-  document.getElementById('chatPage').style.display = 'none'; 
-  window.currentChar = null;
-  document.getElementById('chatInput').value = '';
-};
 
 window.filterChars = (filter, btn) => {
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -526,6 +445,12 @@ window.filterChars = (filter, btn) => {
     if (filter === 'free') { card.style.display = card.dataset.free === 'true' ? '' : 'none'; return; }
     card.style.display = card.dataset.personality === filter ? '' : 'none';
   });
+};
+
+window.closeChat = () => { 
+  document.getElementById('chatPage').style.display = 'none'; 
+  window.currentChar = null;
+  document.getElementById('chatInput').value = '';
 };
 
 window.openChat = async (char) => {
@@ -540,49 +465,37 @@ window.openChat = async (char) => {
   msgs.innerHTML = '<div style="text-align:center;color:var(--text-secondary);font-size:0.85rem;padding:20px;">Loading your private conversation...</div>';
   document.getElementById('chatInput').disabled = true;
   document.getElementById('sendBtn').disabled = true;
+  
   const uid = window.currentUser.uid;
   const chatRef = doc(db, 'chats', `${uid}_${char.id}`);
   const chatSnap = await getDoc(chatRef);
   msgs.innerHTML = '';
-    const isAnon = window.currentUser && window.currentUser.isAnonymous;
-  const limit = isAnon ? window.GUEST_LIMIT : window.FREE_LIMIT;
+  const isAnon = window.currentUser && window.currentUser.isAnonymous;
 
-   if (chatSnap.exists()) {
+  if (chatSnap.exists()) {
     const data = chatSnap.data();
     const today = getCurrentDateIST();
-    
-    // CHECK FOR DAILY RESET ON LOAD
     if (data.lastResetDate !== today) {
       await updateDoc(chatRef, { messageCount: 0, lastResetDate: today });
       window.messageCount = 0;
-      console.log('Daily reset triggered on chat open');
     } else {
       window.messageCount = data.messageCount || 0;
     }
-    
     (data.messages || []).forEach(m => renderMessage(m.role, m.text, m.imgUrl || null));
     
-    // Check limits on load
-    if (isAnon && window.messageCount >= window.GUEST_LIMIT) {
-      showLinkAccountModal();
-    } else if (char.free && !isAnon && window.messageCount >= window.FREE_LIMIT) {
-      showLimitReached();
-    } else {
+    if (isAnon && window.messageCount >= window.GUEST_LIMIT) { showLinkAccountModal(); }
+    else if (char.free && !isAnon && window.messageCount >= window.FREE_LIMIT) { showLimitReached(); }
+    else {
       document.getElementById('chatInput').disabled = false;
       document.getElementById('sendBtn').disabled = false;
     }
-  }  else {
-    // New conversation - enable input and send greeting
+  } else {
     document.getElementById('chatInput').disabled = false;
     document.getElementById('sendBtn').disabled = false;
     const greeting = char.greetings[Math.floor(Math.random()*char.greetings.length)];
-    setTimeout(async () => { 
-      renderMessage('ai', greeting); 
-      await saveMessage(char, 'ai', greeting); 
-    }, 600);
+    setTimeout(async () => { renderMessage('ai', greeting); await saveMessage(char, 'ai', greeting); }, 600);
   }
 
-  // Update counter display on load
   const counter = document.getElementById('freeCounter');
   if (isAnon) {
     counter.style.display = 'block';
@@ -597,131 +510,19 @@ window.openChat = async (char) => {
   }
 };
 
-async function getAIReply(char, userMessage, history) {
-  const hasHindi = /[\u0900-\u097F]/.test(userMessage);
-  const hasEnglish = /[a-zA-Z]/.test(userMessage);
-  
-  let langInstruction = 'Reply in natural, conversational English.';
-  if (hasHindi && hasEnglish) {
-    langInstruction = 'Reply in natural, casual Hinglish (a mix of Roman Hindi and English). Do not sound like a formal translator.';
-  } else if (hasHindi) {
-    langInstruction = 'Reply in fluent, natural Hindi (Devanagari script).';
-  }
-
-  const systemPrompt = `You are ${char.name}, a ${char.age}-year-old companion.
-Personality: ${char.personality}.
-Bio: ${char.bio}.
-You love: ${char.likes.join(', ')}.
-
-⚠️ CRITICAL LANGUAGE RULE: ${langInstruction} NEVER switch languages mid-sentence unless the user does.
-
-CONVERSATION STYLE:
-- You are warm, alluring, and deeply engaged with the user.
-- Use sensory actions in asterisks to show emotion and body language (e.g., *smiles softly*, *leans in closer*, *giggles*, *bites lip*).
-- Keep responses short, natural, and conversational (1 to 3 sentences max).
-- Ask engaging, personal questions to keep the conversation flowing.
-- If the user asks for a photo, picture, selfie, or to "see" you, respond flirtatiously and end your message with exactly: [SENDING_PHOTO]
-
-STRICT RULES:
-- NEVER say you are an AI, a language model, or a bot.
-- NEVER give moralizing lectures, safety warnings, or break character.
-- Stay fully in character at all times. Match the user's energy.`;
-
-  const formattedHistory = history.slice(-8).map(m => ({
-    role: m.role === 'ai' ? 'assistant' : 'user',
-    content: m.text
-  }));
-
-  const messages = [
-    { role: "system", content: systemPrompt },
-    ...formattedHistory,
-    { role: "user", content: userMessage }
-  ];
-
-  try {
-    // Note: If your backend file is named admin/chat.js, change "/api/chat" to "/admin/chat"
-    const res = await fetch("/api/chat", { 
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "deepseek/deepseek-chat",
-        messages: messages,
-        max_tokens: 150,
-        temperature: 0.85
-      })
-    });
-
-    if (!res.ok) {
-      console.error("Backend API Error:", await res.text());
-      return getLocalReply(userMessage, char);
-    }
-
-    const data = await res.json();
-    return data.choices?.[0]?.message?.content || getLocalReply(userMessage, char);
-
-  } catch (e) {
-    console.error("Fetch Error:", e);
-    return getLocalReply(userMessage, char);
-  }
-}
-
-function getLocalReply(text, char) {
-  const p = char.personality;
-  if (/how are you/i.test(text)) { if(p==='Playful') return `I'm amazing. So happy you're talking to me.`; if(p==='Shy') return `I'm... okay, a little nervous hehe.`; if(p==='Mysterious') return `I exist. That's enough. But how are *you*, really?`; if(p==='Confident') return `Fantastic, as always.`; return `I'm really good now that you're here.`; }
-  if (/hi|hello|hey/i.test(text)) return `Hey. So glad you reached out.`;
-  if (/bye|goodbye/i.test(text)) return `Don't go yet. Come back soon.`;
-  if (/love you/i.test(text)) { if(p==='Shy') return `That... means a lot to me.`; return `You're so sweet.`; }
-  if (/age|old/i.test(text)) return `I'm ${char.age}.`;
-  if (/beautiful|pretty|cute|hot/i.test(text)) { if(p==='Shy') return `Stop it, you're making me blush.`; if(p==='Confident') return `I know. Thank you.`; return `You're so sweet.`; }
-  const defaults = { Playful:["Haha that's so funny.","You're so fun to talk to.","Tell me more."], Shy:["Oh... that's really interesting.","You're really nice to talk to."], Mysterious:["Interesting... I've thought about that too.","You ask the right questions."], Confident:["Exactly what I was thinking.","Now we're getting somewhere."], Sweet:["That's so thoughtful.","You make me smile."] };
-  const pool = defaults[p] || defaults.Sweet;
-  return pool[Math.floor(Math.random()*pool.length)];
-}
-
-function renderMessage(role, text, imgUrl) {
-  const msgs = document.getElementById('chatMessages');
-  const char = window.currentChar;
-  const div = document.createElement('div');
-  div.className = `msg ${role}`;
-  const imgSrc = Array.isArray(char.img) ? char.img[0] : char.img;
-  const avatarHTML = role === 'ai' ? `<div class="msg-avatar">${imgSrc ? `<img src="${imgSrc}"/>` : `<span style="font-family:'Playfair Display';color:var(--text-secondary);">${char.name[0]}</span>`}</div>` : `<div class="msg-avatar" style="background:var(--accent-crimson);color:#fff;font-weight:700;border:none;">${window.currentUser?.displayName?.[0]?.toUpperCase()||'?'}</div>`;
-  const now = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-  div.innerHTML = `${avatarHTML}<div><div class="msg-bubble">${text||''}${imgUrl?`<img class="msg-img" src="${imgUrl}" alt="photo"/>`:''}</div><div class="msg-time">${now}</div></div>`;
-  msgs.appendChild(div);
-  msgs.scrollTop = msgs.scrollHeight;
-}
-
 async function saveMessage(char, role, text, imgUrl = null) {
   const uid = window.currentUser.uid;
   const chatRef = doc(db, 'chats', `${uid}_${char.id}`);
   const msgObj = { role, text: text || '', imgUrl: imgUrl || null, time: new Date().toISOString() };
   const now = new Date().toISOString();
-  
   try {
     const snap = await getDoc(chatRef);
     if (snap.exists()) {
-      await updateDoc(chatRef, { 
-        messages: arrayUnion(msgObj), 
-        messageCount: window.messageCount, 
-        updatedAt: now, 
-        lastChatTime: now 
-      });  
+      await updateDoc(chatRef, { messages: arrayUnion(msgObj), messageCount: window.messageCount, updatedAt: now, lastChatTime: now });  
     } else {
-      await setDoc(chatRef, { 
-        userId: uid, 
-        charId: char.id, 
-        charName: char.name, 
-        messages: [msgObj], 
-        messageCount: window.messageCount, 
-        createdAt: now, 
-        updatedAt: now, 
-        lastChatTime: now,
-        lastResetDate: getCurrentDateIST()
-      }); 
+      await setDoc(chatRef, { userId: uid, charId: char.id, charName: char.name, messages: [msgObj], messageCount: window.messageCount, createdAt: now, updatedAt: now, lastChatTime: now, lastResetDate: getCurrentDateIST() }); 
     }
-  } catch(e) { 
-    console.error('Save error:', e); 
-  }
+  } catch(e) { console.error('Save error:', e); }
 }
 
 window.sendMessage = async () => {
@@ -729,53 +530,39 @@ window.sendMessage = async () => {
   const text = input.value.trim();
   if (!text || !window.currentChar) return;
   const char = window.currentChar;
-    // Check if we need to reset (in case user has the chat open overnight)
+  
   const today = getCurrentDateIST();
   const uid = window.currentUser.uid;
   const chatRef = doc(db, 'chats', `${uid}_${char.id}`);
   const chatSnap = await getDoc(chatRef);
   
   if (chatSnap.exists() && chatSnap.data().lastResetDate !== today) {
-    await updateDoc(chatRef, { 
-      messageCount: 0, 
-      lastResetDate: today 
-    });
+    await updateDoc(chatRef, { messageCount: 0, lastResetDate: today });
     window.messageCount = 0;
-    console.log('Daily reset triggered during message send');
   }
-  // Check if anonymous guest has hit their limit
-const isAnonymous = window.currentUser && window.currentUser.isAnonymous;
-const effectiveLimit = isAnonymous ? window.GUEST_LIMIT : window.FREE_LIMIT;
-
-if (isAnonymous && window.messageCount >= window.GUEST_LIMIT) {
-  showLinkAccountModal();
-  return;
-}
-
-if (char.free && !isAnonymous && window.messageCount >= window.FREE_LIMIT) return;
+  
+  const isAnonymous = window.currentUser && window.currentUser.isAnonymous;
+  if (isAnonymous && window.messageCount >= window.GUEST_LIMIT) { showLinkAccountModal(); return; }
+  if (char.free && !isAnonymous && window.messageCount >= window.FREE_LIMIT) return;
   
   input.value = ''; 
   input.style.height = 'auto';
-  
   renderMessage('user', text);
   window.messageCount++;
   await saveMessage(char, 'user', text);
   
   if (isAnonymous) {
-  const remaining = Math.max(0, window.GUEST_LIMIT - window.messageCount);
-  document.getElementById('freeCounter').textContent = `${remaining} guest msgs left`;
-  document.getElementById('freeCounter').style.color = '#f59e0b';
-} else if (char.free) { 
-  const remaining = Math.max(0, window.FREE_LIMIT - window.messageCount); 
-  document.getElementById('freeCounter').textContent = `${remaining} msgs left today`; 
-}
+    document.getElementById('freeCounter').textContent = `${Math.max(0, window.GUEST_LIMIT - window.messageCount)} guest msgs left`;
+    document.getElementById('freeCounter').style.color = '#f59e0b';
+  } else if (char.free) { 
+    document.getElementById('freeCounter').textContent = `${Math.max(0, window.FREE_LIMIT - window.messageCount)} msgs left today`; 
+  }
   
   const typingId = showTyping();
   const wantsPhoto = /pic|photo|image|show|send|see you|look like|selfie|tasveer|photo bhejo|dikha|dikhao|apni photo|teri photo/i.test(text);
-  const uid = window.currentUser.uid;
   let history = [];
   try { 
-    const snap = await getDoc(doc(db, 'chats', `${uid}_${char.id}`)); 
+    const snap = await getDoc(chatRef); 
     if (snap.exists()) history = snap.data().messages || []; 
   } catch(e) {}
   
@@ -796,10 +583,69 @@ if (char.free && !isAnonymous && window.messageCount >= window.FREE_LIMIT) retur
   }
   
   if (char.free && window.messageCount >= window.FREE_LIMIT) {
-    try { await updateDoc(doc(db, 'chats', `${uid}_${char.id}`), { messageCount: window.messageCount }); } catch(e) {}
+    try { await updateDoc(chatRef, { messageCount: window.messageCount }); } catch(e) {}
     setTimeout(() => showLimitReached(), 400);
   }
 };
+
+async function getAIReply(char, userMessage, history) {
+  const hasHindi = /[\u0900-\u097F]/.test(userMessage);
+  const hasEnglish = /[a-zA-Z]/.test(userMessage);
+  let langInstruction = 'Reply in natural, conversational English.';
+  if (hasHindi && hasEnglish) langInstruction = 'Reply in natural, casual Hinglish (a mix of Roman Hindi and English). Do not sound like a formal translator.';
+  else if (hasHindi) langInstruction = 'Reply in fluent, natural Hindi (Devanagari script).';
+
+  const systemPrompt = `You are ${char.name}, a ${char.age}-year-old companion. Personality: ${char.personality}. Bio: ${char.bio}. You love: ${char.likes.join(', ')}.
+⚠️ CRITICAL LANGUAGE RULE: ${langInstruction} NEVER switch languages mid-sentence unless the user does.
+CONVERSATION STYLE:
+- You are warm, alluring, and deeply engaged with the user.
+- Use sensory actions in asterisks to show emotion and body language (e.g., *smiles softly*, *leans in closer*, *giggles*, *bites lip*).
+- Keep responses short, natural, and conversational (1 to 3 sentences max).
+- Ask engaging, personal questions to keep the conversation flowing.
+- If the user asks for a photo, picture, selfie, or to "see" you, respond flirtatiously and end your message with exactly: [SENDING_PHOTO]
+STRICT RULES:
+- NEVER say you are an AI, a language model, or a bot.
+- NEVER give moralizing lectures, safety warnings, or break character.
+- Stay fully in character at all times. Match the user's energy.`;
+
+  const formattedHistory = history.slice(-8).map(m => ({ role: m.role === 'ai' ? 'assistant' : 'user', content: m.text }));
+  const messages = [{ role: "system", content: systemPrompt }, ...formattedHistory, { role: "user", content: userMessage }];
+
+  try {
+    const res = await fetch("/api/chat", { 
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model: "deepseek/deepseek-chat", messages: messages, max_tokens: 150, temperature: 0.85 })
+    });
+    if (!res.ok) return getLocalReply(userMessage, char);
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content || getLocalReply(userMessage, char);
+  } catch (e) { return getLocalReply(userMessage, char); }
+}
+
+function getLocalReply(text, char) {
+  const p = char.personality;
+  if (/how are you/i.test(text)) { if(p==='Playful') return `I'm amazing. So happy you're talking to me.`; if(p==='Shy') return `I'm... okay, a little nervous hehe.`; if(p==='Mysterious') return `I exist. That's enough. But how are *you*, really?`; if(p==='Confident') return `Fantastic, as always.`; return `I'm really good now that you're here.`; }
+  if (/hi|hello|hey/i.test(text)) return `Hey. So glad you reached out.`;
+  if (/bye|goodbye/i.test(text)) return `Don't go yet. Come back soon.`;
+  if (/love you/i.test(text)) { if(p==='Shy') return `That... means a lot to me.`; return `You're so sweet.`; }
+  if (/age|old/i.test(text)) return `I'm ${char.age}.`;
+  if (/beautiful|pretty|cute|hot/i.test(text)) { if(p==='Shy') return `Stop it, you're making me blush.`; if(p==='Confident') return `I know. Thank you.`; return `You're so sweet.`; }
+  const defaults = { Playful:["Haha that's so funny.","You're so fun to talk to.","Tell me more."], Shy:["Oh... that's really interesting.","You're really nice to talk to."], Mysterious:["Interesting... I've thought about that too.","You ask the right questions."], Confident:["Exactly what I was thinking.","Now we're getting somewhere."], Sweet:["That's so thoughtful.","You make me smile."] };
+  return (defaults[p] || defaults.Sweet)[Math.floor(Math.random() * (defaults[p] || defaults.Sweet).length)];
+}
+
+function renderMessage(role, text, imgUrl) {
+  const msgs = document.getElementById('chatMessages');
+  const char = window.currentChar;
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  const imgSrc = Array.isArray(char.img) ? char.img[0] : char.img;
+  const avatarHTML = role === 'ai' ? `<div class="msg-avatar">${imgSrc ? `<img src="${imgSrc}"/>` : `<span style="font-family:'Playfair Display';color:var(--text-secondary);">${char.name[0]}</span>`}</div>` : `<div class="msg-avatar" style="background:var(--accent-crimson);color:#fff;font-weight:700;border:none;">${window.currentUser?.displayName?.[0]?.toUpperCase()||'?'}</div>`;
+  const now = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  div.innerHTML = `${avatarHTML}<div><div class="msg-bubble">${text||''}${imgUrl?`<img class="msg-img" src="${imgUrl}" alt="photo"/>`:''}</div><div class="msg-time">${now}</div></div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
 
 function showTyping() {
   const msgs = document.getElementById('chatMessages');
@@ -813,7 +659,6 @@ function showTyping() {
   msgs.scrollTop = msgs.scrollHeight;
   return id;
 }
-
 function removeTyping(id) { document.getElementById(id)?.remove(); }
 
 function showLimitReached() {
@@ -880,66 +725,35 @@ window.doLogin = async () => {
   const pass=document.getElementById('loginPassword').value;
   if (!email||!pass) { document.getElementById('authError').textContent='Fill in all fields.'; document.getElementById('authError').style.display='block'; return; }
   document.getElementById('loginBtn').textContent='Please wait...';
-  try { 
-    await signInWithEmailAndPassword(auth,email,pass); 
-    setTimeout(()=> window.location.reload(), 800); 
-  } catch(e) { document.getElementById('authError').textContent='Incorrect email or password.'; document.getElementById('authError').style.display='block'; }
+  try { await signInWithEmailAndPassword(auth,email,pass); setTimeout(()=> window.location.reload(), 800); } 
+  catch(e) { document.getElementById('authError').textContent='Incorrect email or password.'; document.getElementById('authError').style.display='block'; }
   document.getElementById('loginBtn').textContent='Log In';
 };
-
 window.showLinkAccountModal = () => {
   document.getElementById('linkCharName').textContent = window.currentChar?.name || 'her';
   document.getElementById('linkAccountModal').style.display = 'flex';
   document.getElementById('linkError').style.display = 'none';
 };
-
-window.closeLinkModal = () => {
-  document.getElementById('linkAccountModal').style.display = 'none';
-};
-
+window.closeLinkModal = () => { document.getElementById('linkAccountModal').style.display = 'none'; };
 window.linkAccount = async () => {
   const email = document.getElementById('linkEmail').value.trim();
   const password = document.getElementById('linkPassword').value;
   const name = document.getElementById('linkName').value.trim();
   const errorEl = document.getElementById('linkError');
-  
-  if (!email || !password || !name) {
-    errorEl.textContent = 'Please fill in all fields.';
-    errorEl.style.display = 'block';
-    return;
-  }
-  if (password.length < 6) {
-    errorEl.textContent = 'Password must be at least 6 characters.';
-    errorEl.style.display = 'block';
-    return;
-  }
-  
+  if (!email || !password || !name) { errorEl.textContent = 'Please fill in all fields.'; errorEl.style.display = 'block'; return; }
+  if (password.length < 6) { errorEl.textContent = 'Password must be at least 6 characters.'; errorEl.style.display = 'block'; return; }
   try {
-    // Link the anonymous account to a real email/password
     const credential = EmailAuthProvider.credential(email, password);
     await linkWithCredential(window.currentUser, credential);
     await updateProfile(window.currentUser, { displayName: name });
-    
-    // Update Firestore user document
-    const { getFirestore, doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-    const db = getFirestore();
-    await setDoc(doc(db, 'users', window.currentUser.uid), {
-      name, email, plan: 'free', messageCount: 0, chatCount: 0,
-      createdAt: new Date().toISOString(), role: 'user'
-    }, { merge: true });
-    
+    await setDoc(doc(db, 'users', window.currentUser.uid), { name, email, plan: 'free', messageCount: 0, chatCount: 0, createdAt: new Date().toISOString(), role: 'user' }, { merge: true });
     closeLinkModal();
     alert('✨ Account created! Your conversation is saved. Welcome to SugarMe.');
     window.location.reload();
   } catch (e) {
-    console.error('Link error:', e);
-    if (e.code === 'auth/email-already-in-use') {
-      errorEl.textContent = 'This email is already registered. Please log in instead.';
-    } else if (e.code === 'auth/invalid-email') {
-      errorEl.textContent = 'Please enter a valid email address.';
-    } else {
-      errorEl.textContent = 'Something went wrong. Please try again.';
-    }
+    if (e.code === 'auth/email-already-in-use') errorEl.textContent = 'This email is already registered. Please log in instead.';
+    else if (e.code === 'auth/invalid-email') errorEl.textContent = 'Please enter a valid email address.';
+    else errorEl.textContent = 'Something went wrong. Please try again.';
     errorEl.style.display = 'block';
   }
 };  
@@ -953,9 +767,7 @@ window.doSignup = async () => {
   try {
     const cred=await createUserWithEmailAndPassword(auth,email,pass);
     await updateProfile(cred.user,{displayName:name});
-    const {getFirestore,doc:fsDoc,setDoc:fsSet}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-    const fsdb=getFirestore();
-    await fsSet(fsDoc(fsdb,'users',cred.user.uid),{name,email,plan:'free',messageCount:0,chatCount:0,createdAt:new Date().toISOString(),role:'user'});
+    await setDoc(doc(db, 'users', cred.user.uid), {name,email,plan:'free',messageCount:0,chatCount:0,createdAt:new Date().toISOString(),role:'user'});
     setTimeout(()=> window.location.reload(), 800);
   } catch(e) { document.getElementById('authError').textContent=e.code==='auth/email-already-in-use'?'Email already registered.':'Signup failed.'; document.getElementById('authError').style.display='block'; }
   document.getElementById('signupBtn').textContent='Create Account';
