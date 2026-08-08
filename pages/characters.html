@@ -619,22 +619,24 @@ window.sendMessage = async () => {
   if (!text) return;
   
   const char = window.currentChar;
-  const today = getCurrentDateIST();
   const uid = window.currentUser.uid;
   const chatRef = doc(db, 'chats', `${uid}_${char.id}`);
-  const chatSnap = await getDoc(chatRef);
-  
-  if (chatSnap.exists() && chatSnap.data().lastResetDate !== today) {
-    await updateDoc(chatRef, { messageCount: 0, lastResetDate: today });
-    window.messageCount = 0;
-  }
   
   const isAnonymous = window.currentUser.isAnonymous;
-  if (isAnonymous && window.messageCount >= window.GUEST_LIMIT) { showLinkAccountModal(); return; }
-  if (char.free && !isAnonymous && window.messageCount >= window.FREE_LIMIT) return;
+  
+  // Check limits based on the real messageCount we fetched in openChat
+  if (isAnonymous && window.messageCount >= window.GUEST_LIMIT) { 
+    showLinkAccountModal(); 
+    return; 
+  }
+  if (char.free && !isAnonymous && window.messageCount >= window.FREE_LIMIT) {
+    showLimitReached();
+    return;
+  }
   
   input.value = ''; 
   input.style.height = 'auto';
+  
   renderMessage('user', text);
   window.messageCount++;
   await saveMessage(char, 'user', text);
@@ -671,7 +673,6 @@ window.sendMessage = async () => {
   }
   
   if (char.free && window.messageCount >= window.FREE_LIMIT) {
-    try { await updateDoc(chatRef, { messageCount: window.messageCount }); } catch(e) {}
     setTimeout(() => showLimitReached(), 400);
   }
 };
